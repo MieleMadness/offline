@@ -350,7 +350,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
-        <span className="soc-version">Offline v0.8.0 · Development preview</span>
+        <span className="soc-version">Offline v0.9.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">

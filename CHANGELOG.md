@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.9.0 — Explain and protect account data previews (development)
+
+- Added readable, cautious explanations of exported advertising, searches, location, device/security, app, connections, engagement and account data categories.
+- Added category-specific year filters, source-file provenance details and records shown in incremental groups of 50.
+- Concealed sensitive search, location, security, off-platform and personal values and source paths by default in Your Data.
+- Redacted these same sensitive records in global library search until explicitly revealed; search/category changes reset disclosure.
+- Added synthetic tests for data year/source filtering, categorized sensitive records and safe display model metadata.
+- Data remains in the active unlocked preview; display masking is not independent encryption or a substitute for a locked workspace. Manual UI and export acceptance remain outstanding.
+
+
 ## v0.8.0 — Messenger browsing and date filters (development)
 
 - Added within-conversation search, year and attachment filters, participant selection and inclusive local start/end date filtering.

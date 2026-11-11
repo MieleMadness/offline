@@ -100,9 +100,12 @@
 - [ ] HEIC and video previews, full album relationship support, image codec security and 10k+ file stress tests.
 
 ### Understand Your Data follow-ups
-- [ ] Clear categorized views for searches, ads/interests, third-party/off-platform events, account settings, logins/devices, locations/check-ins and reactions where included.
-- [ ] Timeline/filter/source detail for each supported data type, with privacy-sensitive defaults.
-- [ ] Explain in plain language what each exported field represents, citing export source, avoiding unsupported inferences.
+- [x] Recognized exported categories shown with cautious explanations, record counts and source-file provenance (v0.9.0; not all Meta schemas are supported).
+- [ ] Expand parsing coverage for ads, searches, off-platform events, account settings, devices, locations and reactions across export vintages.
+- [x] Year filters, explicit source-path detail, bounded record batches and default masking of sensitive record values (v0.9.0; manual UI acceptance pending).
+- [ ] Full date-range filtering and more structured decoding for individual data categories.
+- [x] Initial plain-language category guidance without inventing absent Meta fields, plus source-file provenance (v0.9.0).
+- [ ] Field-level explanations and richer schema-aware source interpretation.
 - [ ] Data export/retention controls, privacy report and profile-specific delete/reindex.
 - [ ] User-controlled summary metrics (only where computed from actual records).
 
@@ -122,7 +125,9 @@
 
 **Exit gate:** External threat review and data-isolation tests. Do not label a profile as secured until real encryption/authentication exists.
 
-## Phase 8 — v0.9.x: Compatibility, scale and polish
+## Phase 8 — v0.9.x: Data transparency, compatibility, scale and polish
+
+- [x] v0.9.0: Private-by-default previews for sensitive Your Data categories and global search results; source provenance and year filters (pending UI acceptance).
 - [ ] More Facebook export vintages, HTML layouts and JSON schemas; multiple selected data categories; multipart ZIP.
 - [ ] Documented compatibility matrix with synthetic fixtures, safe fallbacks and accuracy checks.
 - [ ] 10k/100k+ content performance benchmarks, thumbnail budgets, search scale and stress tests.

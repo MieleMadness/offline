@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.8.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.9.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -22,6 +22,12 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Understanding your data (v0.9.0 development)
+
+The **Your Data** explorer now explains each recognized data category in plain language, filters actual downloaded records by year, reveals source file provenance on demand and paginates long record lists. Searches, locations, login/device details, connected-app activity and account/profile values start concealed in this panel. You can explicitly reveal their contents. Sensitive data matches in **Search library** are concealed too, and return to hidden whenever the search or filter changes.
+
+These are **display privacy controls**, not extra encryption or an authentication barrier: the data remains in memory while the profile is unlocked, and other views, such as messages and optional local AI searches, can still reveal information. Always lock the profile before sharing your screen. The category guidance describes what was found, not everything Meta holds.
 
 ## Conversation exploration (v0.8.0 development)
 
