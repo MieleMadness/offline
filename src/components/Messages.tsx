@@ -3,8 +3,9 @@ import { File, LockKeyhole, MessageCircle, MessagesSquare } from "lucide-react";
 import { formatNumber } from "../archive";
 import { clockLabel, dateLabel, filterConversations, messageDays, type ImportedArchive } from "../social-model";
 import { Avatar, EmptyState, timeISOString } from "./Shared";
+import { MediaStrip } from "./ArchivePhoto";
 
-export default function Messages({ archive, query }: { archive: ImportedArchive; query: string }) {
+export default function Messages({ archive, query, sourceZip }: { archive: ImportedArchive; query: string; sourceZip: string | null }) {
   const chats = useMemo(() => filterConversations(archive.social.conversations, query), [archive, query]);
   const [selected, setSelected] = useState<string | null>(null);
   const current = chats.find((chat) => chat.id === selected) ?? chats[0];
@@ -54,7 +55,10 @@ export default function Messages({ archive, query }: { archive: ImportedArchive;
                     <time dateTime={timeISOString(message.timestamp)}>{clockLabel(message.timestamp)}</time></div>
                   <div className="soc-message-bubble">
                     {message.text && <p>{message.text}</p>}
-                    {message.attachments > 0 && <span className="soc-attachment"><File size={14} aria-hidden="true"/>
+                    {message.mediaPaths?.length ? <MediaStrip zipPath={sourceZip} paths={message.mediaPaths}
+                      count={message.attachments} compact/> : null}
+                    {message.attachments > 0 && !message.mediaPaths?.length && <span className="soc-attachment">
+                      <File size={14} aria-hidden="true"/>
                       {message.attachments} attachment{message.attachments === 1 ? "" : "s"} referenced</span>}
                   </div>
                 </div>

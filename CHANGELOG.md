@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.7.2 — ZIP parser compatibility test correction
+
+- Removed a brittle synthetic duplicate-member test that assumed the ZIP reader would expose both identical central-directory names. Its iterator behavior may collapse aliases, so the test could not reliably assert the media reader saw two candidates.
+- Preserved the production duplicate-path check for archives that expose ambiguous entries. Added a mislabeled-image rejection to the regression suite and clarified this edge-case limitation in security notes.
+- Synchronized the patch version after the v0.7.1 native test failure. Native Windows verification is requested again.
+
+
+## v0.7.1 — Windows ZIP fixture test correction
+
+- Fixed the synthetic duplicate-name ZIP test: the ZIP writer itself refuses duplicate names before the reader is invoked. The test now constructs a synthetic duplicate entry by rewriting its two ZIP directory headers; the reader's production duplicate-path guard remains unchanged.
+- Advanced npm, Cargo, Tauri, on-screen and CI workflow versions consistently to v0.7.1 after the v0.7.0 Windows test failure.
+
+
+## v0.7.0 — On-demand archive photo previews (development)
+
+- Added Photographs gallery with lazy image display, search and bounded page batches.
+- Native on-demand read-only ZIP image service for JPEG, PNG, GIF and WebP up to 4 MiB, with safety checks on names, signatures, size and duplicate entries.
+- Recognized local image references in selected JSON/HTML post and Messenger export records, displaying them inline when available.
+- Original ZIP connection is temporary, current-profile scoped and rechecked against the saved inventory after unlocking; photos are not included in encrypted backups.
+- Added synthetic path, MIME, ZIP reader and reconnection tests. Full compatibility, codec security, native UI acceptance and video/HEIC remain pending.
+
+
 ## v0.6.0 — Family profile lifecycle (development)
 
 - Added a dedicated family-management screen with accessible rename and removal actions.

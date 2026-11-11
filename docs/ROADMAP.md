@@ -91,7 +91,13 @@
 
 **Exit gate:** Large conversations remain responsive; a thread never crosses profile boundaries.
 
-## Phase 6 — v0.7.x: Understand Your Data
+## Phase 6 — v0.7.x: Photo previews and Understand Your Data
+
+- [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0, duplicate ZIP fixture constraints documented in v0.7.2; Windows and real-export acceptance pending).
+- [x] Recognized local image references under supported HTML/JSON posts and Messenger messages, with safe fallbacks.
+- [ ] HEIC and video previews, full album relationship support, image codec security and 10k+ file stress tests.
+
+### Understand Your Data follow-ups
 - [ ] Clear categorized views for searches, ads/interests, third-party/off-platform events, account settings, logins/devices, locations/check-ins and reactions where included.
 - [ ] Timeline/filter/source detail for each supported data type, with privacy-sensitive defaults.
 - [ ] Explain in plain language what each exported field represents, citing export source, avoiding unsupported inferences.
@@ -132,7 +138,7 @@
 - Cross-device family sync only if opt-in encryption and trustworthy sharing can be built.
 
 ## Next coding order
-Next, exercise backup/recovery and storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+Next, verify v0.7.0 native photo/gallery integration and image codec safety; exercise backup/recovery storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
 
 ## Prioritized v0.5.0 work
 

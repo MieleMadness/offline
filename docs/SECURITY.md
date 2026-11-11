@@ -41,3 +41,15 @@ Local AI requests send selected content to the installed Ollama service on loopb
 Unlocked users can copy the already AES-256-GCM encrypted IndexedDB snapshot into a local .offlinevault file. The JSON envelope contains visible profile name, accent, ID and ciphertext length; actual social content stays encrypted using the existing PIN/passphrase-derived key and owner-specific authenticated data. Import verifies decryption and basic schema before creating the saved snapshot; existing saved copies cannot be overwritten. Native backup IO caps files at 128 MiB and uses no-overwrite hard-link finalization.
 
 Threat limits: A copied backup can be attacked offline, especially when protected by an 8-digit PIN. Backup files do not authenticate all visible metadata. Original Facebook ZIP and media files are not included. This is an early recovery mechanism, not a third-party-audited secure backup solution. Filesystems lacking hard-link support may reject backup writes. Never commit backup files to Git.
+
+
+## v0.7.0 — Read-only image preview boundaries
+
+The app may read image bytes on demand from a user-selected ZIP via local Tauri IPC. No archive member is extracted or written to disk. The reader enforces relative member names, unique ZIP paths, a 250,000-entry directory cap and a 4 MiB uncompressed image cap. Only JPEG, PNG, GIF and WebP are allowed, with basic magic-signature checking; SVG, HTML, web URLs, video and executable resources cannot be rendered as images. This basic filter is not a full decoder or malware scanner; image decompression bombs and native codec vulnerabilities require further assessment.
+
+The ZIP connection path exists only in the mounted active-profile component memory and is cleared on lock or profile switch. Reconnecting a saved preview checks inventory names and sizes, but not a cryptographic file signature. The preview's encrypted backup contains source references but no ZIP or media binaries. Do not upload private images or ZIP files to test logs or GitHub.
+
+
+### ZIP duplicate-member qualification (v0.7.2)
+
+The image reader rejects multiple matching names **when the ZIP library exposes them as distinct entries**. The library may resolve or collapse ambiguous duplicate-name members before the reader's scan; the current reader does not independently parse the raw central directory. This edge case requires separate ZIP parser acceptance and should not be advertised as comprehensive duplicate-directory protection.

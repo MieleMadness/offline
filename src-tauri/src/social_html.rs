@@ -6,7 +6,7 @@ use chrono::{DateTime, NaiveDate, NaiveDateTime};
 use scraper::{ElementRef, Html, Selector};
 
 use super::{
-    category_for, clipped, Conversation, DataCategory, DataRecord, Message, Post,
+    category_for, clipped, image_reference, Conversation, DataCategory, DataRecord, Message, Post,
     MAX_CONVERSATIONS, MAX_DATA_RECORDS, MAX_MESSAGES, MAX_POSTS,
 };
 
@@ -65,6 +65,20 @@ fn card_time(block: ElementRef<'_>, selector: &Selector) -> Option<i64> {
     None
 }
 
+
+fn local_image_paths(block: ElementRef<'_>, selector: &Selector, source: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    for node in block.select(selector).take(12) {
+        if node.value().name() != "img" { continue; }
+        if let Some(path) = node.value().attr("src")
+            .and_then(|uri| image_reference(source, uri, true)) {
+            if !result.contains(&path) { result.push(path); }
+            if result.len() >= 8 { break; }
+        }
+    }
+    result
+}
+
 pub(super) fn ingest_html(
     path: &str, contents: &str,
     posts: &mut Vec<Post>,
@@ -109,6 +123,7 @@ pub(super) fn ingest_html(
                 timestamp: card_time(block, &timestamp),
                 text: message,
                 attachments,
+                media_paths: local_image_paths(block, &media, path),
             });
             *message_total += 1;
         }
@@ -128,6 +143,7 @@ pub(super) fn ingest_html(
                 author: if heading_text.is_empty() { None } else { Some(heading_text) },
                 text: content,
                 media_count: attachments,
+                media_paths: local_image_paths(block, &media, path),
                 source_path: path.to_owned(),
             });
         }
@@ -172,6 +188,7 @@ mod tests {
         assert_eq!(posts[0].text, "The picnic was wonderful!");
         assert_eq!(posts[0].author.as_deref(), Some("Taylor"));
         assert_eq!(posts[0].media_count, 1);
+        assert_eq!(posts[0].media_paths, vec!["your_facebook_activity/photos/image.jpg"]);
         assert!(posts[0].timestamp.is_some());
     }
 
