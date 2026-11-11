@@ -126,3 +126,10 @@
 
 ## Next coding order
 Next, exercise backup/recovery and storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+
+## Prioritized v0.5.x work
+
+- Implemented PIN enrollment and changing the unlock secret on an unlocked encrypted workspace.
+- Implemented bounded text and image relevance search using local Ollama models.
+- Verified native text and image inference with EmbeddingGemma and Moondream in v0.5.1. Verified changing the workspace PIN and rejecting the previous PIN.
+- Model setup now offers explicit one-time downloads. Next extend media indexing and full-library semantic retrieval, then encrypt persisted embeddings under the workspace key.

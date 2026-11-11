@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.4.1.** Adds optional encrypted saved previews. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.5.1.** Includes encrypted workspace PINs and local text/image AI search. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -33,7 +33,7 @@ Prerequisites: Node.js 22+, Rust (MSVC), Visual Studio C++ Build Tools, and the 
 ```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
-git checkout feature/encrypted-library-0.4.1
+git checkout feature/local-search-pin-0.5.0
 npm install
 npm run tauri dev
 ```
@@ -75,3 +75,7 @@ GitHub runs lightweight frontend checks on pull requests. The full Windows compi
 - [Changelog](CHANGELOG.md)
 
 The application's open-source license is still to be selected. Bundled third-party skill files retain their own licenses.
+
+## Workspace PIN and local AI search
+
+v0.5.1 includes a PIN option for encrypted workspaces and a bounded local AI search preview using EmbeddingGemma and Moondream. Download the models once from the search panel. See [setup, scope and verification](docs/LOCAL_AI_SEARCH.md). Synthetic text and image searches passed through the native Windows app. Full-library indexing remains planned.

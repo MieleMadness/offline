@@ -1,5 +1,20 @@
 # Changelog
 
+## v0.5.1 — Smaller local search models and setup
+
+- Fix the v0.5.0 model-loading dependency by using small text embeddings and local image captions. Add explicit one-time model downloads and setup status.
+- Bound model responses and image dimensions. Cover unsafe image paths and oversized image dimensions with synthetic regression tests.
+- Clear search state when replacing the archive, including replacements with the same filename. Improve search and encryption control contrast in dark mode.
+- Native Windows acceptance passed text/image inference and PIN changes, old-PIN rejection and restart. Synthetic fixtures only.
+
+
+## v0.5.0 — Workspace PIN and local AI search preview
+
+- Set an 8–20 digit encryption PIN or change an unlocked workspace’s secret. Older passphrase snapshots remain readable.
+- Search sampled text by meaning and selected ZIP images by visual content through a locally installed Ollama model. No model download occurs automatically.
+- Real inference acceptance is pending. The installed model failed to load with synthetic input on this computer.
+
+
 ## v0.4.1 — Encrypted saved previews (development)
 
 - Optional per-profile encrypted snapshot. Enrollment locks the preview immediately. Unlocking restores posts, conversations, account records and the ZIP inventory. Switching owners unmounts the unlocked view.

@@ -28,3 +28,9 @@ The app keeps the decrypted preview and key in the active profile component. Swi
 - Defend against decompression bombs, unexpected MIME, symlinks/extracted folders (when supported), and HTML/resource injection.
 - Test large archives, cancellation, corruption and partial progress without hangs.
 - Perform manual Windows UI/accessibility checks before releasing installer, and choose code signing/reproducible dependency lockfiles.
+
+## v0.5.0 additions
+
+A PIN derives the encryption key using the existing KDF. PINs have less entropy than long passphrases and can be guessed offline by someone who copies a snapshot. The enrollment UI requires 8–20 digits. UI attempt throttling would not prevent offline guessing.
+
+Local AI requests send selected content to the installed Ollama service on loopback. Read [the search boundary](LOCAL_AI_SEARCH.md) before enabling it for private data.

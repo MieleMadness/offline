@@ -6,6 +6,7 @@ const STORE = "snapshots";
 const encoder = new TextEncoder();
 
 export interface Snapshot {
+  credential?: "passphrase" | "pin";
   revision: string;
   salt: Uint8Array;
   iv: Uint8Array;
