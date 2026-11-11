@@ -184,4 +184,12 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [x] Guard against blocked/silent family profile catalog writes and corrupt existing metadata; use verified owner mapping before encrypting/restoring/deleting local saved previews.
 - [x] Test best-effort catalog compensation when encrypted snapshot transactions reject a write.
 - [ ] Exercise real Windows IndexedDB/localStorage quota, interrupted storage, and power-loss scenarios; consolidate metadata and ciphertext into an atomic store in a future security milestone.
-- [ ] Integrate the separately developed encrypted workspace text index PR #27 after reconciling it with newer app import, media and family architecture; do not merge its older v0.6.x base as a standalone release.
+- [x] v0.15.0: Reconcile the older #27 encrypted workspace text-index implementation with v0.14 family/Messenger/photo/import architecture, plus index validation and owner source checks (CI/manual acceptance pending).
+
+
+## Pre-v1 development milestone — v0.15.0 (local text discovery integration)
+
+- [x] Port full-workspace local embedding index onto current v0.14.0 code while retaining import/recovery, Messenger and photographs.
+- [x] Add bounded vector storage, protected backup restoration, current-profile ZIP checks and opt-in UX.
+- [ ] Complete full Windows/Rust build, real local Ollama inference, reboot/unlock, storage quota, and cross-profile isolation smoke tests.
+- [ ] Consider an atomic IndexedDB family-catalog migration and separate image thumbnail indexing before v1.0.

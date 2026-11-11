@@ -129,3 +129,16 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 - [x] Synthetic code-level test: full ZIP photo listing and single-file read across the legacy 5,000-entry boundary, with verified directory-index identity (Windows CI acceptance required).
 - [ ] Manual Windows acceptance: connect `large-5125-photos.zip`, search for `synthetic_005100`, open the result in the full-size viewer, and inspect the last page.
 - [ ] Realistic media performance: profile memory, CPU, ZIP directory scans, and full-resolution image decode; 1×1 PNGs are not representative.
+
+
+## v0.15.0 — Encrypted local semantic search acceptance
+
+1. With fictional JSON/HTML archives, unlock two separate family profiles. Build a text index for Alex and verify a search near the **end** of a late Messenger message appears, beyond the previous first-30-record limit.
+2. Search the same query in Taylor's profile and confirm no Alex excerpt, source path, status, or vectors appear. Lock Alex and verify indexing/search state is unmounted.
+3. Save Alex's encrypted profile, build the index and restart Offline. Unlock with the correct PIN/passphrase, confirm cached search works. A wrong key or other owner ID must fail authentication.
+4. Replace Alex's archive with an explicitly confirmed import. Confirm its old index is discarded and a new model/content fingerprint is required. Change the installed model digest and confirm index rebuilding is requested.
+5. Interrupt an index build mid-batch. Confirm the progress count is retained only for the current unlocked session and does not appear for other owners. Test unusually large archives, storage quota exhaustion, and invalid recovered vector metadata.
+6. Attempt AI image search with another family's ZIP. The source mismatch must refuse inference before private image bytes are sent to the local model. Confirm the original ZIP stays read-only.
+7. Keep keyword search fully functional without Ollama or models. Confirm no real family data appears in GitHub, CI logs, crashes or shared screenshots.
+
+**Scope:** these are release-blocking **manual Windows tests**. Passing synthetic unit tests or a native compile is not proof of real inference quality, complete privacy, or production-scale indexing.

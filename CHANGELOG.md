@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.15.0 — Reconciled local search index on current family archive (development)
+
+- Port the optional full-workspace text index from older PR #27 onto the v0.14.0 family/Messenger/photo/import code, without replacing newer features.
+- Embed recognized posts, messages and account data into bounded overlapping 450-character chunks in 16-section batches. Support progress, stopping and session-only continuation.
+- Encrypt saved indexes with the existing family snapshot key and revision-checked IndexedDB writes; keep ordinary session indexes in memory and rebuild when content or local model digest changes.
+- Add explicit caps for index entry count/encoded size; reject malformed restored index metadata; validate source ZIP inventory before optional image search to reduce cross-profile mistakes.
+- Keep keyword search available without local AI; add focused UI polish, search integration and encryption/source-isolation tests.
+- Windows native and real-model performance/security acceptance remain pending.
+
+
 ## v0.14.0 — Verifiable family-profile storage and safer encrypted recovery (development)
 
 - Profile creation and rename now verify local profile metadata persistence before updating the active library. Corrupted existing metadata is not silently overwritten.
