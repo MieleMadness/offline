@@ -18,6 +18,7 @@ import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
 import ImportReview from "./components/ImportReview";
 import { requireUsableImport, type ImportHealth } from "./import-health";
+import type { TextIndex } from "./text-index";
 import QuickSearch from "./components/QuickSearch";
 import Photos from "./components/Photos";
 import { sameInventory, photoEntries } from "./archive-images";
@@ -360,6 +361,32 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     } finally { finish(); }
   }
 
+  async function saveTextIndex(index: TextIndex): Promise<void> {
+    if (!archive || !activeProfile || locked || enrolling || !begin()) {
+      throw new Error("Finish the current profile operation before saving a text index.");
+    }
+    try {
+      const nextArchive: ImportedArchive = { ...archive, textIndex: index };
+      if (snapshot) {
+        if (!unlocked) throw new Error("Unlock this saved profile to protect its search index.");
+        const next: Snapshot = {
+          ...await seal(activeProfileId, nextArchive, unlocked.key, snapshot.salt),
+          credential: snapshot.credential,
+        };
+        // The index is committed within the same authenticated owner-bound
+        // snapshot as all other social records, with optimistic revision checks.
+        await saveSnapshot(activeProfileId, next, snapshot.revision);
+        setSnapshot(next);
+        setUnlocked({ key: unlocked.key, archive: nextArchive });
+      } else {
+        // Session-only profiles never persist unencrypted vectors to disk.
+        onSessionArchive(nextArchive);
+      }
+    } finally {
+      finish();
+    }
+  }
+
   const counts: Record<View, number> = {
     feed: archive?.social.posts.length ?? 0,
     messages: archive?.social.conversations.length ?? 0,
@@ -474,7 +501,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
             onConnect={connectOriginalZip} busy={busy}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
-          {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query}/>}
+          {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query} onSaveIndex={saveTextIndex}/>}
           <footer className="soc-bottom-status"><span><LockKeyhole size={13} aria-hidden="true"/> Files stay on this device</span>
             <span>{formatNumber(archive.social.filesRead)} HTML/JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
           </footer>
