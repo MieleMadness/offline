@@ -14,6 +14,7 @@ import Data from "./components/Data";
 import Files from "./components/Files";
 import { createProfile, safeActiveId, safeLoadProfiles, saveProfiles, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
+import ImportSummary from "./components/ImportSummary";
 import "./social.css";
 
 type View = "feed" | "messages" | "data" | "files";
@@ -160,7 +161,7 @@ export default function SocialApp() {
           <button type="button" className="soc-mobile-trigger" aria-label="Toggle navigation"
             onClick={() => setMenuOpen(!menuOpen)}><Menu size={20}/></button>
           <span>My archive</span><ChevronRight size={15} aria-hidden="true"/>
-          <strong>{labels[view]}</strong>
+          <strong>{activeProfile ? activeProfile.displayName + " · " + labels[view] : "Family library"}</strong>
         </div>
         <div className="soc-top-controls">
           {archive && <label className="soc-top-search">
@@ -171,7 +172,7 @@ export default function SocialApp() {
           </label>}
           <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile}>
             <ArrowDownToLine size={17} aria-hidden="true"/>
-            <span>{busy ? "Reading…" : archive ? "Change archive" : "Import ZIP"}</span>
+            <span>{busy ? "Reading…" : activeProfile ? "Import for " + activeProfile.displayName : "Create a profile first"}</span>
           </button>
         </div>
       </header>
@@ -199,14 +200,15 @@ export default function SocialApp() {
             <div><MessagesSquare size={22} aria-hidden="true"/><strong>Messages</strong><span>People & conversations</span></div>
             <div><ShieldCheck size={22} aria-hidden="true"/><strong>Your data</strong><span>See your export</span></div>
           </div>
-          <p className="soc-preview-limit">Early preview: Facebook JSON posts, Messenger threads and selected data records. Actual media previews and more export formats are planned for later updates.</p>
+          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Profile switching is organizational, not encrypted access. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
+          <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
           <footer className="soc-bottom-status"><span><LockKeyhole size={13} aria-hidden="true"/> Files stay on this device</span>
-            <span>{formatNumber(archive.social.filesRead)} JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
+            <span>{formatNumber(archive.social.filesRead)} HTML/JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
           </footer>
         </>}
       </main>
