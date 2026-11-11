@@ -40,7 +40,9 @@
 - [x] Create, rename and switch local profiles in the family library.
 - [ ] First-run personal vs family library chooser.
 - [x] Per-profile archive ownership: explicit import target, no automatic cross-profile merging.
-- [ ] Persist profile metadata and index scope locally; prevent stale async import from switching owner.
+- [x] v0.14.0: Verify family profile metadata read-back before new owner creation, rename, encrypted recovery or deletion, with best-effort rollback on failed operations (manual acceptance pending).
+- [ ] Migrate the profile catalog and encrypted snapshot metadata to a single atomic store, and test power-loss recovery; current dual-store commits are not atomic.
+- [ ] Persist full profile-scoped indexes and guard against all stale import/search work across profile switches.
 - [ ] No private data in shared global search, logs, temp files or test fixtures.
 - [x] UI distinguishes organizational profiles from actual encrypted/password-protected vaults.
 - [x] Profile removal uses typed confirmation, scope warning, encrypted snapshot deletion and backup guidance (pending manual Windows acceptance).
@@ -144,7 +146,7 @@
 **Exit gate:** User acceptance against representative redacted exports and offline-first security checklist.
 
 ## Phase 9 — v1.0.0: Public desktop release
-- [x] v0.13.0: Opt-in unsigned **test executable artifact** with SHA-256 checksum from verified Windows compilation (artifact workflow pending native verification).
+- [x] v0.13.0: Opt-in unsigned **test executable artifact** with SHA-256 checksum produced by verified [Windows CI](https://github.com/MieleMadness/offline/actions/runs/43088969267); manual executable acceptance pending.
 - [ ] Public Windows installer, publisher details, code signing (when available), reproducible signed release workflow and checksum.
 - [ ] App license decided; third-party skill licenses and bundled runtime attribution retained.
 - [ ] Manual multi-profile acceptance, HTML+JSON acceptance, security/privacy audit, accessibility and uninstall/backup tests.
@@ -175,3 +177,11 @@ Next, verify v0.12.0 large-ZIP native page navigation, image codec safety and ZI
 - [x] Require side-by-side review and explicit confirmation before replacing existing session or encrypted saved previews.
 - [x] Show import coverage and skipped-file limitations; recognize common JSON timestamp variants and English HTML date layouts.
 - [ ] Complete native Windows import/replacement smoke tests, multi-export deduplication, storage-loss recovery, 10k+ media stress tests and independent security review before v1.0.
+
+
+## Pre-v1 development milestone — v0.14.0 (profile and backup reliability)
+
+- [x] Guard against blocked/silent family profile catalog writes and corrupt existing metadata; use verified owner mapping before encrypting/restoring/deleting local saved previews.
+- [x] Test best-effort catalog compensation when encrypted snapshot transactions reject a write.
+- [ ] Exercise real Windows IndexedDB/localStorage quota, interrupted storage, and power-loss scenarios; consolidate metadata and ciphertext into an atomic store in a future security milestone.
+- [ ] Integrate the separately developed encrypted workspace text index PR #27 after reconciling it with newer app import, media and family architecture; do not merge its older v0.6.x base as a standalone release.

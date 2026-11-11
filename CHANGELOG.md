@@ -1,12 +1,21 @@
 # Changelog
 
+## v0.14.0 — Verifiable family-profile storage and safer encrypted recovery (development)
+
+- Profile creation and rename now verify local profile metadata persistence before updating the active library. Corrupted existing metadata is not silently overwritten.
+- Encrypted backup restoration verifies and stages its owner mapping **before** committing ciphertext; recovery fails without changing encrypted storage if profile metadata is blocked.
+- Profile deletion stages the updated catalog before the expected-revision IndexedDB deletion; rejected writes attempt to restore the previous catalog.
+- Shared failure-compensation helper, storage read-back checks, and synthetic tests for blocked/silent writes, partial updates, invalid catalogs, owner mapping and failed vault transactions.
+- The storage technologies cannot share an atomic transaction, so power loss between catalog and snapshot commits remains a documented limitation; hands-on Windows acceptance is still required.
+
+
 ## v0.13.0 — Reproducible unsigned Windows test builds (development)
 
 - Add an opt-in GitHub Actions artifact for the unsigned Windows executable **only after successful full native builds**, including an independently generated SHA-256 checksum file.
 - Retain preview artifacts for seven days, with no installer, release publication, signing or background updater.
 - Keep the separate `[rust]` native fictional-import acceptance mode available without rebuilding the whole desktop executable.
 - Document safe use with reproducible fictional HTML/JSON ZIP fixtures, exact checksum verification, Windows account isolation, error reporting and remaining security/release gates.
-- Windows artifact production and hands-on native UI acceptance remain pending.
+- Unsigned executable artifact and checksum were produced by [green Windows CI](https://github.com/MieleMadness/offline/actions/runs/43088969267); hands-on native UI acceptance remains pending.
 
 
 ## v0.12.0 — Full ZIP photograph discovery and guarded import (development)
