@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  cleanProfileName, commitCatalogBackedChange, createProfile, deserializeProfiles, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
+  cleanProfileName, commitCatalogBackedChange, createProfile, deserializeProfiles, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, saveProfiles, setProfileOwnedValue, PROFILE_COLORS,
   type FamilyProfile,
 } from "./profiles";
 
@@ -100,6 +100,22 @@ describe("family profile isolation helpers", () => {
     expect(() => persistProfileCatalog([first, second], second.id, failing)).toThrow(/Previous settings were restored/);
     expect(storage.getItem("offline.familyProfiles.v1")).toBe(oldCatalog);
     expect(storage.getItem("offline.activeFamilyProfile.v1")).toBe(first.id);
+  });
+
+  it("does not erase malformed profile metadata during automatic startup preferences save", () => {
+    const broken = store({"offline.familyProfiles.v1": "{ truncated",
+      "offline.activeFamilyProfile.v1": "previous-profile"});
+    expect(saveProfiles([], "", broken)).toBe(false);
+    expect(broken.getItem("offline.familyProfiles.v1")).toBe("{ truncated");
+    expect(broken.getItem("offline.activeFamilyProfile.v1")).toBe("previous-profile");
+
+    const mixed = store({"offline.familyProfiles.v1":
+      JSON.stringify([first, {id:"missing-label", createdAt:1}])});
+    expect(saveProfiles([first], first.id, mixed)).toBe(false);
+    expect(mixed.getItem("offline.familyProfiles.v1")).toContain("missing-label");
+    const empty = store();
+    expect(saveProfiles([], "", empty)).toBe(true);
+    expect(empty.getItem("offline.familyProfiles.v1")).toBe("[]");
   });
 
   it("detects silent storage failures and protects corrupt existing owner metadata", () => {

@@ -79,13 +79,35 @@ export function safeActiveId(profiles: readonly FamilyProfile[]): string {
   }
 }
 
-export function saveProfiles(profiles: readonly FamilyProfile[], selectedId: string): void {
+function existingCatalogIsValid(raw: string | null): boolean {
+  if (raw === null) return true;
   try {
-    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles));
-    window.localStorage.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) && deserializeProfiles(raw).length === value.length;
+  } catch { return false; }
+}
+
+/**
+ * Best-effort active profile preference persistence.
+ * Never rewrite a corrupt owner catalog on mount, even when it parses as an
+ * empty/partial list; the vault may still contain ciphertext for those IDs.
+ * Security-sensitive changes use persistProfileCatalog instead.
+ */
+export function saveProfiles(
+  profiles: readonly FamilyProfile[], selectedId: string, storage?: ProfileCatalogStorage,
+): boolean {
+  try {
+    const store = storage ?? window.localStorage;
+    if (!existingCatalogIsValid(store.getItem(PROFILE_STORAGE_KEY))) return false;
+    const serialized = JSON.stringify(profiles);
+    store.setItem(PROFILE_STORAGE_KEY, serialized);
+    store.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    return store.getItem(PROFILE_STORAGE_KEY) === serialized &&
+      store.getItem(ACTIVE_PROFILE_KEY) === selectedId;
   } catch {
-    // WebView localStorage can be blocked. Family profiles still work for this session;
-    // callers should communicate that persistence may be unavailable.
+    // A selection can remain usable for this session without pretending a
+    // persistent encrypted owner identity was committed.
+    return false;
   }
 }
 
@@ -124,15 +146,8 @@ export function persistProfileCatalog(
 
   // Treat a previously corrupt catalog as a recovery issue, not a blank library:
   // silently overwriting it could strand ciphertext belonging to another owner.
-  if (before !== null) {
-    try {
-      const parsed: unknown = JSON.parse(before);
-      if (!Array.isArray(parsed) || deserializeProfiles(before).length !== parsed.length) {
-        throw new Error("invalid");
-      }
-    } catch {
-      throw new Error("The saved family profile catalog is damaged. Export/recover your saved previews before changing profiles.");
-    }
+  if (!existingCatalogIsValid(before)) {
+    throw new Error("The saved family profile catalog is damaged. Export/recover your saved previews before changing profiles.");
   }
 
   try {
