@@ -7,6 +7,7 @@ export type MatchKind = Exclude<PreviewSearchKind, "all">;
 export interface PreviewSearchHit {
   id: string;
   kind: MatchKind;
+  categoryId?: string;
   title: string;
   excerpt: string;
   source: string;
@@ -94,7 +95,7 @@ export function searchPreview(
           [category.label, record.title, record.detail, record.sourcePath].join(" "))) {
           matches.push({
             id: "data:" + category.id + ":" + record.sourcePath + ":" + index,
-            kind: "data", title: record.title, excerpt: excerpt(record.detail, needle),
+            kind: "data", categoryId: category.id, title: record.title, excerpt: excerpt(record.detail, needle),
             source: record.sourcePath, timestamp: record.timestamp,
           });
         }
