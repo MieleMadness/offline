@@ -1,0 +1,48 @@
+name: Offline 0.1.0 · Verify
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    name: 0.1.0 · Frontend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript
+        run: npm run check
+      - name: UI tests
+        run: npm run test
+      - name: Production bundle
+        run: npm run build
+
+  windows:
+    name: 0.1.0 · Windows desktop compile
+    runs-on: windows-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+      - name: Rust archive tests
+        run: cargo test --manifest-path src-tauri/Cargo.toml
+      - name: Compile Windows desktop application
+        run: npx tauri build --no-bundle
