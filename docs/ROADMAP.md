@@ -84,8 +84,8 @@
 ### Conversation work (remaining)
 
 - [ ] Messenger conversation history complete with sender, dates, media attachments and thread parts.
-- [x] Initial person/conversation search plus in-thread keyword, year and attachment filters; incremental older-message display (development; UI acceptance pending).
-- [ ] Full message search indexing, date-range picker and performance acceptance for large threads.
+- [x] Initial in-thread keyword/year and attachment filters; incremental older-message browsing (pending native UI acceptance).
+- [ ] Full search indexing, date-range picker and large-thread performance acceptance.
 - [ ] Friend/follower/group/event relationship views from exported data.
 - [ ] Conversation output (readable HTML/PDF/text) for the archive owner; no accidental sharing.
 - [ ] Explicit missing encrypted-chat warnings and documented import limitations.
@@ -94,7 +94,7 @@
 
 ## Phase 6 — v0.7.x: Photo previews and Understand Your Data
 
-- [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0, ZIP test fixture corrected in v0.7.1; Windows and real-export acceptance pending).
+- [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0, duplicate ZIP fixture constraints documented in v0.7.2; Windows and real-export acceptance pending).
 - [x] Recognized local image references under supported HTML/JSON posts and Messenger messages, with safe fallbacks.
 - [ ] HEIC and video previews, full album relationship support, image codec security and 10k+ file stress tests.
 
