@@ -3,6 +3,7 @@ import { CalendarDays, Check, ChevronRight, Eye, EyeOff, FileText, Info, ShieldC
 import { fileName, formatNumber } from "../archive";
 import { availableRecordYears, dateLabel, filterDataRecords, type ImportedArchive } from "../social-model";
 import { EmptyState, timeISOString } from "./Shared";
+import { isPrivateDataCategory } from "../data-privacy";
 
 /** Explanations are cautious: they describe export categories, not unobserved Meta behavior. */
 const guidance: Record<string, string> = {
@@ -16,7 +17,6 @@ const guidance: Record<string, string> = {
   personal: "Profile and account details that were included in your export.",
   other: "Additional files recognized by category, but not decoded into a more specific type.",
 };
-const privateCategories = new Set(["searches", "locations", "security", "external", "personal"]);
 
 export default function Data({ archive, query }: { archive: ImportedArchive; query: string }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function Data({ archive, query }: { archive: ImportedArchive; que
   const records = useMemo(() => filterDataRecords(
     current?.records ?? [], query, year, !!current?.label.toLocaleLowerCase().includes(needle) && !!needle,
   ), [current, query, year, needle]);
-  const privateCategory = !!current && privateCategories.has(current.id);
+  const privateCategory = isPrivateDataCategory(current?.id);
   const concealed = privateCategory && revealedId !== current?.id;
 
   function chooseCategory(id: string) {
