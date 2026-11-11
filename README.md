@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development status:** v0.3.0 family/format preview on `feature/family-formats-0.3.0`. No verified public installer yet. v0.2.0 is the last native-verified baseline.
+> **Development preview v0.4.1.** Adds optional encrypted saved previews. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -20,7 +20,9 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 ## Important family privacy distinction
 
-Family profiles currently organize content in app memory. Names/colors can be saved as local app preferences, but imported post/message contents are **not** persisted between app restarts. Profile switching is **not authentication or encryption**; everyone using the same Windows login could potentially switch to another person's preview. For private family use before encrypted profile vaults ship, use separate Windows user accounts and do not import sensitive archives when someone else has access to your OS session.
+Ordinary imports stay in memory until you close Offline. Anyone using the app can select an ordinary profile. To keep a preview, choose **Save encrypted copy**, set a unique passphrase, and retain your original ZIP. Offline immediately locks the saved copy. Unlocking allows browsing or replacing that profile’s saved preview. Use **Lock preview** before handing over the device. Switching profiles and reopening the app also require unlocking again.
+
+Profile names and colors remain visible. The original ZIP has its original Windows file permissions. The passphrase protects the saved snapshot only. Losing the passphrase means reimporting the ZIP into another profile. Clearing WebView app data removes saved previews. Keep independent backups.
 
 Individual archives remain read-only. Offline never requests Facebook credentials or uploads ZIP content.
 
@@ -31,7 +33,7 @@ Prerequisites: Node.js 22+, Rust (MSVC), Visual Studio C++ Build Tools, and the 
 ```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
-git checkout feature/family-formats-0.3.0
+git checkout feature/encrypted-library-0.4.1
 npm install
 npm run tauri dev
 ```
@@ -48,7 +50,7 @@ When a milestone requires a Windows binary:
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1 -BuildDesktop
 ```
 
-GitHub runs lightweight frontend checks on pull requests. The full Windows compilation is opt-in for milestone verification via manual workflow dispatch or a temporary `[windows]` PR title marker. Keep package, Tauri, Cargo, CI and release versions synchronized. Green baseline: 0.2.0 → next feature minor 0.3.0; if 0.3.0 is red, use 0.3.1 for the targeted fix.
+GitHub runs lightweight frontend checks on pull requests. The full Windows compilation is opt-in for milestone verification via manual workflow dispatch or a temporary `[windows]` PR title marker. Keep package, Tauri, Cargo, CI and release versions synchronized. Advance a verified green feature by one minor version and use a patch for failed-build corrections.
 
 ## Current safety and limitations
 
@@ -59,7 +61,7 @@ GitHub runs lightweight frontend checks on pull requests. The full Windows compi
 - Media referenced by a post is not yet decoded or displayed.
 - Some export timestamps are ambiguous; timezone-less HTML dates are approximate, and unsupported dates remain undated.
 - Some encrypted Messenger history may not appear in a standard Facebook export.
-- Family archive imports are currently session-only; multi-file reconciliation and persistent storage are future milestones.
+- Each profile can keep one encrypted snapshot. Backup/restore, passphrase changes, scheduled locking, multipart reconciliation and indexed search remain open.
 - Only synthetic data should be used in tests, issues and CI logs.
 
 ## Project guide

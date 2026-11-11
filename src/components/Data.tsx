@@ -23,7 +23,7 @@ export default function Data({ archive, query }: { archive: ImportedArchive; que
       <span><Check size={15} aria-hidden="true"/> Local</span>
     </div>
     {categories.length === 0 ? <EmptyState icon={SlidersHorizontal} title="No matching categories">
-      The archive doesn't contain recognized JSON data in this area, or your search has no results.
+      The archive doesn't contain recognized HTML or JSON data in this area, or your search has no results.
     </EmptyState> : <div className="soc-data-grid">
       <aside className="soc-data-categories" aria-label="Data categories">
         <div className="soc-category-heading">Available categories</div>
@@ -48,6 +48,6 @@ export default function Data({ archive, query }: { archive: ImportedArchive; que
       </section>
     </div>}
     {archive.social.filesSkipped > 0 && <p className="soc-soft-caption">
-      {archive.social.filesSkipped} JSON files were skipped because they were invalid or exceeded the safety limits.</p>}
+      {archive.social.filesSkipped} HTML/JSON files were skipped because they were invalid or exceeded the safety limits.</p>}
   </div>;
 }

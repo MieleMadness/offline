@@ -16,11 +16,13 @@ Every record carries `profile_id`, `import_id`, `source_path`, source format, op
 | --- | --- | --- |
 | Facebook JSON ZIP | `.json` files and recognized directory/metadata patterns | Rust JSON parser with strict read/decompression budgets |
 | Facebook HTML ZIP | `index.html` plus HTML category/message/post files | Rust *non-executing* DOM parser and per-export-version selectors |
-| Mixed ZIP | Both JSON and HTML members | Detect primary/duplicate categories; never double-count silently |
+| Mixed ZIP | Both JSON and HTML members | Scan both formats; matching content can appear twice until reconciliation ships |
 | Extracted folder | `index.html`/JSON structure; recursively scanned under approved root | Future support with symlink/path safeguards |
 | Multipart ZIP | same profile, multiple ZIPs/parts | Future batch import with hashing, dedupe and provenance |
 
 The format dropdown should be **Auto detect** by default, with an override only for advanced troubleshooting. Do not insist users choose JSON when they already have HTML.
+
+v0.4.1 accepts a leading UTF-8 BOM in JSON and reads machine-readable HTML time attributes before localized text on the same element. A synthetic archived-thread fixture combines one JSON and one HTML part with the same sender and timestamp.
 
 ### Canonical data types
 1. `Post`: author, timestamp, caption/body, media references, reactions/comments when present, original source path.

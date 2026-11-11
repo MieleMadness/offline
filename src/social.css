@@ -126,7 +126,7 @@ button:disabled { cursor: not-allowed; }
 .soc-feed-rail { padding-top: 10px; }
 .soc-side-panel { padding: 26px 24px 22px; background: var(--panel); border: 1px solid var(--border); border-radius: 15px; }
 .soc-panel-icon { display: grid; place-items: center; width: 43px; height: 43px; background: #e8f5ed; border-radius: 12px; color: var(--accent); }
-.soc-side-panel h2 { max-width: 230px; font-size: 22px; line-height: 1.22; letter-spacing: -.035em; margin: 19px 0 11px; }
+.soc-side-panel h2 { color: var(--ink); max-width: 230px; font-size: 22px; line-height: 1.22; letter-spacing: -.035em; margin: 19px 0 11px; }
 .soc-side-panel p { font-size: 12px; line-height: 1.7; color: var(--subtle); margin: 0; }
 .soc-stat-list { display: grid; gap: 0; margin-top: 24px; border-top: 1px solid var(--border); }
 .soc-stat-list > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); }
@@ -380,3 +380,9 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-color-scheme: dark) {
   .soc-import-warning, .soc-import-warning > svg { color: #f3ca84; }
 }
+
+.soc-vault-form { color: var(--ink); margin: 2rem auto; padding: 1.5rem; max-width: 30rem; display: grid; gap: 1rem; }
+.soc-vault-form h2, .soc-vault-form p { margin: 0; }
+.soc-vault-form label { display: grid; gap: .4rem; }
+.soc-vault-form input, .soc-vault-action, .soc-vault-form button[type="button"] { font: inherit; color: inherit; background: transparent; border: 1px solid currentColor; border-radius: .5rem; padding: .6rem .8rem; }
+.soc-vault-form > div { display: flex; gap: .7rem; }
