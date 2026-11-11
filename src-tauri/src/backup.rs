@@ -100,6 +100,14 @@ mod tests {
     }
 
     #[test]
+    fn rejects_invalid_utf8_in_a_selected_backup_file() {
+        let file = test_file("invalid-utf8");
+        fs::write(&file, [0xff_u8, 0xfe_u8, 0xfd_u8]).unwrap();
+        assert!(read_backup(&file).unwrap_err().contains("UTF-8"));
+        fs::remove_file(file).unwrap();
+    }
+
+    #[test]
     fn rejects_wrong_extensions_missing_files_and_oversized_input() {
         let file = test_file("missing");
         assert!(read_backup(&file).is_err());
