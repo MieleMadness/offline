@@ -49,7 +49,7 @@ jobs:
       - name: Install frontend packages
         run: npm install --no-audit --no-fund
       - name: Generate fictional ZIPs for native importer acceptance
-        run: python scripts/generate_facebook_fixtures.py --output fixtures/generated
+        run: python scripts/generate_facebook_fixtures.py --output fixtures/generated --large-count 5125
       - name: Rust unit tests and native fictional-export acceptance
         env:
           OFFLINE_ACCEPTANCE_FIXTURES: ${{ github.workspace }}/fixtures/generated

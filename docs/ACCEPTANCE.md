@@ -101,3 +101,10 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 ## Native fictional-export integration gate (development)
 
 The Windows milestone job now generates fictional HTML/JSON ZIPs locally and runs the production Rust reader against them. Confirm all native fixture tests report green when the `OFFLINE_ACCEPTANCE_FIXTURES` variable is set: JSON posts/messages/data, HTML posts/messages/media, empty/malformed import cases and mixed seconds/milliseconds dates. This closes a gap between testing the fixture generator and testing the actual import adapter. It does not replace a human Windows UI walkthrough or real-format redacted export acceptance.
+
+
+## Native large-photo ZIP regression
+
+- [x] Code-level test: production ZIP photo listing and single-file read use the generated fictional 5,125-image archive and validate directory-index identity (CI result required).
+- [ ] Manual Windows acceptance: connect `large-5125-photos.zip`, search for `synthetic_005100`, open the result in the full-size viewer and inspect the last page.
+- [ ] Performance profile: measure memory/CPU and photo page latency on ordinary hardware using realistically sized images; tiny 1×1 fixture PNGs are **not** representative.

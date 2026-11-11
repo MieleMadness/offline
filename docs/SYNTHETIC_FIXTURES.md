@@ -65,3 +65,8 @@ The Windows milestone workflow generates the same fictional files and sets `OFFL
 
 
 **CI optimization:** Add `[rust]` to the draft pull-request title for a one-time Windows Rust test run with fictional ZIPs, without rebuilding the desktop executable. Use `[windows]` only for a full milestone compile. Ordinary PRs run the fast frontend and Python checks only.
+
+
+## Native on-disk large-photo acceptance
+
+The targeted `[rust]` Windows job generates `large-5125-photos.zip` from fictional 1×1 PNGs and runs the production Rust ZIP photo directory and bounded image reader against it. It checks page 5,101 onward, one last-page entry, an exact ZIP member index, and a rejected mismatched index/path. This verifies the native read-only code uses the full ZIP directory instead of silently stopping at 5,000 entries. It is **not** a 5,125-photo decode benchmark or a performance guarantee for full-resolution photos.
