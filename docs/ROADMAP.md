@@ -108,7 +108,12 @@
 
 **Exit gate:** The app clearly distinguishes what was supplied in the ZIP from what may exist on Meta's systems.
 
-## Phase 7 — v0.8.x: Family Memories & strong private vaults
+## Phase 7 — v0.8.x: Messenger browsing and Family Memories
+
+- [x] v0.8.0: Search within conversations and filter by year, participant, attachments and local date range; progressive older-message display (native/UI acceptance pending).
+- [ ] Thread export, larger-message virtualization, cross-export deduplication and full attachment compatibility.
+
+### Family Memories and private vaults
 - [ ] Per-profile encryption at rest and vetted key management; strong isolation even under a shared Windows account if a profile password is used.
 - [ ] Family Memories view built from **explicitly selected** posts/media. Consent and revocation are mandatory.
 - [ ] No automatic sharing of messages, searches, precise locations, logins or advertising activity.

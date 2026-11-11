@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.7.2.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.8.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -21,7 +21,7 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
 
-## Conversation exploration (next feature batch)
+## Conversation exploration (v0.8.0 development)
 
 Inside a Messenger conversation, search the thread's own messages, choose a year (including unknown dates), limit the view to messages with attachments, and use **More filters** for a participant and inclusive local start/end dates. Messages load in recent batches of 250 with a **Show older messages** action; the reading position is preserved as older history appears. These controls operate only on the current family profile and do not fetch missing or end-to-end encrypted Messenger history.
 
