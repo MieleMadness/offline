@@ -58,3 +58,8 @@ The image reader rejects multiple matching names **when the ZIP library exposes 
 ## v0.9.0: Sensitive account-data display controls
 
 The Your Data panel conceals names, details and source paths by default for data categories classified as searches, locations, security, connected-app/off-platform activity and personal account details. The global Search library also conceals the corresponding data result titles, snippets and paths until the user explicitly reveals them. Reveal state clears on search or category changes. These are UI display controls, **not an encryption boundary**: parsed data still exists in the unlocked workspace memory. Messages, posts and optional opt-in local model inference may show sensitive content. Do not claim that a masked category hides all private data within Offline; lock a saved profile to protect access, and avoid sharing an unlocked screen.
+
+
+## v0.10.0 — Non-destructive import and source coverage safeguards
+
+A native ZIP can pass filename and UTF-8 checks yet decode no useful social content. The frontend now refuses to replace a preview when the new archive contains no readable records and no media inventory. A previously present preview is staged for explicit review, and an encrypted snapshot cannot be replaced without an extra typed confirmation. Snapshot updates use owner-specific authenticated ciphertext and expected-revision IndexedDB transactions; original ZIP files are never changed. The confirmation is a user-experience protection against accidental data loss, not a security boundary against another person with access to the unlocked Windows session. Media-only exports are honestly labeled as inventory. Full native acceptance, integrity verification and storage-failure tests remain necessary.

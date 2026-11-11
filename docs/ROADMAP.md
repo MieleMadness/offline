@@ -129,7 +129,9 @@
 
 - [x] v0.9.0: Private-by-default previews for sensitive Your Data categories and global search results; source provenance and year filters (pending UI acceptance).
 - [ ] More Facebook export vintages, HTML layouts and JSON schemas; multiple selected data categories; multipart ZIP.
-- [ ] Documented compatibility matrix with synthetic fixtures, safe fallbacks and accuracy checks.
+- [x] v0.10.0 import health and safety: no accidental saved-preview replacement for unrecognized ZIPs, media-only disclosure, explicit confirmation for replacement (native acceptance pending).
+- [x] v0.10.0 timestamp normalization for common Meta JSON seconds/milliseconds and common English HTML date patterns with synthetic regression tests.
+- [ ] Full compatibility matrix for real-world redacted HTML/JSON export variations, import validation and source mapping.
 - [ ] 10k/100k+ content performance benchmarks, thumbnail budgets, search scale and stress tests.
 - [ ] Browser-like accessibility audit, dark/light focus and contrast, 900/1280/1440 resolutions.
 - [ ] Backup/restore testing, corrupted archive and crash recovery, disk-space management.
@@ -160,3 +162,11 @@ Next, verify v0.7.0 native photo/gallery integration and image codec safety; exe
 - Implemented bounded text and image relevance search using local Ollama models.
 - Pending successful real inference acceptance with a model that fits available memory.
 - Next extend media indexing, model setup and full-library semantic retrieval, then encrypt persisted embeddings under the workspace key.
+
+
+## Pre-v1 development milestone — v0.10.0 (import reliability)
+
+- [x] Reject archives with no recognized records or media before modifying the current preview.
+- [x] Require side-by-side review and explicit confirmation before replacing existing session or encrypted saved previews.
+- [x] Show import coverage and skipped-file limitations; recognize common JSON timestamp variants and English HTML date layouts.
+- [ ] Complete native Windows import/replacement smoke tests, multi-export deduplication, storage-loss recovery, 10k+ media stress tests and independent security review before v1.0.

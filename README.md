@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.9.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.10.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -22,6 +22,14 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Import safety and coverage (v0.10.0 development)
+
+Choosing a Facebook HTML or JSON ZIP now runs a conservative **import coverage check** before any data changes. A ZIP with no readable post, message, account data or recognizable media is rejected; your current preview remains intact. A ZIP with only media is allowed as a *media/file inventory*, not presented as decoded social history. The import header reports posts, messages, recognized account data, indexed media and skipped text files; expand **Import scope and limitations** for more detail.
+
+If you already have a preview, Offline does **not** combine imports or silently overwrite it. Instead, you see a review of the existing and selected ZIPs. You can keep your current preview or explicitly replace it. Replacing an encrypted saved copy additionally requires typing **REPLACE** and warns you to make an independent encrypted backup first. Replacement uses a transactional snapshot revision check. Original ZIP files are never modified or deleted.
+
+Numeric Meta timestamps are accepted as Unix seconds, named millisecond fields or unambiguous 13-digit millisecond values; numeric strings are supported. Common human-readable HTML timestamps are also recognized. Ambiguous or invalid timestamps remain undated instead of being guessed.
 
 ## Understanding your data (v0.9.0 development)
 

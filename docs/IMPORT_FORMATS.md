@@ -57,3 +57,12 @@ v0.4.1 accepts a leading UTF-8 BOM in JSON and reads machine-readable HTML time 
 ## v0.7.0 — Image preview scope
 
 Recognized JSON photo and attachment-media URI fields and HTML image src fields are resolved only to local ZIP member paths. Remote URLs, data URLs, scripts, SVG and paths escaping the ZIP root are never loaded. The dedicated Photographs gallery uses the existing bounded inventory of up to 5,000 ZIP paths and does not require a post association. Supported images are JPEG/PNG/GIF/WebP up to 4 MiB uncompressed. Video/HEIC files, images with unsupported references and members outside the indexed inventory remain unpreviewable. Media is read only when needed in the current profile session, never stored inside an encrypted saved preview or portable backup.
+
+
+## v0.10.0 — Import confidence and replacement safety
+
+- Read-only scanning distinguishes useful decoded records from a ZIP containing only navigational HTML, empty JSON or unrecognized files. No-content ZIPs are rejected without replacing an existing preview.
+- Media-only ZIPs are permitted as an inventory preview, with a clear limitation: posts, messages and account records were not decoded. This is not an assertion that all media binaries can be displayed.
+- Import coverage includes post/message/record counts, media inventory, text-file counts and skipped parsing warnings. Unsupported records and partial archives must never be presented as complete Facebook history.
+- When a profile already has an archive, newly parsed data is staged in memory. The user must explicitly choose to replace the existing preview, and an encrypted saved copy requires typing REPLACE. This does not merge multiple ZIP exports.
+- Timestamp adapters accept valid Unix seconds, explicitly named millisecond timestamps, unambiguous 13-digit numeric millisecond values and numeric strings. Common explicit English HTML timestamps are supported. Invalid or ambiguous dates remain unknown. Any local date without a timezone is currently interpreted as UTC for approximate sorting, documented as a limitation.

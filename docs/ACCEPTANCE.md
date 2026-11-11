@@ -61,3 +61,15 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 5. Load over 60 synthetic data records; the list should initially show 50 and support Show more. Confirm private values never appear in logs, error notices or public tests.
 
 **Why:** Data may include security and location details. An understandable account-data explorer must not silently expose those fields during ordinary search or screen sharing.
+
+
+## v0.10.0 — Import safety smoke tests
+
+1. With an encrypted saved profile open, select a synthetic ZIP containing only index.html and empty JSON. Confirm an informative error and verify the original encrypted snapshot revision is unchanged.
+2. Select a synthetic photo-only ZIP. Confirm it is labeled **media/file inventory only**, never as decoded posts/messages.
+3. Select a second valid JSON or HTML ZIP while an existing saved preview is unlocked. Confirm the review screen accurately shows both archive filenames and approximate counts, with **Keep current preview** as the safest action.
+4. Confirm **Replace encrypted preview** is disabled until exactly REPLACE is typed. Cancel, lock or switch profiles; the pending ZIP must not leak into another family workspace.
+5. Confirm replacement works only when explicitly requested, updates a single owner, and leaves original ZIPs unchanged. Simulate storage failure and a stale snapshot revision; previously saved contents must remain intact.
+6. Check timestamps from Unix seconds, named millisecond fields, 13-digit millisecond numeric strings and explicit HTML dates. Ambiguous local strings must remain undated.
+
+**Why:** importing another Facebook download must never silently destroy the only saved copy of prior memories.
