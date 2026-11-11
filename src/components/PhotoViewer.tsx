@@ -53,6 +53,7 @@ export default function PhotoViewer({ entries, index, zipPath, onClose, onNaviga
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
       if (previouslyFocused?.isConnected) previouslyFocused.focus();
+      else document.querySelector<HTMLButtonElement>(".soc-photo-open:not(:disabled)")?.focus();
     };
   }, []);
 

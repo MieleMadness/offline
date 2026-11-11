@@ -44,7 +44,8 @@ export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSi
 
   return <div ref={node} className={"soc-photo-frame " + (compact ? "soc-photo-compact " : "") + (fullSize ? "soc-photo-full" : "")}>
     {status === "ready" && url
-      ? <img src={url} alt={caption ?? "Archived photo: " + fileName(member)} loading="lazy" decoding="async"/>
+      ? <img src={url} alt={caption ?? "Archived photo: " + fileName(member)}
+          loading="lazy" decoding="async" onError={() => { setUrl(""); setStatus("failed"); }}/>
       : <div className="soc-photo-empty" role="status">
           {status === "failed" ? <ImageOff size={24} aria-hidden="true"/> : <ImageIcon size={24} aria-hidden="true"/>}
           <span>{!zipPath ? "Connect original ZIP to view" : status === "failed" ? "Preview unavailable" :
