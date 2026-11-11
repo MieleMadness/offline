@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import {
   Archive, ArchiveRestore, ArrowDownToLine, ArrowRight, CalendarDays, Check, Download,
-  ChevronRight, FileArchive, FolderOpen, Info, LockKeyhole, Menu,
+  ChevronRight, FileArchive, FolderOpen, Image as ImageIcon, Info, LockKeyhole, Menu,
   MessagesSquare, Search, ShieldCheck, X, type LucideIcon,
 } from "lucide-react";
 import { formatNumber, formatSize, type ArchiveReport } from "./archive";
@@ -17,25 +17,28 @@ import ProfilePicker from "./components/ProfilePicker";
 import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
 import QuickSearch from "./components/QuickSearch";
+import Photos from "./components/Photos";
+import { sameInventory, photoEntries } from "./archive-images";
 import VaultForm from "./components/VaultForm";
 import { deleteSnapshot, deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
 import { recoveredProfileName, serializeBackup, validateRecoveredArchive, type PortableBackup } from "./backup";
 import RestoreBackup from "./components/RestoreBackup";
 import "./social.css";
 
-type View = "feed" | "messages" | "data" | "files" | "search";
+type View = "feed" | "messages" | "photos" | "data" | "files" | "search";
 const navigation: { id: View; name: string; icon: LucideIcon }[] = [
   { id: "feed", name: "My timeline", icon: CalendarDays },
   { id: "messages", name: "Messages", icon: MessagesSquare },
+  { id: "photos", name: "Photographs", icon: ImageIcon },
   { id: "data", name: "Your data", icon: ShieldCheck },
   { id: "files", name: "Archive files", icon: FileArchive },
   { id: "search", name: "Search library", icon: Search },
 ];
 const labels: Record<View, string> = {
-  feed: "My timeline", messages: "Messages", data: "Your data", files: "Archive files", search: "Search library",
+  feed: "My timeline", messages: "Messages", photos: "Photographs", data: "Your data", files: "Archive files", search: "Search library",
 };
 const placeholders: Record<View, string> = {
-  feed: "Search posts", messages: "Search people or messages",
+  feed: "Search posts", messages: "Search people or messages", photos: "Search photographs",
   data: "Search collected data", files: "Search filenames", search: "Search this profile",
 };
 
@@ -144,6 +147,9 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const locked = !!snapshot && !unlocked;
   const archive = ready ? (snapshot ? unlocked?.archive ?? null : sessionArchive) : null;
   const [view, setView] = useState<View>("feed");
+  // Source ZIP is only a temporary association for this mounted, active profile.
+  // Never place a local filesystem path in the encrypted preview or backups.
+  const [sourceZip, setSourceZip] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -172,6 +178,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   }
   function finish() { pending.current = false; setBusy(false); }
   function lock() {
+    setSourceZip(null);
     setUnlocked(null);
     setQuery("");
     setView("feed");
@@ -254,6 +261,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       } else {
         onSessionArchive(imported);
       }
+      setSourceZip(selected);
       setView("feed");
       setQuery("");
     } catch (cause) {
@@ -262,6 +270,27 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     } finally {
       finish();
     }
+  }
+
+  async function connectOriginalZip() {
+    if (!archive || locked || enrolling) return;
+    if (!begin()) return;
+    try {
+      const selected = await open({
+        multiple: false, directory: false,
+        filters: [{ name: "Original ZIP archive", extensions: ["zip"] }],
+      });
+      if (typeof selected !== "string") return;
+      const candidate = await invoke<ArchiveReport>("inspect_archive", { path: selected });
+      if (!sameInventory(archive.report, candidate)) {
+        throw new Error("This ZIP does not match the current profile's imported file inventory. Choose the same original download.");
+      }
+      setSourceZip(selected);
+      setNotice("Original archive connected for this session. Photos can now be previewed locally.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : typeof cause === "string" ? cause :
+        "The selected ZIP could not be connected.");
+    } finally { finish(); }
   }
 
   async function exportBackup() {
@@ -287,6 +316,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const counts: Record<View, number> = {
     feed: archive?.social.posts.length ?? 0,
     messages: archive?.social.conversations.length ?? 0,
+    photos: archive ? photoEntries(archive.report).length : 0,
     data: archive?.social.dataCategories.length ?? 0,
     files: archive?.report.totalFiles ?? 0,
     search: archive ? meaningfulCount(archive.social) : 0,
@@ -320,7 +350,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
-        <span className="soc-version">Offline v0.6.0 · Development preview</span>
+        <span className="soc-version">Offline v0.7.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -338,6 +368,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
               value={query} onChange={(event) => setQuery(event.target.value)}/>
             <kbd>Ctrl K</kbd>
           </label>}
+          {archive && !sourceZip && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
+            onClick={connectOriginalZip}><ImageIcon size={16} aria-hidden="true"/> Connect photos</button>}
           {unlocked && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
             onClick={exportBackup}><Download size={16} aria-hidden="true"/> Backup</button>}
           {unlocked && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
@@ -382,11 +414,13 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
             <div><MessagesSquare size={22} aria-hidden="true"/><strong>Messages</strong><span>People & conversations</span></div>
             <div><ShieldCheck size={22} aria-hidden="true"/><strong>Your data</strong><span>See your export</span></div>
           </div>
-          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
+          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. JPEG, PNG, GIF and WebP previews require connecting the original ZIP. Video playback and more export variants are planned.</p>
         </div></div> : <>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
-          {view === "feed" && <Feed archive={archive} query={query}/>}
-          {view === "messages" && <Messages archive={archive} query={query}/>}
+          {view === "feed" && <Feed archive={archive} query={query} sourceZip={sourceZip}/>}
+          {view === "messages" && <Messages archive={archive} query={query} sourceZip={sourceZip}/>}
+          {view === "photos" && <Photos report={archive.report} query={query} zipPath={sourceZip}
+            onConnect={connectOriginalZip} busy={busy}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
           {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query}/>}
