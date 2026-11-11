@@ -28,6 +28,8 @@ jobs:
         run: npm run check
       - name: Frontend unit tests
         run: npm run test
+      - name: Synthetic Facebook ZIP fixture tests (Python, no user data)
+        run: python3 -m unittest discover -s scripts -p 'test_fixture_generator.py'
       - name: Production frontend bundle
         run: npm run build
 
