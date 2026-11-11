@@ -335,6 +335,7 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
     let mut categories = BTreeMap::new();
     let mut warnings = Vec::new();
     let mut files_read = 0_usize;
+    let mut attempts = 0_usize;
     let mut files_skipped = 0_usize;
     let mut bytes_read = 0_u64;
     let mut message_total = 0_usize;
@@ -350,12 +351,13 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
         }
         let lower = path.to_ascii_lowercase();
         if !lower.ends_with(".json") { continue; }
-        if files_read >= MAX_JSON_FILES || file.size() > MAX_JSON_FILE_BYTES
+        if attempts >= MAX_JSON_FILES || file.size() > MAX_JSON_FILE_BYTES
             || bytes_read.saturating_add(file.size()) > MAX_TOTAL_JSON_BYTES
         {
             files_skipped += 1;
             continue;
         }
+        attempts += 1;
         let mut bytes = Vec::with_capacity(file.size() as usize);
         // A checked upper bound also protects against inaccurate ZIP directory sizes.
         file.by_ref().take(MAX_JSON_FILE_BYTES + 1).read_to_end(&mut bytes)
@@ -396,6 +398,18 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
     data_categories.sort_by(|a, b| b.file_count.cmp(&a.file_count).then_with(|| a.label.cmp(&b.label)));
     for item in &mut data_categories {
         item.records.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    }
+    if posts.len() >= MAX_POSTS {
+        warnings.push(format!("Showing at most {MAX_POSTS} posts in this preview."));
+    }
+    if message_total >= MAX_MESSAGES {
+        warnings.push(format!("Showing at most {MAX_MESSAGES} messages in this preview."));
+    }
+    if threads.len() >= MAX_CONVERSATIONS {
+        warnings.push(format!("Showing at most {MAX_CONVERSATIONS} conversations."));
+    }
+    if record_total >= MAX_DATA_RECORDS {
+        warnings.push(format!("Showing at most {MAX_DATA_RECORDS} data records."));
     }
     if files_skipped > 0 {
         warnings.push(format!("{files_skipped} JSON files were skipped because they were unsupported, invalid, or exceeded import safety limits."));
