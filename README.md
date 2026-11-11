@@ -1,67 +1,75 @@
 # Offline
 
-**Offline** is a privacy-first Windows desktop app for exploring downloadable social-media history, starting with Facebook JSON archives. Everything is processed on your own computer without account login or cloud uploads.
+**Offline** — *Your memories, on your terms.*
 
-> **Status:** v0.2.0 is in development. The social timeline, conversations and data explorer are preview features; there is no verified public installer yet.
+A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-## Your archive, the way it should look
+> **Development status:** v0.3.0 family/format preview on `feature/family-formats-0.3.0`. No verified public installer yet. v0.2.0 is the last native-verified baseline.
 
-**Timeline.** Posts appear in a familiar social feed, sorted by original date and grouped by month. Search their text, filter by year and identify posts with media references.
+## The experience
 
-**Messages.** Conversations are grouped by people, and messages are presented in date order with sender names, timestamps and text. Multipart `message_1.json` / `message_2.json` threads are combined by conversation folder.
+| Area | What you'll see |
+| --- | --- |
+| My Timeline | Familiar post cards sorted by month and date, with year filters and attachment references |
+| Messages | Conversation list by name, sender, dates and chronological message bubbles |
+| Your Data | Categorized previews of account, advertising, searches, devices, locations and other exported activity |
+| Archive Files | Read-only ZIP inventory for original filenames, sizes and metadata |
+| Family Profiles (preview) | Create and switch among local family member names; imports belong to one chosen profile |
 
-**Your data.** Explore the JSON export categories that were actually found, such as advertising-related information, searches, location/check-ins, devices/login history, connections and off-platform activity. Data coverage depends on the export; Offline doesn't claim to show everything Meta has stored.
+**Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
 
-**Files.** Search the original ZIP inventory by filename or size.
+## Important family privacy distinction
 
-The three core views use a desktop-first UI with clear typographic hierarchy, light/dark mode, keyboard focus and reduced-motion support.
+Family profiles currently organize content in app memory. Names/colors can be saved as local app preferences, but imported post/message contents are **not** persisted between app restarts. Profile switching is **not authentication or encryption**; everyone using the same Windows login could potentially switch to another person's preview. For private family use before encrypted profile vaults ship, use separate Windows user accounts and do not import sensitive archives when someone else has access to your OS session.
 
-## Development and local verification
+Individual archives remain read-only. Offline never requests Facebook credentials or uploads ZIP content.
 
-Prerequisites: Node.js 22+, Rust stable (MSVC on Windows), Visual Studio C++ Build Tools and Tauri 2 Windows WebView2 prerequisites.
+## Local development on Windows
+
+Prerequisites: Node.js 22+, Rust (MSVC), Visual Studio C++ Build Tools, and the Tauri 2/WebView2 Windows prerequisites.
 
 ```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
-git checkout feature/social-archive-0.2.0
+git checkout feature/family-formats-0.3.0
 npm install
 npm run tauri dev
 ```
 
-For normal development, **test locally**, not in a full GitHub Windows workflow every time:
+Local validation (recommended after each cohesive change):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1
 ```
 
-For an on-demand Windows executable build:
+When a milestone requires a Windows binary:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1 -BuildDesktop
 ```
 
-GitHub runs short frontend checks on pull requests. Full Windows compilation runs only on manual workflow dispatch or a PR explicitly titled with `[windows]`. Don't release without verifying the exact commit and testing a Windows installation.
+GitHub runs lightweight frontend checks on pull requests. The full Windows compilation is opt-in for milestone verification via manual workflow dispatch or a temporary `[windows]` PR title marker. Keep package, Tauri, Cargo, CI and release versions synchronized. Green baseline: 0.2.0 → next feature minor 0.3.0; if 0.3.0 is red, use 0.3.1 for the targeted fix.
 
-## Privacy and current limits
+## Current safety and limitations
 
-- Import a local Facebook ZIP archive. ZIP bytes and all processing stay on your device.
-- Source ZIP is read-only; JSON entries are read into **bounded, in-memory** structures, not extracted to folders or persisted to disk.
-- Limits: 250,000 archive entries; 1,000 JSON files; 4 MiB per JSON file; 48 MiB JSON data total; 3,000 posts; 500 conversations; 12,000 messages; 900 data-preview records. Additional records may be omitted.
-- Posts, participants and activity vary significantly among Meta export versions; content may be incomplete.
-- Media thumbnails and original media are **not rendered yet**. Only attachment counts are shown.
-- Facebook HTML exports and separate encrypted Messenger downloads are **not yet supported**.
-- Some Messenger exports may contain garbled Unicode or incomplete encrypted history; future compatibility passes will address these.
-- React displays imported text safely as text (never as executable HTML); archive scripts are never run.
+- Only local ZIP imports, never unzip/export to disk or execute imported HTML/JavaScript.
+- HTML is parsed as inert text/DOM; exports with unrecognized HTML layouts may show empty/missing sections.
+- JSON and HTML file reading is bounded to protect memory; current limits are 1,000 candidate files, 4 MiB per text file, and 48 MiB text data per archive, with additional post/message/record caps.
+- UTF-8 HTML is supported; HTML using other encodings may be skipped with a warning.
+- Media referenced by a post is not yet decoded or displayed.
+- Some export timestamps are ambiguous; timezone-less HTML dates are approximate, and unsupported dates remain undated.
+- Some encrypted Messenger history may not appear in a standard Facebook export.
+- Family archive imports are currently session-only; multi-file reconciliation and persistent storage are future milestones.
+- Only synthetic data should be used in tests, issues and CI logs.
 
-Never commit a real user's archive or messages to GitHub. Synthetic fixtures only.
+## Project guide
 
-## Design and engineering
+- [Brand, fonts, palette and interface style](docs/BRAND_GUIDE.md)
+- [Complete phased roadmap](docs/ROADMAP.md)
+- [Family architecture and protection requirements](docs/FAMILY_ARCHITECTURE.md)
+- [HTML and JSON import strategy](docs/IMPORT_FORMATS.md)
+- [Security boundaries](docs/SECURITY.md)
+- [Required three design skills](docs/DESIGN_SKILLS.md)
+- [Changelog](CHANGELOG.md)
 
-- [AGENTS.md](AGENTS.md) — development discipline, version policy, and required three design skills
-- [DESIGN.md](DESIGN.md) — the social archive design system
-- [docs/DESIGN_SKILLS.md](docs/DESIGN_SKILLS.md) — UI/UX Pro Max, Impeccable, and Emil design engineering
-- [docs/ROADMAP.md](docs/ROADMAP.md) — phases and acceptance criteria
-- [docs/SECURITY.md](docs/SECURITY.md) — boundaries and limits
-- [CHANGELOG.md](CHANGELOG.md) — release history
-
-Offline's own license remains undecided. Bundled third-party design skills retain their respective licenses.
+The application's open-source license is still to be selected. Bundled third-party skill files retain their own licenses.

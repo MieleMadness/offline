@@ -39,7 +39,7 @@ describe("social archive UI helpers", () => {
     expect(avatarInitials("Robin Doe")).toBe("RD");
     expect(avatarInitials(null)).toBe("A");
     const archive: SocialArchive = {
-      posts, conversations: chats, dataCategories: [], filesRead: 2, filesSkipped: 0, warnings: [],
+      posts, conversations: chats, dataCategories: [], filesRead: 2, jsonFilesRead: 2, htmlFilesRead: 0, formatHint: "JSON", filesSkipped: 0, warnings: [],
     };
     expect(meaningfulCount(archive)).toBe(4);
   });

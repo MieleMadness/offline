@@ -1,21 +1,29 @@
 # Changelog
 
-## 0.2.0 — In development (social archive reader)
+## v0.3.0 — In development (family and HTML/JSON import)
 
-- Replaced the file-first landing experience with a chronological social-media-style feed.
-- Added dated feed cards, year search/filter, media-reference indicators and source provenance.
-- Added Messenger-style conversations organized by participants and dated messages.
-- Added a "Your data" explorer for JSON export categories and readable example entries.
-- Added a bounded native Rust JSON reader for Facebook posts and conversation parts without extracting or modifying the source ZIP.
-- Added synthetic parser fixtures and TypeScript tests for filtering, year/date grouping, and people search.
-- Introduced local PowerShell verification; fast GitHub PR checks; full Windows compilation only on manual dispatch or an explicit [windows] PR.
-- Synced package, Tauri and Rust app versions to 0.2.0.
+- Introduced family profile names, selectable accent avatars and a visible profile switcher.
+- Assigned each in-memory ZIP preview to an explicit family profile; separated content on switching.
+- Added a read-only, non-executing HTML adapter for commonly exported post, Messenger and data page structures.
+- Routed bounded HTML and JSON file reads to the same social archive UI model.
+- Added a format-aware import summary displaying HTML/JSON scans, skipped files and limitations.
+- Added synthetic Rust HTML-only, mixed JSON/HTML and HTML message/post tests, plus TypeScript profile validation tests.
+- Added a brand guide, family access/privacy specification, format compatibility plan and phased roadmap through 1.0.
+- Synced package, Tauri, Rust and CI labels at 0.3.0. Full Windows verification is on demand.
 
-**Known limits:** JSON export formats vary. Only selected post and Messenger shapes are parsed; no media previews, complete indexes, HTML export parsing, or persistent database yet. Original archives remain read-only. No public installer should be distributed before Windows validation.
+**Known limits:** Profiles are organizational, not password locks; content is in memory and resets on exit. HTML parser only recognizes selected layouts; imported HTML is never executed. No actual media previews, persistent family vault, broad format compatibility, or release installer. Full verification pending.
 
-## 0.1.0 — Verified project baseline
+## v0.2.0 — Verified technical baseline
 
-- Tauri 2 and React/TypeScript desktop shell.
-- Read-only ZIP inventory, category counts, filename browsing and native file picker.
-- Frontend unit tests and Windows Rust/desktop compile checks passed at commit 5835071 before merge.
-- Bundled three Open-Photo design skill instructions and initial reference files.
+- Chronological social-media-style timeline and posts filter.
+- Messenger-style inbox and dated messages with participant names.
+- "Your Data" category explorer from supported JSON records.
+- Read-only bounded native JSON import and file provenance.
+- Fast frontend PR checks, opt-in Windows CI, local PowerShell verifier.
+- GitHub frontend and Windows native checks passed before merge; no public installer.
+
+## v0.1.0 — Verified initial desktop baseline
+
+- Tauri desktop ZIP inspector with read-only metadata scanning.
+- Source file categories, counts, filename browsing and basic tests.
+- Imported UI/UX Pro Max, Impeccable and Emil design skills; created project rules.

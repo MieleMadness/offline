@@ -1,52 +1,43 @@
-# Offline desktop experience · v0.2.0
+# Offline desktop design system · v0.3.0
 
-## Intent
+**Product promise:** Your memories, on your terms.
 
-**Personal archive, not a database viewer.** Give users a recognizable social-media experience built from their actual export, while preserving provenance and avoiding simulated interactions. Source files are always read only. The interface communicates what was and was not included.
+Offline is a social archive viewer, not an account-connected social network. Its familiar feed should feel warm, calm and organized. See [full brand guide](docs/BRAND_GUIDE.md) for palette, typography, spacing, voice and profile accents.
 
-Design references: [UI/UX Pro Max](.agents/skills/ui-ux-pro-max/SKILL.md), [Impeccable](.agents/skills/impeccable/SKILL.md) in **Operate** mode, and [Emil Design Engineering](.agents/skills/emil-design-eng/SKILL.md).
+## Navigation hierarchy
 
-## Information architecture
+A persistent **family profile selector** anchors the sidebar. All timeline, conversation, personal data and file views are scoped to the selected person. An import action clearly states its target person. A family group does **not** imply access to another member's private history.
 
-1. **My timeline:** the default view after import. Chronological feed cards, original timestamps, post author when supplied, per-month dividers, year/media filters, filename provenance and search.
-2. **Messages:** conversation list by names/participants, newest thread first; within a thread messages are chronological and grouped by calendar date with sender/time visible. No reply box or simulated sent status.
-3. **Your data:** actual detected export categories on the left, readable records on the right, backed by source file names and cautious coverage language.
-4. **Archive files:** lower-priority raw inventory for troubleshooting and transparency.
+1. **My Timeline:** post cards with dates, author when supplied, captions, attachment counts and source provenance.
+2. **Messages:** people list by name, chronological bubbles grouped by date, sender names and timestamps.
+3. **Your Data:** categorize recognized exported records and show details with source provenance, including missing/unsupported warnings.
+4. **Archive Files:** original ZIP metadata for transparency; lower priority than the familiar browsing experience.
 
-A single persistent local ZIP import action is placed in the top toolbar; no account connection UI. When no archive is loaded, the welcoming empty state explains exactly what the app can read.
-
-## Layout
-
-- Dark evergreen sidebar 238px, main content flex and scroll, 76px top toolbar.
-- Feed has a 730px reading column and optional 300px context rail. At smaller widths, prioritize the feed over the rail.
-- Messages two-column inbox with nested scrolling and a read-only footer.
-- Data explorer with category list and records panel.
-- Dense file paths truncate visibly but expose the full path as a title.
-
-## Theme tokens
+## Core tokens
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Canvas | #f6f8f6 | #131e19 |
-| Surface | #ffffff | #1b2922 |
-| Ink | #193129 | #f1faf3 |
-| Secondary | #53695e | #c6d7c9 |
-| Border | #e0e8e1 | #354b3d |
-| Accent | #17634d | #a5e7bd |
-| Focus | #329a78 | #91e0b3 |
+| Canvas | `#F6F8F6` | `#131E19` |
+| Surface | `#FFFFFF` | `#1B2922` |
+| Text | `#193129` | `#F1FAF3` |
+| Secondary | `#53695E` | `#C6D7C9` |
+| Borders | `#E0E8E1` | `#354B3D` |
+| Pine accent | `#17634D` | `#A5E7BD` |
+| Focus | `#329A78` | `#91E0B3` |
 
-Windows native Segoe UI Variable/Segoe UI, no remotely loaded fonts. Icons from one consistent vector family. No fabricated avatars/photos: initials are generated from source names.
+Windows-native **Segoe UI Variable / Segoe UI / system sans**, without remote fonts. Use a 4/8px spacing rhythm, 10–14px soft corners, clear focus states and Lucide vector icons. Family avatar accents: Harbor blue, Orchid purple, Terracotta coral, Golden amber, Evergreen green. These are decorative cues, never authentication.
 
-## Interactions and integrity
+## Responsive screens
+- Desktop dark evergreen sidebar about 238px, flexible reading column, 76px top navigation.
+- Feed max 730px reading width with optional 300px contextual rail.
+- Messenger-style inbox with participant list and conversation reading pane.
+- Account-data explorer with categories and details.
+- Small-screen collapsed navigation and accessible focus/scroll states.
+- Honor light/dark system preference and reduced motion.
 
-- Search is scoped to the current view; Ctrl/Cmd+K focuses search; Escape clears and blurs.
-- All interactive elements have hover/focus/disabled states. Keyboard actions are instantaneous; no gratuitous motion. Respect Windows reduced-motion.
-- Never present source archives as editable; no fake Like, Comment, Share, Send or Export buttons.
-- Post images are not yet decoded: show a truthful attachment placeholder.
-- If data is missing or unsupported, show a helpful empty state rather than synthetic records.
-- Display imported strings as text; never render untrusted HTML. Show the original file provenance for posts and records.
-- Treat actual Windows visual acceptance and accessibility checks as separate from TypeScript lint/build success.
-
-## QA
-
-Verify 900px wide main app, 1280/1440 desktop, reduced motion, light/dark contrast, long names and paths, absent timestamp, mixed export versions, blank archive, corrupted ZIP, truncated JSON, and dense conversation threads before publishing a public installer.
+## Quality standards
+- Apply UI/UX Pro Max for information architecture, Impeccable Operate mode for quality and Emil Design Engineering for interaction polish.
+- Every control must work. No simulated Like/Send actions.
+- Clearly label approximate HTML dates, limited imports, missing exported categories and attachment placeholders.
+- No synthetic memories presented as real history.
+- Distinguish organizational profile switching from true encrypted access; don't imply secure private accounts.

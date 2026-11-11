@@ -12,6 +12,9 @@ import Feed from "./components/Feed";
 import Messages from "./components/Messages";
 import Data from "./components/Data";
 import Files from "./components/Files";
+import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
+import ProfilePicker from "./components/ProfilePicker";
+import ImportSummary from "./components/ImportSummary";
 import "./social.css";
 
 type View = "feed" | "messages" | "data" | "files";
@@ -30,13 +33,41 @@ const placeholders: Record<View, string> = {
 };
 
 export default function SocialApp() {
-  const [archive, setArchive] = useState<ImportedArchive | null>(null);
+  const [profiles, setProfiles] = useState<FamilyProfile[]>(safeLoadProfiles);
+  const [activeProfileId, setActiveProfileId] = useState<string>(() => safeActiveId(safeLoadProfiles()));
+  // Content is memory-only in the preview; cross-profile indexes are not shared.
+  const [archivesByProfile, setArchivesByProfile] = useState<Record<string, ImportedArchive>>({});
+  const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
+  const archive = activeProfile ? profileOwnedValue(archivesByProfile, activeProfileId) : null;
   const [view, setView] = useState<View>("feed");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    saveProfiles(profiles, activeProfileId);
+  }, [profiles, activeProfileId]);
+
+  const addFamilyProfile = (name: string) => {
+    const profile = createProfile(profiles, name, () => crypto.randomUUID(), Date.now());
+    setProfiles((existing) => [...existing, profile]);
+    setActiveProfileId(profile.id);
+    setView("feed");
+    setQuery("");
+    setError("");
+    setMenuOpen(false);
+  };
+
+  const chooseFamilyProfile = (id: string) => {
+    if (busy || !profiles.some((profile) => profile.id === id)) return;
+    setActiveProfileId(id);
+    setView("feed");
+    setQuery("");
+    setError("");
+    setMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
@@ -61,6 +92,12 @@ export default function SocialApp() {
 
   async function importZip() {
     if (busy) return;
+    if (!activeProfile) {
+      setError("Create a family profile before importing an archive.");
+      return;
+    }
+    // Capture owner before any asynchronous file reading; never assign a result to a switched user.
+    const ownerId = activeProfile.id;
     setError("");
     try {
       const selected = await open({
@@ -72,7 +109,7 @@ export default function SocialApp() {
       setBusy(true);
       const report = await invoke<ArchiveReport>("inspect_archive", { path: selected });
       const social = await invoke<SocialArchive>("read_social_archive", { path: selected });
-      setArchive({ report, social });
+      setArchivesByProfile((existing) => setProfileOwnedValue(existing, ownerId, { report, social }));
       setView("feed");
       setQuery("");
     } catch (cause) {
@@ -95,6 +132,8 @@ export default function SocialApp() {
       <div className="soc-brand"><div className="soc-brand-logo"><Archive size={22} aria-hidden="true"/></div>
         <span><strong>offline<span>.</span></strong><small>YOUR DIGITAL HISTORY</small></span>
       </div>
+      <ProfilePicker profiles={profiles} activeId={activeProfileId} disabled={busy}
+        onChoose={chooseFamilyProfile} onCreate={addFamilyProfile}/>
       <div className="soc-side-label">YOUR LIBRARY</div>
       <nav className="soc-nav" aria-label="Archive sections">
         {navigation.map(({ id, name, icon: Icon }) => <button key={id}
@@ -111,9 +150,9 @@ export default function SocialApp() {
             <small>{formatNumber(archive.report.totalFiles)} files · {formatSize(archive.report.totalUncompressedBytes)}</small></span>
         </div>}
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
-          <span><strong>Yours. Only yours.</strong><small>Read and viewed locally.</small></span>
+          <span><strong>Local archive preview</strong><small>Profile switch is not a security lock.</small></span>
         </div>
-        <span className="soc-version">Offline v0.2.0 · Development preview</span>
+        <span className="soc-version">Offline v0.3.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -122,7 +161,7 @@ export default function SocialApp() {
           <button type="button" className="soc-mobile-trigger" aria-label="Toggle navigation"
             onClick={() => setMenuOpen(!menuOpen)}><Menu size={20}/></button>
           <span>My archive</span><ChevronRight size={15} aria-hidden="true"/>
-          <strong>{labels[view]}</strong>
+          <strong>{activeProfile ? activeProfile.displayName + " · " + labels[view] : "Family library"}</strong>
         </div>
         <div className="soc-top-controls">
           {archive && <label className="soc-top-search">
@@ -131,9 +170,9 @@ export default function SocialApp() {
               value={query} onChange={(event) => setQuery(event.target.value)}/>
             <kbd>Ctrl K</kbd>
           </label>}
-          <button type="button" className="soc-import" onClick={importZip} disabled={busy}>
+          <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile}>
             <ArrowDownToLine size={17} aria-hidden="true"/>
-            <span>{busy ? "Reading…" : archive ? "Change archive" : "Import ZIP"}</span>
+            <span>{busy ? "Reading…" : activeProfile ? "Import for " + activeProfile.displayName : "Create a profile first"}</span>
           </button>
         </div>
       </header>
@@ -143,9 +182,11 @@ export default function SocialApp() {
       <main className="soc-scroll">
         {!archive ? <div className="soc-welcome"><div className="soc-welcome-inner">
           <div className="soc-welcome-symbol"><Archive size={27} aria-hidden="true"/></div>
-          <h1>Every memory has a place<span>.</span></h1>
-          <p>Bring your Facebook download back to life. Browse a familiar timeline, find old conversations, and discover what's in your archive—privately, on your computer.</p>
-          <button type="button" className="soc-primary" onClick={importZip} disabled={busy}>
+          <h1>{activeProfile ? "Every memory has a place" : "Every story starts somewhere"}<span>.</span></h1>
+          <p>{activeProfile
+            ? "Welcome to " + activeProfile.displayName + "'s library. Bring a Facebook download to life with a familiar timeline, conversations and account activity."
+            : "Create the first family profile using the sidebar. Each person will have their own archive view—no accounts or cloud upload required."}</p>
+          <button type="button" className="soc-primary" onClick={importZip} disabled={busy || !activeProfile}>
             <FolderOpen size={19} aria-hidden="true"/>{busy ? "Reading archive…" : "Choose your Facebook ZIP"}
             <ArrowRight size={17} aria-hidden="true"/>
           </button>
@@ -159,14 +200,15 @@ export default function SocialApp() {
             <div><MessagesSquare size={22} aria-hidden="true"/><strong>Messages</strong><span>People & conversations</span></div>
             <div><ShieldCheck size={22} aria-hidden="true"/><strong>Your data</strong><span>See your export</span></div>
           </div>
-          <p className="soc-preview-limit">Early preview: Facebook JSON posts, Messenger threads and selected data records. Actual media previews and more export formats are planned for later updates.</p>
+          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Profile switching is organizational, not encrypted access. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
+          <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
           <footer className="soc-bottom-status"><span><LockKeyhole size={13} aria-hidden="true"/> Files stay on this device</span>
-            <span>{formatNumber(archive.social.filesRead)} JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
+            <span>{formatNumber(archive.social.filesRead)} HTML/JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
           </footer>
         </>}
       </main>

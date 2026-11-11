@@ -44,6 +44,9 @@ export interface SocialArchive {
   conversations: Conversation[];
   dataCategories: DataCategory[];
   filesRead: number;
+  jsonFilesRead: number;
+  htmlFilesRead: number;
+  formatHint: string;
   filesSkipped: number;
   warnings: string[];
 }
