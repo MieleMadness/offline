@@ -545,6 +545,71 @@ mod tests {
         ZipArchive::new(Cursor::new(data)).unwrap()
     }
 
+    /// Set OFFLINE_ACCEPTANCE_FIXTURES after generating fictional ZIP archives.
+    /// The ordinary local Rust test suite remains self-contained without them.
+    /// CI's Windows milestone job MUST set this variable so these tests run.
+    fn generated_zip(name: &str) -> Option<ZipArchive<std::fs::File>> {
+        let root = std::env::var_os("OFFLINE_ACCEPTANCE_FIXTURES")?;
+        let path = std::path::PathBuf::from(root).join(name);
+        let file = std::fs::File::open(&path).unwrap_or_else(|err| {
+            panic!("Required fictional acceptance fixture {} could not open: {err}", path.display())
+        });
+        Some(ZipArchive::new(file).expect("synthetic test ZIP should be valid"))
+    }
+
+    #[test]
+    fn generated_json_export_populates_real_native_post_message_and_data_adapters() {
+        let Some(zip) = generated_zip("family-json.zip") else { return; };
+        let decoded = scan(zip).expect("parse fictional JSON ZIP");
+        assert_eq!(decoded.posts.len(), 3);
+        assert!(decoded.posts.iter().any(|post|
+            post.text.contains("picnic") &&
+            post.media_paths.contains(&"photos/picnic.png".to_owned())));
+        assert!(decoded.posts.iter().any(|post| post.timestamp.is_none()));
+        assert!(decoded.posts.iter().any(|post| post.timestamp == Some(1_700_000_000)));
+        assert_eq!(decoded.conversations.len(), 1);
+        assert_eq!(decoded.conversations[0].messages.len(), 3);
+        assert!(decoded.data_categories.iter().any(|cat| cat.id == "searches"));
+        assert_eq!(decoded.files_skipped, 0);
+    }
+
+    #[test]
+    fn generated_html_export_populates_real_native_html_adapter_and_local_media() {
+        let Some(zip) = generated_zip("family-html.zip") else { return; };
+        let decoded = scan(zip).expect("parse fictional HTML ZIP");
+        assert_eq!(decoded.posts.len(), 1);
+        assert!(decoded.posts[0].text.contains("picnic"));
+        assert!(decoded.posts[0].timestamp.is_some());
+        assert!(decoded.posts[0].media_paths.iter().any(|path|
+            path == "your_facebook_activity/photos/picnic.png"));
+        assert_eq!(decoded.conversations.len(), 1);
+        assert_eq!(decoded.conversations[0].messages.len(), 2);
+        assert_eq!(decoded.files_skipped, 0);
+    }
+
+    #[test]
+    fn generated_invalid_and_navigation_only_zips_have_no_decoded_memories() {
+        for name in ["navigation-only.zip", "invalid-json.zip", "media-only.zip"] {
+            let Some(zip) = generated_zip(name) else { return; };
+            let decoded = scan(zip).expect("scan fictional edge-case ZIP");
+            assert_eq!(decoded.posts.len(), 0, "invented post in {name}");
+            assert!(decoded.conversations.is_empty(), "invented messages in {name}");
+            assert!(decoded.data_categories.is_empty(), "invented account data in {name}");
+            if name == "invalid-json.zip" {
+                assert!(decoded.files_skipped >= 1, "malformed JSON was not reported");
+            }
+        }
+    }
+
+    #[test]
+    fn generated_numeric_timestamp_variants_have_expected_known_unknown_dates() {
+        let Some(zip) = generated_zip("timestamp-variants.zip") else { return; };
+        let decoded = scan(zip).expect("scan timestamp variant ZIP");
+        assert_eq!(decoded.posts.len(), 4);
+        assert_eq!(decoded.posts.iter().filter(|p| p.timestamp.is_none()).count(), 1);
+        assert_eq!(decoded.posts.iter().filter(|p| p.timestamp == Some(1_700_000_000)).count(), 3);
+    }
+
     #[test]
     fn normalizes_facebook_json_timestamps_without_inventing_invalid_dates() {
         assert_eq!(time_at(&serde_json::json!({"timestamp": 1_700_000_000})), Some(1_700_000_000));
