@@ -71,3 +71,10 @@ Recognized JSON photo and attachment-media URI fields and HTML image src fields 
 ## Reproducible synthetic acceptance archives
 
 Offline tracks a privacy-safe Python standard-library generator and tests for fictional Facebook-style JSON, HTML, multipart Messenger, media-only, navigation-only, malformed JSON and mixed timestamp cases. See [Synthetic test archives](SYNTHETIC_FIXTURES.md). These fixtures exercise known parser paths but cannot establish universal compatibility with real Meta export formats.
+
+
+## v0.12.0 — Full ZIP photograph directory (read-only)
+
+The saved import report still contains at most 5,000 file records, while its section totals reflect the inspected ZIP. With the original ZIP connected, the Photographs page uses a separate on-demand native command to scan **all** eligible ZIP member names, up to the existing 250,000-entry ZIP limit. A bounded response returns at most 24 JPEG/PNG/GIF/WebP candidate image filenames per UI page, including those beyond the saved 5,000-record inventory. Search filters ZIP-contained image paths; it never fetches remote media or writes thumbnails.
+
+The page's ZIP-directory index is checked against the selected member name when bytes are opened. Images above 4 MiB and unsupported formats are excluded, while inline post/message images without a directory index use conservative member-name lookup. The scan is metadata-only and repeated for each page request; it is **not** a persisted full-file index or a guarantee of fast performance on very large archives. When no original ZIP is connected, only saved inventory images are shown.

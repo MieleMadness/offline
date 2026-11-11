@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.12.0 — Full ZIP photograph discovery and guarded import (development)
+
+- Add a bounded Rust photo-list API for the **complete ZIP directory**, not just the first 5,000 imported file entries, with server-side filename filtering, photo counts, 24-file response pages and conservative MIME-extension/size/path screening.
+- Pass an exact ZIP directory index from each native photo-list result when reading an image; the reader confirms its filename, size and MIME before returning bytes. Inline social-post/media references retain their existing path-lookup safety handling.
+- Support local gallery and full-size viewer navigation across page boundaries, with cancelled stale requests, retryable errors and accessible loading states.
+- Keep all source ZIP paths in memory only, never extract, persist or upload media. Current image preview remains JPEG/PNG/GIF/WebP under 4 MiB. Large-library stress and codec security remain unverified.
+- Restore the previously commented-out import operation guard found during review, avoiding overlapping import requests.
+- Add synthetic Rust >5,000-image inventory tests, native response validation and large-offset pagination regression coverage. Windows verification and hands-on tests are pending.
+
+
 ## v0.11.0 — Bounded photo navigation and full-size viewer (development)
 
 - Changed the Photographs gallery from cumulative Show More rendering to 24-image page navigation, capping mounted gallery images rather than holding every visited image.
