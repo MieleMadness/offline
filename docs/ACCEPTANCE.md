@@ -122,3 +122,10 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 6. Simulate a crash between localStorage and IndexedDB transactions. Document the residual non-atomic state and verify recovery using an independent encrypted backup. **This manual crash/power-loss acceptance is not covered by unit tests.**
 
 **Why:** account labels and encrypted ciphertext live in different browser stores. Failure must not silently strand family memories or imply that a partially completed deletion succeeded.
+
+
+## Native 5,125-photo ZIP regression
+
+- [x] Synthetic code-level test: full ZIP photo listing and single-file read across the legacy 5,000-entry boundary, with verified directory-index identity (Windows CI acceptance required).
+- [ ] Manual Windows acceptance: connect `large-5125-photos.zip`, search for `synthetic_005100`, open the result in the full-size viewer, and inspect the last page.
+- [ ] Realistic media performance: profile memory, CPU, ZIP directory scans, and full-resolution image decode; 1×1 PNGs are not representative.
