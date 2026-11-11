@@ -1,14 +1,21 @@
 # Changelog
 
-The project uses early-development semantic versions. A green release must be verified by GitHub CI and a Windows desktop check.
+## 0.2.0 — In development (social archive reader)
 
-## 0.1.0 — In development
+- Replaced the file-first landing experience with a chronological social-media-style feed.
+- Added dated feed cards, year search/filter, media-reference indicators and source provenance.
+- Added Messenger-style conversations organized by participants and dated messages.
+- Added a "Your data" explorer for JSON export categories and readable example entries.
+- Added a bounded native Rust JSON reader for Facebook posts and conversation parts without extracting or modifying the source ZIP.
+- Added synthetic parser fixtures and TypeScript tests for filtering, year/date grouping, and people search.
+- Introduced local PowerShell verification; fast GitHub PR checks; full Windows compilation only on manual dispatch or an explicit [windows] PR.
+- Synced package, Tauri and Rust app versions to 0.2.0.
 
-- Added a Tauri 2 / React 19 / TypeScript Windows application shell.
-- Added an accessible archive overview with local-only messaging, category browsing, filename search, and sorting.
-- Added a Rust ZIP metadata scanner with a native file picker and no archive extraction.
-- Added basic classification for photos, videos, messages, posts, comments, reactions, friends and profile-related files.
-- Added synthetic Rust scanner tests, TypeScript utility tests, a Windows build workflow and contributor guidance.
-- Integrated the three Open-Photo design skill instructions (UI/UX Pro Max, Impeccable, Emil).
+**Known limits:** JSON export formats vary. Only selected post and Messenger shapes are parsed; no media previews, complete indexes, HTML export parsing, or persistent database yet. Original archives remain read-only. No public installer should be distributed before Windows validation.
 
-**Known limits:** This version inventories ZIP member metadata only. It does not read posts/messages, render extracted photos/videos, index all files in large exports, or persist imported archives. Maximum 250,000 ZIP entries and at most 5,000 filenames returned to the UI. No installer/release is published until Windows CI and manual verification pass.
+## 0.1.0 — Verified project baseline
+
+- Tauri 2 and React/TypeScript desktop shell.
+- Read-only ZIP inventory, category counts, filename browsing and native file picker.
+- Frontend unit tests and Windows Rust/desktop compile checks passed at commit 5835071 before merge.
+- Bundled three Open-Photo design skill instructions and initial reference files.

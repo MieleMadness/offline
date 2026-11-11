@@ -1,23 +1,20 @@
-name: Offline 0.1.0 · Verify
+name: Offline 0.2.0 · Verify
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Only the newest commit on the same development branch needs a full Windows build.
+# Fast checks run on PRs; Windows compilation is explicitly opt-in.
 concurrency:
-  group: offline-verify-${{ github.head_ref || github.ref_name }}
+  group: offline-0.2.0-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   frontend:
-    name: 0.1.0 · Frontend checks
+    name: 0.2.0 · Fast frontend verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -25,17 +22,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install frontend dependencies
+      - name: Install frontend packages
         run: npm install --no-audit --no-fund
-      - name: TypeScript
+      - name: TypeScript check
         run: npm run check
-      - name: UI tests
+      - name: Frontend unit tests
         run: npm run test
-      - name: Production bundle
+      - name: Production frontend bundle
         run: npm run build
 
   windows:
-    name: 0.1.0 · Windows desktop compile
+    # Dispatch manually for release, or add [windows] to a PR title.
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
+    name: 0.2.0 · Windows compile (on demand)
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
@@ -44,9 +43,9 @@ jobs:
         with:
           node-version: '22'
       - uses: dtolnay/rust-toolchain@stable
-      - name: Install frontend dependencies
+      - name: Install frontend packages
         run: npm install --no-audit --no-fund
-      - name: Rust archive tests
+      - name: Rust unit tests
         run: cargo test --manifest-path src-tauri/Cargo.toml
-      - name: Compile Windows desktop application
+      - name: Build Windows desktop executable
         run: npx tauri build --no-bundle

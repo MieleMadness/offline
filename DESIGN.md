@@ -1,49 +1,52 @@
-# Offline desktop design system · v0.1.0
+# Offline desktop experience · v0.2.0
 
-## Product experience
-An offline-first, calm, reliable local archive inspector. **Operate** mode (Impeccable). The primary goal is to help people locate and understand their data without fearing an upload or accidental modification. Prioritize trustworthy labels, keyboard access and comprehensible feedback over decoration.
+## Intent
 
-## Core layout
-- Fixed left navigation (253 px at desktop width) and a flexible, scrollable content area.
-- Main toolbar: breadcrumb, persistent local-only status and import action.
-- Empty state: one primary import action and a readable overview of expected future content areas.
-- Loaded state: archive filename, confirmed totals and a category list.
-- File inventory: searchable, sortable rows. Display nested paths without breaking layout.
-- Status footer: privacy promise and version, no fictitious job progress.
+**Personal archive, not a database viewer.** Give users a recognizable social-media experience built from their actual export, while preserving provenance and avoiding simulated interactions. Source files are always read only. The interface communicates what was and was not included.
 
-## Palette
-| Role | Light | Dark |
+Design references: [UI/UX Pro Max](.agents/skills/ui-ux-pro-max/SKILL.md), [Impeccable](.agents/skills/impeccable/SKILL.md) in **Operate** mode, and [Emil Design Engineering](.agents/skills/emil-design-eng/SKILL.md).
+
+## Information architecture
+
+1. **My timeline:** the default view after import. Chronological feed cards, original timestamps, post author when supplied, per-month dividers, year/media filters, filename provenance and search.
+2. **Messages:** conversation list by names/participants, newest thread first; within a thread messages are chronological and grouped by calendar date with sender/time visible. No reply box or simulated sent status.
+3. **Your data:** actual detected export categories on the left, readable records on the right, backed by source file names and cautious coverage language.
+4. **Archive files:** lower-priority raw inventory for troubleshooting and transparency.
+
+A single persistent local ZIP import action is placed in the top toolbar; no account connection UI. When no archive is loaded, the welcoming empty state explains exactly what the app can read.
+
+## Layout
+
+- Dark evergreen sidebar 238px, main content flex and scroll, 76px top toolbar.
+- Feed has a 730px reading column and optional 300px context rail. At smaller widths, prioritize the feed over the rail.
+- Messages two-column inbox with nested scrolling and a read-only footer.
+- Data explorer with category list and records panel.
+- Dense file paths truncate visibly but expose the full path as a title.
+
+## Theme tokens
+
+| Token | Light | Dark |
 | --- | --- | --- |
-| Canvas | #f6f8f7 | #121b18 |
-| Main surface | #ffffff | #1a2722 |
-| Primary text | #18261f | #f1f8f3 |
-| Secondary text | #50645d | #c5d6ca |
-| Accent | #226451 | #9de2b8 |
-| Sidebar | #17231f | #101713 |
-| Border | #e0e8e3 | #35483e |
-| Focus | #42a585 | #8eddae |
+| Canvas | #f6f8f6 | #131e19 |
+| Surface | #ffffff | #1b2922 |
+| Ink | #193129 | #f1faf3 |
+| Secondary | #53695e | #c6d7c9 |
+| Border | #e0e8e1 | #354b3d |
+| Accent | #17634d | #a5e7bd |
+| Focus | #329a78 | #91e0b3 |
 
-## Typography and spacing
-- Prefer native Windows Segoe UI Variable / Segoe UI to avoid external font loading.
-- H1 desktop 30–43 px, empty state 45–78 px. Body default 13–16 px depending on density. Labels and file paths 10–12 px.
-- Use a 4/8 px rhythm and restrained 9–14 px corner radii on controls and file containers.
-- Keep filenames and export paths truncatable, with full paths as tooltips.
-- Numerical counts right align and use tabular numbers.
+Windows native Segoe UI Variable/Segoe UI, no remotely loaded fonts. Icons from one consistent vector family. No fabricated avatars/photos: initials are generated from source names.
 
-## Interaction rules
-- Use vector Lucide icons, not emoji.
-- Every primary action must work; never render a fake action. Inactive future features appear only as descriptive text.
-- Apply hover, focus-visible, disabled, loading, error, and empty states.
-- Ctrl/Cmd+K focuses file search when an archive is loaded; Escape clears it.
-- Avoid animations on frequent keyboard actions; UI hover transitions 120–150 ms.
-- Honor system reduced-motion and system light/dark preference.
-- File rows are informational in v0.1.0, not clickable/openable yet.
+## Interactions and integrity
 
-## Trust/consent
-- First import shows exactly what is supported: ZIP metadata and filename grouping.
-- Never expose real user data in logging, screenshots, samples, GitHub or CI.
-- Do not render archive HTML in a WebView, evaluate imported scripts, extract source data automatically, or auto-connect to an account.
-- Import is read-only; no archive contents are uploaded, extracted or persisted in v0.1.0.
+- Search is scoped to the current view; Ctrl/Cmd+K focuses search; Escape clears and blurs.
+- All interactive elements have hover/focus/disabled states. Keyboard actions are instantaneous; no gratuitous motion. Respect Windows reduced-motion.
+- Never present source archives as editable; no fake Like, Comment, Share, Send or Export buttons.
+- Post images are not yet decoded: show a truthful attachment placeholder.
+- If data is missing or unsupported, show a helpful empty state rather than synthetic records.
+- Display imported strings as text; never render untrusted HTML. Show the original file provenance for posts and records.
+- Treat actual Windows visual acceptance and accessibility checks as separate from TypeScript lint/build success.
 
-## Skills
-Apply `.agents/skills/ui-ux-pro-max/SKILL.md`, `.agents/skills/impeccable/SKILL.md` (Operate mode), and `.agents/skills/emil-design-eng/SKILL.md` before modifying UI. See `docs/DESIGN_SKILLS.md` for their pinned full installers and licenses.
+## QA
+
+Verify 900px wide main app, 1280/1440 desktop, reduced motion, light/dark contrast, long names and paths, absent timestamp, mixed export versions, blank archive, corrupted ZIP, truncated JSON, and dense conversation threads before publishing a public installer.
