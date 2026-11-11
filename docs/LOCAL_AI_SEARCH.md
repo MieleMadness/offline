@@ -2,9 +2,13 @@
 
 Each family profile is a workspace. Ordinary imports stay accessible to everyone using the library. Save an encrypted copy to set an unlock secret. Choose PIN (8–20 digits) or a passphrase. When an encrypted workspace is unlocked, Change PIN or passphrase replaces its encryption key and salt atomically. Keep the original ZIP. Lost secrets cannot be reset.
 
+## Search library — instant keyword lookup
+
+The Search library section works without installing or running Ollama. It searches only the posts, conversations and data records parsed for the active, currently unlocked profile, with year and category filters. Results include dates and available source paths. Search does not index unparsed ZIP files or persist any query or result to disk. It renders at most 250 matches at once; refine the query to find others.
+
 ## Local AI search preview
 
-Open Local AI search within an unlocked archive. Enter an installed Ollama model name and describe what to find. Search text sends up to the first 30 posts, messages and account records to Ollama running on 127.0.0.1:11434. Search images asks you to select a ZIP for this workspace and examines up to its first eight JPEG/PNG images, each at most 4 MiB. A vision model is required for images. Results explain the match and retain its source path.
+Open Search library and expand Local AI search within an unlocked archive. Enter an installed Ollama model name and describe what to find. Search text sends up to the first 30 posts, messages and account records to Ollama running on 127.0.0.1:11434. Search images asks you to select a ZIP for this workspace and examines up to its first eight JPEG/PNG images, each at most 4 MiB. A vision model is required for images. Results explain the match and retain its source path.
 
 This is a bounded preview. Whole-library indexing, CLIP-style similarity, OCR, progress/cancellation and a dedicated model installer are follow-ups. Relevant records beyond the sample can be missed. AI relevance judgments can be wrong.
 
