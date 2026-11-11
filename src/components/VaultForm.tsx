@@ -23,7 +23,7 @@ export default function VaultForm({ locked, busy, credential, onSubmit, onCancel
   return <form className="soc-vault-form" onSubmit={submit}>
     <h2>{locked ? "Unlock saved preview" : "Save an encrypted preview"}</h2>
     <p>{locked ? "Enter this workspace’s PIN or passphrase to read its saved archive." :
-      "Your preview stays on this device. Switching profiles locks it. Keep your original ZIP and passphrase. Offline cannot reset it."}</p>
+      "Your preview stays on this device. Switching profiles locks it. Keep your original ZIP and PIN or passphrase. Offline cannot reset it."}</p>
     {!locked && <label>Unlock with<select value={mode} disabled={busy} onChange={e => {
       setMode(e.target.value as "pin" | "passphrase"); setPassword(""); setConfirm(""); setError("");
     }}><option value="passphrase">Passphrase</option><option value="pin">PIN</option></select></label>}

@@ -70,6 +70,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState<{ key: CryptoKey; archive: ImportedArchive } | null>(null);
+  const [previewRevision, setPreviewRevision] = useState(0);
   const [enrolling, setEnrolling] = useState(false);
   const pending = useRef(false);
   const locked = !!snapshot && !unlocked;
@@ -184,6 +185,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       } else {
         onSessionArchive(imported);
       }
+      setPreviewRevision(value => value + 1);
       setView("feed");
       setQuery("");
     } catch (cause) {
@@ -226,7 +228,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
           <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.5.0 · Development preview</span>
+        <span className="soc-version">Offline v0.5.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -283,7 +285,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
           </div>
           <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
-          <LocalSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive}/>
+          <LocalSearch key={snapshot?.revision ?? previewRevision} archive={archive}/>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}
