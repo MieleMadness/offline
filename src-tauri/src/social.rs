@@ -469,6 +469,6 @@ mod tests {
         assert!(!safe_name("../private.json"));
         assert!(!safe_name("C:\\Users\\private.json"));
         assert!(!safe_name("/secret.json"));
-        assert!(!safe_name("a\\0b.json"));
+        assert!(!safe_name("a\0b.json"));
     }
 }
