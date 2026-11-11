@@ -215,6 +215,48 @@ mod tests {
     const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 13, 10, 26, 10, 0, 0, 0, 0];
 
     #[test]
+    fn generated_large_zip_lists_real_photo_bytes_after_five_thousand_members() {
+        // The Windows [rust] acceptance workflow generates this entirely
+        // fictional ZIP. Ordinary local cargo test remains self-contained
+        // when OFFLINE_ACCEPTANCE_FIXTURES is not configured.
+        let Some(root) = std::env::var_os("OFFLINE_ACCEPTANCE_FIXTURES") else { return; };
+        let path = std::path::PathBuf::from(root).join("large-5125-photos.zip");
+        let open = || {
+            let file = std::fs::File::open(&path).unwrap_or_else(|error| {
+                panic!("Required fictional fixture {} could not open: {error}", path.display())
+            });
+            ZipArchive::new(file).expect("generated ZIP should be valid")
+        };
+
+        // The first ZIP member is index.html; member 5,101 is photo #5,100.
+        // This asserts the native service, not a mocked list or in-memory ZIP.
+        let page = list_photo_members(open(), 5_100, 24, "synthetic")
+            .expect("list images past the old 5,000-path inventory cutoff");
+        assert_eq!(page.total, 5_125);
+        assert_eq!(page.offset, 5_100);
+        assert_eq!(page.entries.len(), 24);
+        assert_eq!(page.entries[0].path, "photos/synthetic_005100.png");
+        assert_eq!(page.entries[0].zip_index, 5_101);
+        assert_eq!(page.entries[23].path, "photos/synthetic_005123.png");
+
+        let image = read_image(open(), &page.entries[0].path, Some(page.entries[0].zip_index))
+            .expect("decode local fictional PNG bytes using the indexed ZIP reader");
+        assert_eq!(image.mime, "image/png");
+        let bytes = STANDARD.decode(image.data).expect("valid base64 image");
+        assert!(bytes.starts_with(&[0x89, b'P', b'N', b'G', 13, 10, 26, 10]));
+        assert!(bytes.windows(4).any(|part| part == b"IDAT".as_slice()));
+
+        let last_page = list_photo_members(open(), 5_124, 24, "").unwrap();
+        assert_eq!(last_page.total, 5_125);
+        assert_eq!(last_page.entries.len(), 1);
+        assert_eq!(last_page.entries[0].path, "photos/synthetic_005124.png");
+
+        // An index from this page cannot silently select a different image.
+        assert!(read_image(open(), "photos/synthetic_005101.png",
+            Some(page.entries[0].zip_index)).is_err());
+    }
+
+    #[test]
     fn lists_paginated_photos_across_an_inventory_larger_than_five_thousand() {
         let mut writer = ZipWriter::new(Cursor::new(Vec::new()));
         for index in 0..5_125 {
