@@ -12,7 +12,7 @@ import Feed from "./components/Feed";
 import Messages from "./components/Messages";
 import Data from "./components/Data";
 import Files from "./components/Files";
-import { createProfile, safeActiveId, safeLoadProfiles, saveProfiles, type FamilyProfile } from "./profiles";
+import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ImportSummary from "./components/ImportSummary";
 import "./social.css";
@@ -38,7 +38,7 @@ export default function SocialApp() {
   // Content is memory-only in the preview; cross-profile indexes are not shared.
   const [archivesByProfile, setArchivesByProfile] = useState<Record<string, ImportedArchive>>({});
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
-  const archive = activeProfile ? (archivesByProfile[activeProfileId] ?? null) : null;
+  const archive = activeProfile ? profileOwnedValue(archivesByProfile, activeProfileId) : null;
   const [view, setView] = useState<View>("feed");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
@@ -109,7 +109,7 @@ export default function SocialApp() {
       setBusy(true);
       const report = await invoke<ArchiveReport>("inspect_archive", { path: selected });
       const social = await invoke<SocialArchive>("read_social_archive", { path: selected });
-      setArchivesByProfile((existing) => ({ ...existing, [ownerId]: { report, social } }));
+      setArchivesByProfile((existing) => setProfileOwnedValue(existing, ownerId, { report, social }));
       setView("feed");
       setQuery("");
     } catch (cause) {
