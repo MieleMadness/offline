@@ -246,9 +246,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       setError("Create a family profile before importing an archive.");
       return;
     }
-    // Capture owner before any asynchronous file reading; never assign a result to a switched user.
-    const ownerId = activeProfile.id;
-    if (!begin()) return;
+    // This Library is keyed by owner ID. An unfinished selection is discarded
+    // when the user switches family profiles; no parsed data is shared.    if (!begin()) return;
     try {
       const selected = await open({
         multiple: false,
