@@ -79,13 +79,119 @@ export function safeActiveId(profiles: readonly FamilyProfile[]): string {
   }
 }
 
-export function saveProfiles(profiles: readonly FamilyProfile[], selectedId: string): void {
+function existingCatalogIsValid(raw: string | null): boolean {
+  if (raw === null) return true;
   try {
-    window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles));
-    window.localStorage.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    const value: unknown = JSON.parse(raw);
+    return Array.isArray(value) && deserializeProfiles(raw).length === value.length;
+  } catch { return false; }
+}
+
+/**
+ * Best-effort active profile preference persistence.
+ * Never rewrite a corrupt owner catalog on mount, even when it parses as an
+ * empty/partial list; the vault may still contain ciphertext for those IDs.
+ * Security-sensitive changes use persistProfileCatalog instead.
+ */
+export function saveProfiles(
+  profiles: readonly FamilyProfile[], selectedId: string, storage?: ProfileCatalogStorage,
+): boolean {
+  try {
+    const store = storage ?? window.localStorage;
+    if (!existingCatalogIsValid(store.getItem(PROFILE_STORAGE_KEY))) return false;
+    const serialized = JSON.stringify(profiles);
+    store.setItem(PROFILE_STORAGE_KEY, serialized);
+    store.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    return store.getItem(PROFILE_STORAGE_KEY) === serialized &&
+      store.getItem(ACTIVE_PROFILE_KEY) === selectedId;
   } catch {
-    // WebView localStorage can be blocked. Family profiles still work for this session;
-    // callers should communicate that persistence may be unavailable.
+    // A selection can remain usable for this session without pretending a
+    // persistent encrypted owner identity was committed.
+    return false;
+  }
+}
+
+/**
+ * Protected profile operations must prove that the owner ID is durably mapped
+ * before writing or deleting an encrypted IndexedDB snapshot.
+ *
+ * localStorage is separate from IndexedDB, so this is a verified write with
+ * best-effort rollback, NOT a multi-store ACID transaction. Keep both copies
+ * of an encrypted backup until a recovered profile has been reopened.
+ */
+export type ProfileCatalogStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function persistProfileCatalog(
+  profiles: readonly FamilyProfile[], selectedId: string, storage?: ProfileCatalogStorage,
+): void {
+  if (selectedId && !profiles.some(profile => profile.id === selectedId)) {
+    throw new Error("The selected family member is not present in this library.");
+  }
+  if (profiles.length > 20 || deserializeProfiles(JSON.stringify(profiles)).length !== profiles.length) {
+    throw new Error("The family profile list is invalid and was not saved.");
+  }
+  let store: ProfileCatalogStorage;
+  try { store = storage ?? window.localStorage; }
+  catch { throw new Error("Family profile storage is blocked. No saved preview was changed."); }
+
+  const next = JSON.stringify(profiles);
+  let before: string | null;
+  let previousSelected: string | null;
+  try {
+    before = store.getItem(PROFILE_STORAGE_KEY);
+    previousSelected = store.getItem(ACTIVE_PROFILE_KEY);
+  } catch {
+    throw new Error("Family profile storage could not be read. No saved preview was changed.");
+  }
+
+  // Treat a previously corrupt catalog as a recovery issue, not a blank library:
+  // silently overwriting it could strand ciphertext belonging to another owner.
+  if (!existingCatalogIsValid(before)) {
+    throw new Error("The saved family profile catalog is damaged. Export/recover your saved previews before changing profiles.");
+  }
+
+  try {
+    store.setItem(PROFILE_STORAGE_KEY, next);
+    store.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    if (store.getItem(PROFILE_STORAGE_KEY) !== next ||
+        store.getItem(ACTIVE_PROFILE_KEY) !== selectedId) {
+      throw new Error("Profile catalog readback did not match.");
+    }
+  } catch {
+    let rolledBack = false;
+    try {
+      if (before === null) store.removeItem(PROFILE_STORAGE_KEY);
+      else store.setItem(PROFILE_STORAGE_KEY, before);
+      if (previousSelected === null) store.removeItem(ACTIVE_PROFILE_KEY);
+      else store.setItem(ACTIVE_PROFILE_KEY, previousSelected);
+      rolledBack = store.getItem(PROFILE_STORAGE_KEY) === before &&
+        store.getItem(ACTIVE_PROFILE_KEY) === previousSelected;
+    } catch { /* Storage may be unavailable altogether. */ }
+    throw new Error(rolledBack
+      ? "The family profile catalog could not be saved. Previous settings were restored; no encrypted preview was changed."
+      : "Family profile storage failed and may be inconsistent. Do not close Offline; keep your original ZIPs and encrypted backups.");
+  }
+}
+
+/**
+ * Stages the family catalog before an IndexedDB vault operation. The operation
+ * must resolve only after its transaction commits; on rejection, restore the
+ * old catalog. This is compensation, not an atomic cross-storage transaction.
+ */
+export async function commitCatalogBackedChange(
+  before: readonly FamilyProfile[], beforeSelected: string,
+  next: readonly FamilyProfile[], nextSelected: string,
+  commit: () => Promise<void>, storage?: ProfileCatalogStorage,
+): Promise<void> {
+  persistProfileCatalog(next, nextSelected, storage);
+  try {
+    await commit();
+  } catch (cause) {
+    try { persistProfileCatalog(before, beforeSelected, storage); }
+    catch {
+      throw new Error("The encrypted operation did not complete, but family profile settings could not be restored. Keep your original ZIPs and backups and reopen Offline.");
+    }
+    throw cause;
   }
 }
 

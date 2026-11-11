@@ -12,7 +12,7 @@ import Feed from "./components/Feed";
 import Messages from "./components/Messages";
 import Data from "./components/Data";
 import Files from "./components/Files";
-import { createProfile, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
+import { commitCatalogBackedChange, createProfile, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
@@ -58,21 +58,27 @@ export default function SocialApp() {
 
   function addFamilyProfile(name: string) {
     const profile = createProfile(profiles, name, () => crypto.randomUUID(), Date.now());
-    setProfiles(existing => [...existing, profile]);
+    const next = [...profiles, profile];
+    // Do not present an owner identity that would disappear on restart.
+    persistProfileCatalog(next, profile.id);
+    setProfiles(next);
     setActiveProfileId(profile.id);
   }
 
   function renameProfile(id: string, newName: string) {
     const next = renameFamilyProfile(profiles, id, newName);
+    persistProfileCatalog(next, activeProfileId);
     setProfiles(next);
   }
 
   async function removeProfile(id: string): Promise<void> {
     const next = withoutFamilyProfile(profiles, id, activeProfileId);
     const existing = await loadSnapshot(id);
-    // Compare the revision in the same IndexedDB write transaction. A changed
-    // snapshot must not be destroyed by an outdated profile-management screen.
-    await deleteSnapshot(id, existing?.revision ?? null);
+    // Persist the desired catalog before deletion and restore it if the
+    // revision-checked IndexedDB transaction does not commit.
+    await commitCatalogBackedChange(profiles, activeProfileId,
+      next.profiles, next.selectedId,
+      () => deleteSnapshot(id, existing?.revision ?? null));
     setArchivesByProfile(current => {
       const owned = { ...current };
       delete owned[id];
@@ -97,12 +103,15 @@ export default function SocialApp() {
     if (await loadSnapshot(owner.id)) {
       throw new Error("This profile already has an encrypted saved preview. Nothing was replaced.");
     }
-    await saveSnapshot(owner.id, backup.snapshot, null);
-    if (!known) {
-      setProfiles(current => [...current, {
-        ...owner, displayName: recoveredProfileName(owner, current),
-      }]);
-    }
+    const recoveredProfiles = known ? profiles : [...profiles, {
+      ...owner, displayName: recoveredProfileName(owner, profiles),
+    }];
+    // Establish a verified owner mapping before writing ciphertext. If the
+    // snapshot cannot be saved, restore the previous family catalog.
+    await commitCatalogBackedChange(profiles, activeProfileId,
+      recoveredProfiles, owner.id,
+      () => saveSnapshot(owner.id, backup.snapshot, null));
+    if (!known) setProfiles(recoveredProfiles);
     setArchivesByProfile(current => {
       const next = { ...current };
       delete next[owner.id];
@@ -388,7 +397,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
-        <span className="soc-version">Offline v0.13.0 · Development preview</span>
+        <span className="soc-version">Offline v0.14.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">

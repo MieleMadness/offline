@@ -4,13 +4,25 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.13.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.14.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
+
+**Branch integration:** See the [draft PR dependency order and release gates](docs/INTEGRATION.md); the separate text-index PR must be reconciled with this newer app baseline.
 
 **Unsigned Windows test executable:** Read the [portable development build and SHA-256 verification guide](docs/TEST_WINDOWS_PREVIEW.md). Builds are temporary GitHub Actions artifacts, not public installers; test fictional archives only.
 
 **Privacy-safe acceptance fixtures:** Generate [fictional HTML, JSON, media-only, malformed and 10k-photo ZIPs](docs/SYNTHETIC_FIXTURES.md) without an account or internet access.
+
+## Family profile storage reliability (v0.14.0 development)
+
+Offline now verifies that family profile metadata can be stored and read back **before** creating a profile, renaming it, restoring an encrypted backup or deleting a saved preview. This helps prevent encrypted data from being written under an owner ID that disappears after restarting. A failed write triggers best-effort restoration of the previous profile catalog and a visible error instead of pretending the operation succeeded.
+
+Backup restore still requires the original PIN/passphrase and verifies authenticated contents before changing saved data. Profile removal still requires typed confirmation. The source Facebook ZIP and independent `.offlinevault` backup are never modified.
+
+**Important limitation:** Browser localStorage and IndexedDB are independent stores; they do not share an atomic transaction. This mitigation protects common storage failures but does not solve abrupt power loss between separate commits. Keep encrypted backups outside Offline, and do not treat a green automated build as completed Windows recovery acceptance.
+
+The prior [v0.13.0 Windows build](https://github.com/MieleMadness/offline/actions/runs/43088969267) successfully produced a temporary unsigned test executable and SHA-256 file.
 
 ## The experience
 

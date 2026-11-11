@@ -110,3 +110,22 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 3. Use a disposable Windows account or VM and import **fictional** JSON/HTML fixture ZIPs. Perform manual feed, Messenger, privacy, photo navigation, backup/recovery and profile isolation checks. Capture only synthetic screenshots.
 4. Confirm a targeted `[rust]` PR run does **not** upload the executable; that mode must run the native fixture tests without packaging the application.
 5. Keep v1.0 installer and code-signing tasks open until real-export format, accessibility, performance and independent security acceptance.
+
+
+## v0.14.0 — Family profile catalog recovery and blocked-storage checks
+
+1. Create a fictional family profile and save an encrypted preview. Restart and confirm the original owner ID, profile label and PIN/passphrase still unlock it.
+2. Simulate blocked or quota-limited localStorage **before** creating/renaming a profile. Confirm the operation fails and the UI does not claim the profile was created or updated.
+3. With an encrypted fictional backup prepared, block profile metadata writes and attempt recovery. Confirm the backup is rejected **before** an encrypted snapshot is committed; restore normal storage and retry successfully.
+4. Simulate an IndexedDB transaction failure after catalog staging. Confirm the previous catalog is restored and the original `.offlinevault` file remains usable.
+5. Delete a fictional profile after typing confirmation. Confirm only that owner's encrypted saved preview and catalog entry disappear, and another family member still unlocks normally.
+6. Simulate a crash between localStorage and IndexedDB transactions. Document the residual non-atomic state and verify recovery using an independent encrypted backup. **This manual crash/power-loss acceptance is not covered by unit tests.**
+
+**Why:** account labels and encrypted ciphertext live in different browser stores. Failure must not silently strand family memories or imply that a partially completed deletion succeeded.
+
+
+## Native 5,125-photo ZIP regression
+
+- [x] Synthetic code-level test: full ZIP photo listing and single-file read across the legacy 5,000-entry boundary, with verified directory-index identity (Windows CI acceptance required).
+- [ ] Manual Windows acceptance: connect `large-5125-photos.zip`, search for `synthetic_005100`, open the result in the full-size viewer, and inspect the last page.
+- [ ] Realistic media performance: profile memory, CPU, ZIP directory scans, and full-resolution image decode; 1×1 PNGs are not representative.

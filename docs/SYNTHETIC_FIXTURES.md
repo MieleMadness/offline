@@ -68,3 +68,8 @@ The Windows milestone workflow generates the same fictional files and sets `OFFL
 
 
 For Windows GUI acceptance using the fictional ZIPs, see [Unsigned Windows preview artifact instructions](TEST_WINDOWS_PREVIEW.md). Use a disposable account/VM; do not import actual family data during prerelease testing.
+
+
+## Native on-disk large-photo acceptance
+
+The targeted `[rust]` Windows job generates `large-5125-photos.zip` using fictional 1×1 PNGs and runs the production Rust ZIP photo directory and bounded image reader against it. It checks page 5,101 onward, the last-page entry, exact ZIP member indices, and a rejected mismatched index/path. It is **not** a 5,125-photo decode benchmark or a real-world full-resolution photo performance guarantee.
