@@ -136,3 +136,8 @@ The application's open-source license is still to be selected. Bundled third-par
 ## Workspace PIN and local AI search
 
 v0.5.1 includes a PIN option for encrypted workspaces, instant keyword search across each active profile’s parsed preview, and optional bounded local AI search for text and images through installed Ollama models. See [setup, scope and verification](docs/LOCAL_AI_SEARCH.md). Real inference acceptance remains pending because the installed model failed to load on this computer.
+
+
+## Synthetic ZIP importer integration verification
+
+The [fictional archive fixture guide](docs/SYNTHETIC_FIXTURES.md) now includes optional native Rust importer tests. The Windows milestone workflow generates synthetic ZIPs and runs the production parser on them, in addition to the regular Rust unit, frontend and Python tests. No personal Facebook exports are uploaded to GitHub. A fictional fixture is not evidence that every Meta export layout is supported.
