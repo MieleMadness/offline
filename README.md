@@ -1,65 +1,67 @@
 # Offline
 
-**Offline** is a privacy-first Windows desktop application for browsing personal data archives, starting with Facebook downloads. It's designed to run locally without requiring a Facebook password, account connection, or cloud upload.
+**Offline** is a privacy-first Windows desktop app for exploring downloadable social-media history, starting with Facebook JSON archives. Everything is processed on your own computer without account login or cloud uploads.
 
-> **Status:** v0.1.0 in active development. The first desktop build is an archive **inventory preview** only. There is no verified public installer yet.
+> **Status:** v0.2.0 is in development. The social timeline, conversations and data explorer are preview features; there is no verified public installer yet.
 
-## What you can do in v0.1.0
+## Your archive, the way it should look
 
-- Select a local `.zip` file with the native Windows file picker.
-- Inspect ZIP directory metadata locally without extracting or changing the source archive.
-- See total file counts, uncompressed size, and approximate categories (photos, videos, messages, posts, comments, reactions, friends, profile data and other files).
-- Search and sort the first 5,000 ZIP entries by file path and size.
-- Navigate a responsive, keyboard-accessible desktop interface with system light/dark mode support.
+**Timeline.** Posts appear in a familiar social feed, sorted by original date and grouped by month. Search their text, filter by year and identify posts with media references.
 
-**Not available yet:** Viewing actual messages, extracting or previewing photos/videos, reading post content, scanning every filename beyond 5,000 entries in the UI, preserving an indexed archive across restarts, and HTML export parsing. Classifications are based on *filenames only* and are approximate. Large ZIPs containing more than 250,000 directory entries are rejected in this initial version.
+**Messages.** Conversations are grouped by people, and messages are presented in date order with sender names, timestamps and text. Multipart \`message_1.json\` / \`message_2.json\` threads are combined by conversation folder.
 
-## Start developing on Windows
+**Your data.** Explore the JSON export categories that were actually found, such as advertising-related information, searches, location/check-ins, devices/login history, connections and off-platform activity. Data coverage depends on the export; Offline doesn't claim to show everything Meta has stored.
 
-Prerequisites: Node.js 22+, Rust stable with the MSVC toolchain, Microsoft C++ Build Tools, and the Tauri 2 Windows prerequisites (WebView2). See [Tauri's Windows prerequisites](https://v2.tauri.app/start/prerequisites/).
+**Files.** Search the original ZIP inventory by filename or size.
 
-```powershell
+The three core views use a desktop-first UI with clear typographic hierarchy, light/dark mode, keyboard focus and reduced-motion support.
+
+## Development and local verification
+
+Prerequisites: Node.js 22+, Rust stable (MSVC on Windows), Visual Studio C++ Build Tools and Tauri 2 Windows WebView2 prerequisites.
+
+\`\`\`powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
+git checkout feature/social-archive-0.2.0
 npm install
 npm run tauri dev
-```
+\`\`\`
 
-If you're using the feature branch before it merges into main:
+For normal development, **test locally**, not in a full GitHub Windows workflow every time:
 
-```powershell
-git checkout feature/desktop-archive-foundation-0.1.0
-```
+\`\`\`powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1
+\`\`\`
 
-### Check code
+For an on-demand Windows executable build:
 
-```powershell
-npm run check
-npm run test
-npm run build
-cargo test --manifest-path src-tauri/Cargo.toml
-npx tauri build --no-bundle
-```
+\`\`\`powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1 -BuildDesktop
+\`\`\`
 
-The v0.1.0 build is currently configured as **no-bundle** on purpose; we won't ship a Windows installer until Windows checks and manual acceptance are complete. Initial CI uses `npm install`; a committed npm lockfile will be required before a production release for reproducibility.
+GitHub runs short frontend checks on pull requests. Full Windows compilation runs only on manual workflow dispatch or a PR explicitly titled with \`[windows]\`. Don't release without verifying the exact commit and testing a Windows installation.
 
-## Privacy and security
+## Privacy and current limits
 
-- Source archives are opened **read-only**.
-- Archive member data is not decompressed, executed, displayed as HTML, or uploaded.
-- Unsafe archive paths, oversized member names and unsupported ZIPs produce actionable errors.
-- No real user archives, messages, photos or database files should ever enter Git history or CI.
-- See [security model](docs/SECURITY.md) for current controls and planned hardening.
+- Import a local Facebook ZIP archive. ZIP bytes and all processing stay on your device.
+- Source ZIP is read-only; JSON entries are read into **bounded, in-memory** structures, not extracted to folders or persisted to disk.
+- Limits: 250,000 archive entries; 1,000 JSON files; 4 MiB per JSON file; 48 MiB JSON data total; 3,000 posts; 500 conversations; 12,000 messages; 900 data-preview records. Additional records may be omitted.
+- Posts, participants and activity vary significantly among Meta export versions; content may be incomplete.
+- Media thumbnails and original media are **not rendered yet**. Only attachment counts are shown.
+- Facebook HTML exports and separate encrypted Messenger downloads are **not yet supported**.
+- Some Messenger exports may contain garbled Unicode or incomplete encrypted history; future compatibility passes will address these.
+- React displays imported text safely as text (never as executable HTML); archive scripts are never run.
 
-## Development practices and skills
+Never commit a real user's archive or messages to GitHub. Synthetic fixtures only.
 
-The three design skills from Open-Photo are stored in [`.agents/skills`](.agents/skills): **UI/UX Pro Max**, **Impeccable**, and **Emil Design Engineering**. Coding agents must read and apply them before changing UI, as required by [AGENTS.md](AGENTS.md). Full supporting script/data packages can be installed at pinned versions with [the Windows setup script](scripts/install-design-skills.ps1).
+## Design and engineering
 
-- [Design system](DESIGN.md)
-- [Roadmap](docs/ROADMAP.md)
-- [Skill setup](docs/DESIGN_SKILLS.md)
-- [Changelog](CHANGELOG.md)
+- [AGENTS.md](AGENTS.md) — development discipline, version policy, and required three design skills
+- [DESIGN.md](DESIGN.md) — the social archive design system
+- [docs/DESIGN_SKILLS.md](docs/DESIGN_SKILLS.md) — UI/UX Pro Max, Impeccable, and Emil design engineering
+- [docs/ROADMAP.md](docs/ROADMAP.md) — phases and acceptance criteria
+- [docs/SECURITY.md](docs/SECURITY.md) — boundaries and limits
+- [CHANGELOG.md](CHANGELOG.md) — release history
 
-## Licensing
-
-Offline's own application license has not been selected yet. The bundled third-party design skills retain their respective MIT/Apache-2.0 licenses and original attribution.
+Offline's own license remains undecided. Bundled third-party design skills retain their respective licenses.
