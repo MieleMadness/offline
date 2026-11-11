@@ -16,6 +16,8 @@ import { createProfile, profileOwnedValue, renameFamilyProfile, withoutFamilyPro
 import ProfilePicker from "./components/ProfilePicker";
 import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
+import ImportReview from "./components/ImportReview";
+import { requireUsableImport, type ImportHealth } from "./import-health";
 import QuickSearch from "./components/QuickSearch";
 import Photos from "./components/Photos";
 import { sameInventory, photoEntries } from "./archive-images";
@@ -150,6 +152,9 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   // Source ZIP is only a temporary association for this mounted, active profile.
   // Never place a local filesystem path in the encrypted preview or backups.
   const [sourceZip, setSourceZip] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] = useState<{
+    path: string; archive: ImportedArchive; health: ImportHealth;
+  } | null>(null);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -178,6 +183,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   }
   function finish() { pending.current = false; setBusy(false); }
   function lock() {
+    setPendingImport(null);
     setSourceZip(null);
     setUnlocked(null);
     setQuery("");
@@ -235,7 +241,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   }
 
   async function importZip() {
-    if (!ready || locked || enrolling) return;
+    if (!ready || locked || enrolling || pendingImport) return;
     if (!activeProfile) {
       setError("Create a family profile before importing an archive.");
       return;
@@ -253,23 +259,55 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       const report = await invoke<ArchiveReport>("inspect_archive", { path: selected });
       const social = await invoke<SocialArchive>("read_social_archive", { path: selected });
       const imported = { report, social };
-      if (snapshot && unlocked) {
-        const next = { ...await seal(ownerId, imported, unlocked.key, snapshot.salt), credential: snapshot.credential };
-        await saveSnapshot(ownerId, next, snapshot.revision);
-        setSnapshot(next);
-        setUnlocked({ key: unlocked.key, archive: imported });
+      const health = requireUsableImport(imported);
+      if (archive) {
+        // A second import must never silently overwrite a preview or encrypted vault.
+        setPendingImport({path: selected, archive: imported, health});
       } else {
         onSessionArchive(imported);
+        setSourceZip(selected);
+        setView("feed");
+        setQuery("");
+        if (health.status === "media-only") {
+          setNotice("Only a media/file inventory was recognized. No posts, messages or account records were decoded.");
+        }
       }
-      setSourceZip(selected);
-      setView("feed");
-      setQuery("");
     } catch (cause) {
-      setError(typeof cause === "string"
-        ? cause : "Offline couldn't open this ZIP. Check the file and try again.");
+      setError(typeof cause === "string" ? cause :
+        cause instanceof Error ? cause.message :
+        "Offline couldn't open this ZIP. Check the file and try again.");
     } finally {
       finish();
     }
+  }
+
+  async function confirmReplacement() {
+    if (!pendingImport || !archive || locked || enrolling || !activeProfile) return;
+    if (!begin()) return;
+    try {
+      const staged = pendingImport;
+      if (snapshot) {
+        if (!unlocked) throw new Error("Unlock the saved profile before replacing its preview.");
+        const next = { ...await seal(activeProfileId, staged.archive, unlocked.key, snapshot.salt),
+          credential: snapshot.credential };
+        // Compare the previous revision in the same IndexedDB transaction.
+        await saveSnapshot(activeProfileId, next, snapshot.revision);
+        setSnapshot(next);
+        setUnlocked({ key: unlocked.key, archive: staged.archive });
+      } else {
+        onSessionArchive(staged.archive);
+      }
+      setSourceZip(staged.path);
+      setView("feed");
+      setQuery("");
+      setPendingImport(null);
+      setNotice(staged.health.status === "media-only"
+        ? "Preview replaced with a media-only inventory. The previous preview is no longer available here."
+        : "Preview replaced. Your original ZIP files were not changed.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message :
+        "The import could not be saved. Your original preview was not changed.");
+    } finally { finish(); }
   }
 
   async function connectOriginalZip() {
@@ -376,7 +414,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
             onClick={() => setEnrolling(true)}>Change PIN or passphrase</button>}
           {archive && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
             onClick={snapshot ? lock : () => setEnrolling(true)}>{snapshot ? "Lock preview" : "Save encrypted copy"}</button>}
-          <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile || !ready || locked || enrolling}>
+          <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile || !ready || locked || enrolling || !!pendingImport}>
             <ArrowDownToLine size={17} aria-hidden="true"/>
             <span>{busy ? "Reading…" : locked ? "Preview locked" : unlocked ? "Replace saved preview" : activeProfile ? "Import for " + activeProfile.displayName : "Create a profile first"}</span>
           </button>
@@ -391,7 +429,11 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
           onClick={() => { setNotice(""); onDismissRestoreNotice(); }}><X size={16}/></button>
       </div>}
       <main className="soc-scroll">
-        {!ready ? <p className="soc-soft-caption" role="status">{error ? "Preview unavailable" : "Opening profile…"}</p> :
+        {pendingImport && archive ? <ImportReview candidate={pendingImport.archive}
+          assessment={pendingImport.health} previous={archive}
+          hasSavedCopy={!!snapshot} ownerName={activeProfile?.displayName ?? "Family member"}
+          busy={busy} onKeep={() => setPendingImport(null)} onReplace={confirmReplacement}/> :
+        !ready ? <p className="soc-soft-caption" role="status">{error ? "Preview unavailable" : "Opening profile…"}</p> :
           locked || enrolling ? <VaultForm key={locked ? "unlock" : "save"} locked={locked} busy={busy} credential={snapshot?.credential ?? "passphrase"}
             onSubmit={submitPassphrase} onCancel={enrolling ? () => setEnrolling(false) : undefined}/> :
           !archive ? <div className="soc-welcome"><div className="soc-welcome-inner">
