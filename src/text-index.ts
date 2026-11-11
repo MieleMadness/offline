@@ -27,11 +27,16 @@ export function validateStoredTextIndex(value: unknown): void {
     throw new Error("The encrypted backup contains invalid search index metadata.");
   }
   const encodedLength = Math.ceil(index.dimensions! / 3) * 4;
-  if (encodedLength * index.vectors.length > MAX_INDEX_STORAGE_BYTES ||
-      !index.vectors.every(encoded => typeof encoded === "string" &&
+  let valid = encodedLength * index.vectors.length <= MAX_INDEX_STORAGE_BYTES;
+  if (valid) {
+    try {
+      valid = index.vectors.every(encoded => typeof encoded === "string" &&
         encoded.length === encodedLength &&
         /^[A-Za-z0-9+/]+={0,2}$/.test(encoded) &&
-        atob(encoded).length === index.dimensions)) {
+        atob(encoded).length === index.dimensions);
+    } catch { valid = false; }
+  }
+  if (!valid) {
     throw new Error("The encrypted backup contains an oversized or damaged search index.");
   }
 }
