@@ -1,6 +1,6 @@
 [package]
 name = "offline"
-version = "0.10.0"
+version = "0.11.0"
 description = "Private desktop explorer for personal data exports"
 authors = ["Offline contributors"]
 edition = "2021"

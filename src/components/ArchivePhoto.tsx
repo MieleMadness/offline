@@ -5,8 +5,8 @@ import { imageDataUrl, type ArchiveImageResponse } from "../archive-images";
 import { fileName } from "../archive";
 
 /** The active Library owns the ZIP path. Source paths and decoded images never persist. */
-export function ArchivePhoto({ zipPath, member, caption, compact = false }: {
-  zipPath: string | null; member: string; caption?: string; compact?: boolean;
+export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSize = false }: {
+  zipPath: string | null; member: string; caption?: string; compact?: boolean; fullSize?: boolean;
 }) {
   const node = useRef<HTMLDivElement>(null);
   const [url, setUrl] = useState("");
@@ -42,9 +42,10 @@ export function ArchivePhoto({ zipPath, member, caption, compact = false }: {
     return () => { active = false; observer.disconnect(); };
   }, [zipPath, member]);
 
-  return <div ref={node} className={"soc-photo-frame " + (compact ? "soc-photo-compact" : "")}>
+  return <div ref={node} className={"soc-photo-frame " + (compact ? "soc-photo-compact " : "") + (fullSize ? "soc-photo-full" : "")}>
     {status === "ready" && url
-      ? <img src={url} alt={caption ?? "Archived photo: " + fileName(member)} loading="lazy" decoding="async"/>
+      ? <img src={url} alt={caption ?? "Archived photo: " + fileName(member)}
+          loading="lazy" decoding="async" onError={() => { setUrl(""); setStatus("failed"); }}/>
       : <div className="soc-photo-empty" role="status">
           {status === "failed" ? <ImageOff size={24} aria-hidden="true"/> : <ImageIcon size={24} aria-hidden="true"/>}
           <span>{!zipPath ? "Connect original ZIP to view" : status === "failed" ? "Preview unavailable" :

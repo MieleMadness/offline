@@ -72,7 +72,8 @@
 - [ ] Real images/videos from local archive with verified archive paths, MIME validation and thumbnail caching.
 - [ ] Date/person/year filters, post expansion, albums, reels/stories/check-ins where present.
 - [ ] Comments/reactions when exported and supported; clear provenance and missing-data messages.
-- [ ] Media viewer with keyboard navigation, accessible alt/labels where available, lightweight slideshow.
+- [x] v0.11.0: Local full-size photo viewer with keyboard navigation, accessible controls and focus handling (Windows manual acceptance pending).
+- [ ] Slide show timing, image metadata, exported alt labels and other media UX refinements.
 - [ ] Optional favorites/bookmarks and private collections; no fake social interactions.
 
 **Exit gate:** Real synthetic ZIP media appears inside the right dated posts; rendering is safe and performant on large exports.
@@ -132,6 +133,7 @@
 - [x] v0.10.0 import health and safety: no accidental saved-preview replacement for unrecognized ZIPs, media-only disclosure, explicit confirmation for replacement (native acceptance pending).
 - [x] v0.10.0 timestamp normalization for common Meta JSON seconds/milliseconds and common English HTML date patterns with synthetic regression tests.
 - [ ] Full compatibility matrix for real-world redacted HTML/JSON export variations, import validation and source mapping.
+- [x] v0.11.0: Paginate Photographs in bounded groups of 24 mounted image views, instead of indefinitely accumulating full-size decoded images.
 - [ ] 10k/100k+ content performance benchmarks, thumbnail budgets, search scale and stress tests.
 - [ ] Browser-like accessibility audit, dark/light focus and contrast, 900/1280/1440 resolutions.
 - [ ] Backup/restore testing, corrupted archive and crash recovery, disk-space management.
