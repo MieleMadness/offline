@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { ImportedArchive } from "../social-model";
+import { sameInventory } from "../archive-images";
+import type { ArchiveReport } from "../archive";
 import { fingerprint, packVector, searchIndex, textChunks, validIndex, type TextIndex } from "../text-index";
 
 interface Match { id: string; reason: string }
@@ -110,6 +112,13 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       if (images) {
         const path = await open({ multiple: false, filters: [{ name: "Workspace archive", extensions: ["zip"] }] });
         if (typeof path !== "string" || stopped()) return;
+        // Image inference must never inspect a different family member's ZIP
+        // simply because the operating system picker can navigate to it.
+        const selected = await invoke<ArchiveReport>("inspect_archive", { path });
+        if (!sameInventory(archive.report, selected)) {
+          throw new Error("Choose the original ZIP for this family profile. This file's inventory does not match.");
+        }
+        if (stopped()) return;
         matches = await invoke("ai_image_search", { query, path });
       } else {
         const revision = await invoke<string>("ai_text_model_revision");
@@ -140,7 +149,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     <summary>Local AI search</summary>
     <p>Index all imported posts, messages and account records in this workspace, then search by meaning.
       Saved workspaces keep their index encrypted with the archive. Session indexes stay in memory.
-      Image search currently examines up to eight JPEG/PNG images (4 MiB and 25 megapixels each) from a ZIP you select.
+      Image search checks the selected ZIP against this profile's imported inventory, then examines up to eight JPEG/PNG images (4 MiB and 25 megapixels each) from a ZIP you select.
       Results may include unrelated items. AI-generated image descriptions can be inaccurate.</p>
     {(!status?.textReady || !status?.imagesReady) && <div className="soc-search-setup">
       <p>Install Ollama first. Download each search model once. Archive contents stay on this computer.</p>

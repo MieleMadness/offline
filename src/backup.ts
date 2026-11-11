@@ -1,5 +1,6 @@
 import { PROFILE_COLORS, cleanProfileName, type FamilyProfile, type ProfileColor } from "./profiles";
 import type { ImportedArchive } from "./social-model";
+import { validateStoredTextIndex } from "./text-index";
 import type { Snapshot } from "./vault";
 
 // The profile metadata is visible. The imported social records remain inside AES-GCM ciphertext.
@@ -117,6 +118,9 @@ export function validateRecoveredArchive(value: unknown): asserts value is Impor
       || typeof social.filesRead !== "number" || !Array.isArray(social.warnings)) {
     throw new Error("The decrypted backup contains unsupported social data.");
   }
+  // Existing backups without an AI index remain compatible. If one is present,
+  // reject malformed/oversized vectors before any encrypted snapshot is saved.
+  if (root.textIndex !== undefined) validateStoredTextIndex(root.textIndex);
   for (const post of social.posts) {
     const item = record(post);
     if (typeof item.id !== "string" || typeof item.text !== "string"

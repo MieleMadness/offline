@@ -7,6 +7,35 @@ export interface TextIndex {
   dimensions: number;
   vectors: string[];
 }
+export const MAX_INDEX_SECTIONS = 20_000;
+export const MAX_INDEX_STORAGE_BYTES = 48 * 1024 * 1024;
+
+/** Protect recovery and import paths from oversized or malformed stored vectors. */
+export function validateStoredTextIndex(value: unknown): void {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("The encrypted backup contains an invalid search index.");
+  }
+  const index = value as Partial<TextIndex>;
+  if (index.version !== 1 ||
+      typeof index.modelRevision !== "string" || index.modelRevision.length > 200 ||
+      !index.modelRevision || typeof index.fingerprint !== "string" ||
+      !/^[a-f0-9]{64}$/.test(index.fingerprint) ||
+      !Number.isInteger(index.dimensions) || (index.dimensions ?? 0) < 1 ||
+      (index.dimensions ?? 0) > 4096 ||
+      !Array.isArray(index.vectors) || index.vectors.length > MAX_INDEX_SECTIONS ||
+      index.vectors.length < 1) {
+    throw new Error("The encrypted backup contains invalid search index metadata.");
+  }
+  const encodedLength = Math.ceil(index.dimensions! / 3) * 4;
+  if (encodedLength * index.vectors.length > MAX_INDEX_STORAGE_BYTES ||
+      !index.vectors.every(encoded => typeof encoded === "string" &&
+        encoded.length === encodedLength &&
+        /^[A-Za-z0-9+/]+={0,2}$/.test(encoded) &&
+        atob(encoded).length === index.dimensions)) {
+    throw new Error("The encrypted backup contains an oversized or damaged search index.");
+  }
+}
+
 export interface TextChunk {
   id: string;
   source: string;
@@ -26,7 +55,9 @@ export function textChunks(archive: ImportedArchive): TextChunk[] {
       id: "data-" + c + "-" + r, source: record.sourcePath, text: record.title + "\n" + record.detail,
     }))),
   ];
-  return records.flatMap(record => {
+  const max = MAX_INDEX_SECTIONS;
+  const all: TextChunk[] = [];
+  for (const record of records) {
     const characters = Array.from(record.text);
     const chunks: TextChunk[] = [];
     for (let start = 0; start < characters.length; start += 400) {
@@ -34,8 +65,12 @@ export function textChunks(archive: ImportedArchive): TextChunk[] {
       if (text.trim()) chunks.push({ ...record, text });
       if (start + 450 >= characters.length) break;
     }
-    return chunks;
-  });
+    all.push(...chunks);
+    if (all.length > max) {
+      throw new Error("This archive has too many text sections for the current local index. Try keyword search instead.");
+    }
+  }
+  return all;
 }
 
 export async function fingerprint(chunks: TextChunk[]): Promise<string> {
@@ -59,7 +94,10 @@ export function validIndex(
       index.modelRevision !== revision || !Array.isArray(index.vectors)) return false;
   const minimumDimensions = partial && index.vectors.length === 0 ? 0 : 1;
   if (!Number.isInteger(index.dimensions) || index.dimensions < minimumDimensions || index.dimensions > 4096) return false;
-  if (partial ? index.vectors.length > count : index.vectors.length !== count) return false;
+  if (count > MAX_INDEX_SECTIONS ||
+      index.vectors.length > MAX_INDEX_SECTIONS ||
+      Math.ceil(index.dimensions / 3) * 4 * index.vectors.length > MAX_INDEX_STORAGE_BYTES ||
+      (partial ? index.vectors.length > count : index.vectors.length !== count)) return false;
   return index.vectors.every(vector => {
     if (typeof vector !== "string" || vector.length !== Math.ceil(index.dimensions / 3) * 4) return false;
     try {
