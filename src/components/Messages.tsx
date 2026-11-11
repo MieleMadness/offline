@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { CalendarDays, File, Image as ImageIcon, LockKeyhole, MessageCircle, MessagesSquare, Search } from "lucide-react";
+import { CalendarDays, ChevronDown, File, Image as ImageIcon, LockKeyhole, MessageCircle, MessagesSquare, Search, SlidersHorizontal, X } from "lucide-react";
 import { formatNumber } from "../archive";
-import { availableMessageYears, clockLabel, dateLabel, filterConversations, filterThreadMessages, messageDays, type ImportedArchive } from "../social-model";
+import { availableMessageSenders, availableMessageYears, clockLabel, dateLabel, filterConversations, filterThreadMessages, messageDays, type ImportedArchive } from "../social-model";
 import { Avatar, EmptyState, timeISOString } from "./Shared";
 import { MediaStrip } from "./ArchivePhoto";
 
@@ -12,18 +12,25 @@ export default function Messages({ archive, query, sourceZip }: { archive: Impor
   const [messageSearch, setMessageSearch] = useState("");
   const [year, setYear] = useState("all");
   const [attachmentsOnly, setAttachmentsOnly] = useState(false);
+  const [sender, setSender] = useState("all");
+  const [fromDate, setFromDate] = useState("");
+  const [throughDate, setThroughDate] = useState("");
+  const [showExtra, setShowExtra] = useState(false);
   const [windowSize, setWindowSize] = useState(250);
   const years = useMemo(() => availableMessageYears(current?.messages ?? []), [current]);
+  const senders = useMemo(() => availableMessageSenders(current?.messages ?? []), [current]);
+  const hasInvalidRange = Boolean(fromDate && throughDate && fromDate > throughDate);
+  const advancedCount = Number(sender !== "all") + Number(Boolean(fromDate)) + Number(Boolean(throughDate));
   const filtered = useMemo(() => filterThreadMessages(
-    current?.messages ?? [], messageSearch, year, attachmentsOnly,
-  ), [current, messageSearch, year, attachmentsOnly]);
+    current?.messages ?? [], messageSearch, year, attachmentsOnly, {sender, fromDate, throughDate},
+  ), [current, messageSearch, year, attachmentsOnly, sender, fromDate, throughDate]);
   const visibleMessages = filtered.slice(-windowSize);
   const groups = messageDays(visibleMessages);
   const scroll = useRef<HTMLDivElement>(null);
   const previousHeight = useRef<number | null>(null);
   useEffect(() => {
     if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
-  }, [current?.id, messageSearch, year, attachmentsOnly]);
+  }, [current?.id, messageSearch, year, attachmentsOnly, sender, fromDate, throughDate]);
   useLayoutEffect(() => {
     if (previousHeight.current === null || !scroll.current) return;
     const heightBefore = previousHeight.current;
@@ -36,6 +43,21 @@ export default function Messages({ archive, query, sourceZip }: { archive: Impor
     setMessageSearch("");
     setYear("all");
     setAttachmentsOnly(false);
+    setSender("all");
+    setFromDate("");
+    setThroughDate("");
+    setShowExtra(false);
+    setWindowSize(250);
+    previousHeight.current = null;
+  }
+
+  function clearFilters() {
+    setMessageSearch("");
+    setYear("all");
+    setAttachmentsOnly(false);
+    setSender("all");
+    setFromDate("");
+    setThroughDate("");
     setWindowSize(250);
     previousHeight.current = null;
   }
@@ -92,8 +114,41 @@ export default function Messages({ archive, query, sourceZip }: { archive: Impor
                 onChange={event => { setAttachmentsOnly(event.target.checked); setWindowSize(250); }}/>
               <ImageIcon size={15} aria-hidden="true"/> Attachments
             </label>
+            <button type="button" className={"soc-chat-advanced-toggle " + (showExtra ? "active" : "")}
+              aria-expanded={showExtra} aria-controls="soc-chat-advanced-filters"
+              onClick={() => setShowExtra(value => !value)}>
+              <SlidersHorizontal size={15} aria-hidden="true"/>
+              More filters{advancedCount ? " (" + advancedCount + ")" : ""}
+              <ChevronDown size={14} aria-hidden="true"/>
+            </button>
           </div>
-          <div className="soc-chat-filter-status" role="status">{formatNumber(filtered.length)} matching messages</div>
+          {showExtra && <div id="soc-chat-advanced-filters" className="soc-chat-advanced">
+            <label>Participant
+              <select value={sender} onChange={event => { setSender(event.target.value); setWindowSize(250); }}>
+                <option value="all">All participants</option>
+                {senders.map(name => <option key={name} value={name}>{name}</option>)}
+              </select>
+            </label>
+            <label>From date
+              <input type="date" value={fromDate}
+                onChange={event => { setFromDate(event.target.value); setWindowSize(250); }}/>
+            </label>
+            <label>Through date
+              <input type="date" min={fromDate || undefined} value={throughDate}
+                onChange={event => { setThroughDate(event.target.value); setWindowSize(250); }}/>
+            </label>
+            <button type="button" className="soc-chat-clear" onClick={clearFilters}
+              disabled={!messageSearch && year === "all" && !attachmentsOnly && !advancedCount}>
+              <X size={14} aria-hidden="true"/> Clear filters
+            </button>
+          </div>}
+          {hasInvalidRange && <p className="soc-chat-filter-error" role="alert">
+            The end date must be on or after the start date.
+          </p>}
+          <div className="soc-chat-filter-status" role="status">
+            {formatNumber(filtered.length)} matching messages
+            {advancedCount > 0 && !showExtra ? " · " + advancedCount + " extra filters active" : ""}
+          </div>
           <div className="soc-chat-messages" ref={scroll}>
             {filtered.length > visibleMessages.length && <button type="button" className="soc-chat-load-older"
               onClick={loadOlder}>
