@@ -8,6 +8,8 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
+**Branch integration:** See the [draft PR dependency order and release gates](docs/INTEGRATION.md); the separate text-index PR must be reconciled with this newer app baseline.
+
 **Unsigned Windows test executable:** Read the [portable development build and SHA-256 verification guide](docs/TEST_WINDOWS_PREVIEW.md). Builds are temporary GitHub Actions artifacts, not public installers; test fictional archives only.
 
 **Privacy-safe acceptance fixtures:** Generate [fictional HTML, JSON, media-only, malformed and 10k-photo ZIPs](docs/SYNTHETIC_FIXTURES.md) without an account or internet access.

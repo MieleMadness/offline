@@ -7,6 +7,7 @@
 - Profile deletion stages the updated catalog before the expected-revision IndexedDB deletion; rejected writes attempt to restore the previous catalog.
 - Shared failure-compensation helper, storage read-back checks, and synthetic tests for blocked/silent writes, partial updates, invalid catalogs, owner mapping and failed vault transactions.
 - The storage technologies cannot share an atomic transaction, so power loss between catalog and snapshot commits remains a documented limitation; hands-on Windows acceptance is still required.
+- Carry forward the generated native 5,125-photo ZIP test and bounded indexed-image read from parallel PR #25, with additional fictional fixture generation in Windows CI.
 
 
 ## v0.13.0 — Reproducible unsigned Windows test builds (development)

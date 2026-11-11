@@ -159,7 +159,7 @@
 - Cross-device family sync only if opt-in encryption and trustworthy sharing can be built.
 
 ## Next coding order
-Next, verify v0.12.0 large-ZIP native page navigation, image codec safety and ZIP metadata scan latency; exercise backup/recovery storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+Next, finish v0.14.0 Windows verification and exercise real family backup/restore and storage failure scenarios; reconcile #27's older text-index branch with the current v0.14.x features. Use [the integration checklist](INTEGRATION.md) before merging the stacked draft chain into main. Continue image codec/ZIP metadata performance profiling. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
 
 ## Prioritized v0.5.0 work
 
