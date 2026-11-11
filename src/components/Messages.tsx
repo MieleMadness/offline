@@ -1,18 +1,49 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { File, LockKeyhole, MessageCircle, MessagesSquare } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { CalendarDays, File, Image as ImageIcon, LockKeyhole, MessageCircle, MessagesSquare, Search } from "lucide-react";
 import { formatNumber } from "../archive";
-import { clockLabel, dateLabel, filterConversations, messageDays, type ImportedArchive } from "../social-model";
+import { availableMessageYears, clockLabel, dateLabel, filterConversations, filterThreadMessages, messageDays, type ImportedArchive } from "../social-model";
 import { Avatar, EmptyState, timeISOString } from "./Shared";
 import { MediaStrip } from "./ArchivePhoto";
 
 export default function Messages({ archive, query, sourceZip }: { archive: ImportedArchive; query: string; sourceZip: string | null }) {
   const chats = useMemo(() => filterConversations(archive.social.conversations, query), [archive, query]);
   const [selected, setSelected] = useState<string | null>(null);
-  const current = chats.find((chat) => chat.id === selected) ?? chats[0];
-  const visibleMessages = current?.messages.slice(-500) ?? [];
+  const current = chats.find(chat => chat.id === selected) ?? chats[0];
+  const [messageSearch, setMessageSearch] = useState("");
+  const [year, setYear] = useState("all");
+  const [attachmentsOnly, setAttachmentsOnly] = useState(false);
+  const [windowSize, setWindowSize] = useState(250);
+  const years = useMemo(() => availableMessageYears(current?.messages ?? []), [current]);
+  const filtered = useMemo(() => filterThreadMessages(
+    current?.messages ?? [], messageSearch, year, attachmentsOnly,
+  ), [current, messageSearch, year, attachmentsOnly]);
+  const visibleMessages = filtered.slice(-windowSize);
   const groups = messageDays(visibleMessages);
   const scroll = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight; }, [current?.id]);
+  const previousHeight = useRef<number | null>(null);
+  useEffect(() => {
+    if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
+  }, [current?.id, messageSearch, year, attachmentsOnly]);
+  useLayoutEffect(() => {
+    if (previousHeight.current === null || !scroll.current) return;
+    const heightBefore = previousHeight.current;
+    previousHeight.current = null;
+    scroll.current.scrollTop += scroll.current.scrollHeight - heightBefore;
+  }, [windowSize, current?.id]);
+
+  function chooseThread(id: string) {
+    setSelected(id);
+    setMessageSearch("");
+    setYear("all");
+    setAttachmentsOnly(false);
+    setWindowSize(250);
+    previousHeight.current = null;
+  }
+
+  function loadOlder() {
+    previousHeight.current = scroll.current?.scrollHeight ?? null;
+    setWindowSize(current => current + 250);
+  }
 
   return <div className="soc-content soc-messages-page">
     <div className="soc-page-heading"><h1>Conversations<span>.</span></h1>
@@ -23,7 +54,7 @@ export default function Messages({ archive, query, sourceZip }: { archive: Impor
         {chats.map((chat) => {
           const latest = chat.messages[chat.messages.length - 1];
           return <button type="button" key={chat.id} className={"soc-thread " + (current?.id === chat.id ? "active" : "")}
-            onClick={() => setSelected(chat.id)} aria-current={current?.id === chat.id ? "true" : undefined}>
+            onClick={() => chooseThread(chat.id)} aria-current={current?.id === chat.id ? "true" : undefined}>
             <Avatar name={chat.title}/>
             <span className="soc-thread-info"><span className="soc-thread-line"><strong title={chat.title}>{chat.title}</strong>
               <time>{dateLabel(chat.lastTimestamp)}</time></span>
@@ -41,10 +72,39 @@ export default function Messages({ archive, query, sourceZip }: { archive: Impor
               ? current.participants.join(", ") : "Participants not included"}</span></div>
             <span className="soc-chat-count">{formatNumber(current.messages.length)} messages</span>
           </header>
+          <div className="soc-chat-filters" aria-label="Filter messages in this conversation">
+            <label className="soc-chat-search"><Search size={16} aria-hidden="true"/>
+              <span className="sr-only">Search within this conversation</span>
+              <input type="search" value={messageSearch} placeholder="Search within conversation"
+                onChange={event => { setMessageSearch(event.target.value); setWindowSize(250); }}/>
+            </label>
+            <label className="soc-chat-year"><CalendarDays size={15} aria-hidden="true"/>
+              <span className="sr-only">Filter conversation by year</span>
+              <select value={year} onChange={event => { setYear(event.target.value); setWindowSize(250); }}>
+                <option value="all">All dates</option>
+                {years.map(value => <option value={value} key={value}>
+                  {value === "unknown" ? "Unknown date" : value}
+                </option>)}
+              </select>
+            </label>
+            <label className={"soc-chat-attachments " + (attachmentsOnly ? "selected" : "")}>
+              <input type="checkbox" checked={attachmentsOnly}
+                onChange={event => { setAttachmentsOnly(event.target.checked); setWindowSize(250); }}/>
+              <ImageIcon size={15} aria-hidden="true"/> Attachments
+            </label>
+          </div>
+          <div className="soc-chat-filter-status" role="status">{formatNumber(filtered.length)} matching messages</div>
           <div className="soc-chat-messages" ref={scroll}>
-            {current.messages.length > visibleMessages.length && <p className="soc-chat-limited">Showing the 500 most recent messages in this conversation.</p>}
-            {groups.length === 0 && <EmptyState icon={MessageCircle} title="No readable messages">
-              This conversation was exported without messages that Offline can display yet.
+            {filtered.length > visibleMessages.length && <button type="button" className="soc-chat-load-older"
+              onClick={loadOlder}>
+              Show {formatNumber(Math.min(250, filtered.length - visibleMessages.length))} older messages
+              <span>{formatNumber(filtered.length - visibleMessages.length)} more in this conversation</span>
+            </button>}
+            {groups.length === 0 && <EmptyState icon={MessageCircle}
+              title={current.messages.length ? "No messages match these filters" : "No readable messages"}>
+              {current.messages.length
+                ? "Try another keyword, date or attachment filter."
+                : "This conversation was exported without messages that Offline can display yet."}
             </EmptyState>}
             {groups.map((group) => <div key={group.key}>
               <div className="soc-chat-date"><span>{group.label}</span></div>
