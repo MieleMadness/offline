@@ -101,3 +101,12 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 ## Native fictional-export integration gate (development)
 
 The Windows milestone job now generates fictional HTML/JSON ZIPs locally and runs the production Rust reader against them. Confirm all native fixture tests report green when the `OFFLINE_ACCEPTANCE_FIXTURES` variable is set: JSON posts/messages/data, HTML posts/messages/media, empty/malformed import cases and mixed seconds/milliseconds dates. This closes a gap between testing the fixture generator and testing the actual import adapter. It does not replace a human Windows UI walkthrough or real-format redacted export acceptance.
+
+
+## v0.13.0 — Unsigned Windows test executable artifact
+
+1. Trigger one full native Windows build with `[windows]` in a draft PR title. Confirm the executable and SHA-256 checksum are generated only after TypeScript/frontend and Rust build gates pass.
+2. Download the temporary artifact following [Windows preview instructions](TEST_WINDOWS_PREVIEW.md) and verify the SHA-256 fingerprint before opening it.
+3. Use a disposable Windows account or VM and import **fictional** JSON/HTML fixture ZIPs. Perform manual feed, Messenger, privacy, photo navigation, backup/recovery and profile isolation checks. Capture only synthetic screenshots.
+4. Confirm a targeted `[rust]` PR run does **not** upload the executable; that mode must run the native fixture tests without packaging the application.
+5. Keep v1.0 installer and code-signing tasks open until real-export format, accessibility, performance and independent security acceptance.

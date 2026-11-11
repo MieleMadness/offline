@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.13.0 — Reproducible unsigned Windows test builds (development)
+
+- Add an opt-in GitHub Actions artifact for the unsigned Windows executable **only after successful full native builds**, including an independently generated SHA-256 checksum file.
+- Retain preview artifacts for seven days, with no installer, release publication, signing or background updater.
+- Keep the separate `[rust]` native fictional-import acceptance mode available without rebuilding the whole desktop executable.
+- Document safe use with reproducible fictional HTML/JSON ZIP fixtures, exact checksum verification, Windows account isolation, error reporting and remaining security/release gates.
+- Windows artifact production and hands-on native UI acceptance remain pending.
+
+
 ## v0.12.0 — Full ZIP photograph discovery and guarded import (development)
 
 - Add a bounded Rust photo-list API for the **complete ZIP directory**, not just the first 5,000 imported file entries, with server-side filename filtering, photo counts, 24-file response pages and conservative MIME-extension/size/path screening.

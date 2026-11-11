@@ -1,4 +1,4 @@
-name: Offline 0.12.0 · Verify
+name: Offline 0.13.0 · Verify
 
 on:
   pull_request:
@@ -10,12 +10,12 @@ permissions:
 # Fast checks run on PRs. Use [rust] for targeted Windows Rust tests;
 # [windows] or workflow_dispatch builds the full desktop executable.
 concurrency:
-  group: offline-0.12.0-${{ github.head_ref || github.ref_name }}
+  group: offline-0.13.0-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   frontend:
-    name: 0.12.0 · Fast frontend verification
+    name: 0.13.0 · Fast frontend verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,7 +37,7 @@ jobs:
   windows:
     # Full compile for [windows]; Rust-only importer acceptance for [rust].
     if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]') || contains(github.event.pull_request.title, '[rust]')
-    name: 0.12.0 · Windows native checks (on demand)
+    name: 0.13.0 · Windows native checks (on demand)
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
@@ -57,3 +57,24 @@ jobs:
       - name: Build Windows desktop executable
         if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
         run: npx tauri build --no-bundle
+      - name: Verify unsigned executable and calculate SHA-256
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
+        shell: pwsh
+        run: |
+          $exe = "src-tauri/target/release/offline.exe"
+          if (-not (Test-Path -LiteralPath $exe)) {
+            throw "Expected Windows executable was not produced at $exe"
+          }
+          $hash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath "src-tauri/target/release/SHA256SUMS.txt" -Value "$hash  offline.exe" -Encoding utf8
+      - name: Upload unsigned Windows test executable
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
+        uses: actions/upload-artifact@v4
+        with:
+          name: Offline-v0.13.0-Windows-unsigned-preview
+          path: |
+            src-tauri/target/release/offline.exe
+            src-tauri/target/release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -65,3 +65,6 @@ The Windows milestone workflow generates the same fictional files and sets `OFFL
 
 
 **CI optimization:** Add `[rust]` to the draft pull-request title for a one-time Windows Rust test run with fictional ZIPs, without rebuilding the desktop executable. Use `[windows]` only for a full milestone compile. Ordinary PRs run the fast frontend and Python checks only.
+
+
+For Windows GUI acceptance using the fictional ZIPs, see [Unsigned Windows preview artifact instructions](TEST_WINDOWS_PREVIEW.md). Use a disposable account/VM; do not import actual family data during prerelease testing.
