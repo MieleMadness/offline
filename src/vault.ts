@@ -74,3 +74,32 @@ export async function saveSnapshot(owner: string, next: Snapshot, previousRevisi
     });
   } finally { db.close(); }
 }
+
+
+/** Delete exactly the expected encrypted preview revision. Never touch another owner.
+ * The caller clears the profile catalog only after this transaction commits.
+ */
+export async function deleteSnapshot(owner: string, expectedRevision: string | null): Promise<void> {
+  const db = await openDatabase();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = db.transaction(STORE, "readwrite");
+      const store = transaction.objectStore(STORE);
+      const current = store.get(owner);
+      current.onsuccess = () => {
+        if ((current.result?.revision ?? null) !== expectedRevision) {
+          transaction.abort();
+          return;
+        }
+        store.delete(owner);
+      };
+      transaction.oncomplete = () => resolve();
+      transaction.onabort = () => reject(
+        transaction.error ?? new Error("Saved preview changed. Reopen family management before deleting."),
+      );
+      transaction.onerror = () => reject(transaction.error ?? new Error("Cannot delete this saved preview."));
+    });
+  } finally {
+    db.close();
+  }
+}

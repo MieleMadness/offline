@@ -103,3 +103,29 @@ export function setProfileOwnedValue<T>(
   if (!id || !/^[A-Za-z0-9-]{8,100}$/.test(id)) throw new Error("Invalid family profile ID.");
   return { ...data, [id]: value };
 }
+
+/** Renaming keeps the immutable owner ID, so encrypted snapshots and source records stay bound. */
+export function renameFamilyProfile(
+  profiles: readonly FamilyProfile[], ownerId: string, input: string,
+): FamilyProfile[] {
+  const index = profiles.findIndex(p => p.id === ownerId);
+  if (index < 0) throw new Error("This family profile no longer exists.");
+  const name = cleanProfileName(input);
+  if (!name) throw new Error("Enter a name for this profile.");
+  if (profiles.some(p => p.id !== ownerId && p.displayName.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+    throw new Error("Another family member already uses this name.");
+  }
+  return profiles.map(p => p.id === ownerId ? { ...p, displayName: name } : p);
+}
+
+/** The storage layer handles encrypted snapshot deletion before calling this pure function. */
+export function withoutFamilyProfile(
+  profiles: readonly FamilyProfile[], ownerId: string, selectedId: string,
+): { profiles: FamilyProfile[]; selectedId: string } {
+  if (!profiles.some(p => p.id === ownerId)) throw new Error("This profile no longer exists.");
+  const remaining = profiles.filter(p => p.id !== ownerId);
+  return {
+    profiles: remaining,
+    selectedId: selectedId === ownerId ? remaining[0]?.id ?? "" : selectedId,
+  };
+}

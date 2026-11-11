@@ -37,12 +37,13 @@
 - [x] HTML/JSON common model and support levels in `docs/IMPORT_FORMATS.md`.
 
 ### 2B — Family profile foundations
-- [ ] First-run personal vs family library chooser; create, rename and switch local profiles.
+- [x] Create, rename and switch local profiles in the family library.
+- [ ] First-run personal vs family library chooser.
 - [x] Per-profile archive ownership: explicit import target, no automatic cross-profile merging.
 - [ ] Persist profile metadata and index scope locally; prevent stale async import from switching owner.
 - [ ] No private data in shared global search, logs, temp files or test fixtures.
 - [x] UI distinguishes organizational profiles from actual encrypted/password-protected vaults.
-- [ ] Profile deletion requires confirmation, scope warning and backup guidance.
+- [x] Profile removal uses typed confirmation, scope warning, encrypted snapshot deletion and backup guidance (pending manual Windows acceptance).
 
 ### 2C — HTML + JSON adapters
 - [ ] Auto-detect HTML vs JSON inside ZIP; provide a preview of detected/unsupported sections.
@@ -76,7 +77,12 @@
 
 **Exit gate:** Real synthetic ZIP media appears inside the right dated posts; rendering is safe and performant on large exports.
 
-## Phase 5 — v0.6.x: Conversations and connections
+## Phase 5 — v0.6.x: Family completion and conversations
+
+- [x] v0.6.0: Profile rename and removal with encryption-aware identity retention, compare-before-delete and backup guidance (pending native UI acceptance).
+
+### Conversation work (remaining)
+
 - [ ] Messenger conversation history complete with sender, dates, media attachments and thread parts.
 - [ ] Search across people/conversations; filter by date, attachments and participant.
 - [ ] Friend/follower/group/event relationship views from exported data.

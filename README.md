@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.5.2.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.6.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -16,9 +16,13 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Search library | Profile-scoped keyword search across recognized posts, messages and data, with date/category filters and source details; no AI required |
 | Archive Files | Read-only ZIP inventory for original filenames, sizes and metadata |
 | Encrypted backup and recovery (preview) | Back up an unlocked saved preview to a local encrypted file and restore it using the original secret; existing saved copies cannot be overwritten |
-| Family Profiles (preview) | Create and switch among local family member names; imports belong to one chosen profile |
+| Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Family profile management (development preview)
+
+Use **Manage family profiles** in the family switcher to rename a profile without changing its owner identity or encryption. Removing a profile first deletes its saved encrypted preview from this installation, then removes its local profile record and in-memory session preview. The original Facebook ZIP and any exported backup files remain untouched. Deletion requires typing the profile name and acknowledging that saved data will be lost. Recover from an independent encrypted backup if needed. A shared Windows account does not protect anyone's local profile metadata or saved encrypted blobs from deletion by another OS user.
 
 ## Portable backup and recovery (development preview)
 
@@ -43,7 +47,7 @@ Prerequisites: Node.js 22+, Rust (MSVC), Visual Studio C++ Build Tools, and the 
 ```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
-git checkout feature/unified-preview-search-0.5.0
+git checkout feature/family-profile-management-next
 npm install
 npm run tauri dev
 ```

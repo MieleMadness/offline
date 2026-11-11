@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.6.0 — Family profile lifecycle (development)
+
+- Added a dedicated family-management screen with accessible rename and removal actions.
+- Profile renames preserve the immutable owner identity, keeping encrypted snapshots associated with their original key.
+- Deleting a profile requires exact typed-name confirmation and acknowledges possible data loss. The saved encrypted snapshot is removed using an IndexedDB revision guard, then memory-only content and profile metadata are cleared. No other owner's records are changed, and original ZIP/portable backups remain untouched.
+- Added synthetic tests for independent family identities, duplicate name validation and safe active-profile reassignment after deletion.
+- The baseline v0.5.2 Windows compile and Rust/frontend tests passed; v0.6.0 native UI acceptance is pending.
+
+
 ## v0.5.2 — Windows compile correction
 
 - Fixed an ambiguous Rust `by_ref` call in the portable backup reader found by the on-demand Windows compilation. The same bounded `Read::take` guard remains in place.
