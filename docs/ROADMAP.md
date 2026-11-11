@@ -93,7 +93,7 @@
 
 ## Phase 6 — v0.7.x: Photo previews and Understand Your Data
 
-- [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0; Windows and real-export acceptance pending).
+- [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0, ZIP test fixture corrected in v0.7.1; Windows and real-export acceptance pending).
 - [x] Recognized local image references under supported HTML/JSON posts and Messenger messages, with safe fallbacks.
 - [ ] HEIC and video previews, full album relationship support, image codec security and 10k+ file stress tests.
 

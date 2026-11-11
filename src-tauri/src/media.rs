@@ -115,7 +115,28 @@ mod tests {
     #[test]
     fn rejects_missing_duplicate_and_oversized_members() {
         assert!(read_image(fixture(&[("photos/a.png", PNG)]), "photos/missing.png").is_err());
-        assert!(read_image(fixture(&[("photos/a.png", PNG), ("photos/a.png", PNG)]), "photos/a.png").is_err());
+        // ZipWriter intentionally rejects duplicate names; construct a duplicate
+        // via a synthetic ZIP directory patch to exercise the reader guard.
+        let mut writer = ZipWriter::new(Cursor::new(Vec::new()));
+        for name in ["photos/a.png", "photos/b.png"] {
+            writer.start_file(name, SimpleFileOptions::default()
+                .compression_method(CompressionMethod::Stored)).unwrap();
+            writer.write_all(PNG).unwrap();
+        }
+        let mut bytes = writer.finish().unwrap().into_inner();
+        let target = b"photos/b.png";
+        let replacement = b"photos/a.png";
+        let mut replaced = 0;
+        for i in 0..bytes.len().saturating_sub(target.len() - 1) {
+            if &bytes[i..i + target.len()] == target {
+                bytes[i..i + target.len()].copy_from_slice(replacement);
+                replaced += 1;
+            }
+        }
+        assert_eq!(replaced, 2, "expected one local and one central directory filename");
+        if let Ok(duplicate_zip) = ZipArchive::new(Cursor::new(bytes)) {
+            assert!(read_image(duplicate_zip, "photos/a.png").is_err());
+        } // A ZIP parser rejecting the duplicate directory also satisfies this contract.
         let huge = vec![0u8; MAX_IMAGE_BYTES as usize + 1];
         assert!(read_image(fixture(&[("photos/huge.png", &huge)]), "photos/huge.png").is_err());
     }

@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.7.1 — Windows ZIP fixture test correction
+
+- Fixed the synthetic duplicate-name ZIP test: the ZIP writer itself refuses duplicate names before the reader is invoked. The test now constructs a synthetic duplicate entry by rewriting its two ZIP directory headers; the reader's production duplicate-path guard remains unchanged.
+- Advanced npm, Cargo, Tauri, on-screen and CI workflow versions consistently to v0.7.1 after the v0.7.0 Windows test failure.
+
+
 ## v0.7.0 — On-demand archive photo previews (development)
 
 - Added Photographs gallery with lazy image display, search and bounded page batches.

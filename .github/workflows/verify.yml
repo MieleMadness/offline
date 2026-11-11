@@ -1,4 +1,4 @@
-name: Offline 0.7.0 · Verify
+name: Offline 0.7.1 · Verify
 
 on:
   pull_request:
@@ -9,12 +9,12 @@ permissions:
 
 # Fast checks run on PRs; Windows compilation is explicitly opt-in.
 concurrency:
-  group: offline-0.7.0-${{ github.head_ref || github.ref_name }}
+  group: offline-0.7.1-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   frontend:
-    name: 0.7.0 · Fast frontend verification
+    name: 0.7.1 · Fast frontend verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -34,7 +34,7 @@ jobs:
   windows:
     # Dispatch manually for release, or add [windows] to a PR title.
     if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
-    name: 0.7.0 · Windows compile (on demand)
+    name: 0.7.1 · Windows compile (on demand)
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
