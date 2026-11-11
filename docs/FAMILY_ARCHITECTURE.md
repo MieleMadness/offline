@@ -42,3 +42,7 @@ Local profile selection and a PIN *without encryption* are not reliable protecti
 - Two people with identically named conversations/files remain isolated.
 - Family Memories sharing is opt-in and revocable, with regression tests for scope leaks.
 - Document exact security guarantee of the current build. **Profile switcher alone is not authentication.**
+
+## Local profile management (development preview)
+
+Renaming a local profile changes only its display name, preserving the immutable owner ID so the encrypted snapshot remains decryptable. Deletion requires explicit typed-name confirmation and an acknowledgement that it deletes the stored encrypted preview, in-memory imported preview and local profile metadata. IndexedDB deletion compares the saved revision before removing the entry. The original Facebook ZIP and any portable encrypted backup remain outside the app's deletion scope. This is a data management confirmation, **not** authorization against another person with access to the same Windows account.

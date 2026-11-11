@@ -491,3 +491,57 @@ button:disabled { cursor: not-allowed; }
   .soc-restore-top { margin-bottom: 35px; }
   .soc-restore-form .soc-primary { justify-self: stretch; }
 }
+
+
+/* Family identity management — native form controls, restrained surfaces and explicit danger. */
+.soc-manage-launch { display: inline-flex; align-items: center; gap: 8px; min-height: 38px;
+  width: 100%; margin-top: 8px; padding: 0 6px; border: 0; background: transparent;
+  color: #d1e9d6; text-align: left; font-size: 11px; font-weight: 700; }
+.soc-manage-launch:not(:disabled):hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.soc-manage-launch:disabled { opacity: .6; }
+.soc-manage-wrap { width: min(790px, 100%); }
+.soc-manage-surface { display: grid; gap: 15px; }
+.soc-manage-label { display: block; font-size: 12px; color: var(--ink); font-weight: 710; }
+.soc-manage-select, .soc-manage-rename input, .soc-manage-confirm input:not([type="checkbox"]) {
+  display: block; width: 100%; min-height: 44px; padding: 0 12px; color: var(--ink);
+  background: var(--canvas); border: 1px solid var(--border); border-radius: 9px; font: inherit; font-size: 13px; }
+.soc-manage-identity { display: flex; align-items: center; gap: 13px; margin: 10px 0 4px;
+  padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.soc-manage-identity .soc-profile-avatar { width: 42px; height: 42px; flex: 0 0 42px; font-size: 15px; }
+.soc-manage-identity strong { display: block; color: var(--ink); font-size: 15px; }
+.soc-manage-identity span:last-child { display: block; padding-top: 4px; color: var(--subtle); font-size: 11px; line-height: 1.5; }
+.soc-manage-rename { display: grid; justify-items: start; gap: 12px; padding-bottom: 22px; }
+.soc-manage-rename input { justify-self: stretch; }
+.soc-manage-section-head { display: flex; align-items: center; gap: 9px; color: var(--accent); }
+.soc-manage-section-head h2 { margin: 0; font-size: 17px; font-weight: 720; color: var(--ink); }
+.soc-manage-delete { display: grid; gap: 12px; padding-top: 22px; border-top: 1px solid var(--border); }
+.soc-manage-delete .soc-manage-section-head { color: #a04b38; }
+.soc-manage-delete > p, .soc-manage-confirm p { max-width: 66ch; margin: 0;
+  color: var(--subtle); font-size: 12px; line-height: 1.7; }
+.soc-manage-danger-outline, .soc-manage-danger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  min-height: 44px; padding: 0 16px; border-radius: 9px; font-weight: 730; font-size: 12px; }
+.soc-manage-danger-outline { justify-self: start; border: 1px solid #aa5c53;
+  background: transparent; color: #963f36; }
+.soc-manage-danger-outline:not(:disabled):hover { background: #fff0eb; }
+.soc-manage-danger { background: #a13f3b; color: #fff; border: 1px solid #a13f3b; }
+.soc-manage-danger:not(:disabled):hover { background: #7e2928; }
+.soc-manage-danger:disabled { opacity: .6; }
+.soc-manage-confirm { display: grid; gap: 12px; padding: 16px; border: 1px solid #d6a9a2;
+  border-radius: 12px; background: var(--canvas); }
+.soc-manage-confirm-check { display: flex; align-items: flex-start; gap: 12px;
+  color: var(--ink); font-size: 12px; line-height: 1.6; cursor: pointer; }
+.soc-manage-confirm-check input { width: 18px; height: 18px; accent-color: #a13f3b; flex: 0 0 auto; margin: 2px 0 0; }
+.soc-manage-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; }
+.soc-manage-surface > .soc-success { margin-top: 4px; border-radius: 9px; }
+@media (prefers-color-scheme: dark) {
+  .soc-manage-delete .soc-manage-section-head, .soc-manage-danger-outline { color: #f4b6a8; }
+  .soc-manage-danger-outline { border-color: #bd8c80; }
+  .soc-manage-danger-outline:not(:disabled):hover { background: #563936; }
+  .soc-manage-confirm { border-color: #7d514b; }
+}
+@media (max-width: 650px) {
+  .soc-manage-rename .soc-primary { justify-self: stretch; }
+  .soc-manage-danger-outline { justify-self: stretch; }
+  .soc-manage-actions > * { flex: 1 1 100%; }
+}

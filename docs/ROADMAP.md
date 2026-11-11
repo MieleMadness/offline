@@ -37,12 +37,13 @@
 - [x] HTML/JSON common model and support levels in `docs/IMPORT_FORMATS.md`.
 
 ### 2B — Family profile foundations
-- [ ] First-run personal vs family library chooser; create, rename and switch local profiles.
+- [x] Create, rename and switch local profiles in the family library.
+- [ ] First-run personal vs family library chooser.
 - [x] Per-profile archive ownership: explicit import target, no automatic cross-profile merging.
 - [ ] Persist profile metadata and index scope locally; prevent stale async import from switching owner.
 - [ ] No private data in shared global search, logs, temp files or test fixtures.
 - [x] UI distinguishes organizational profiles from actual encrypted/password-protected vaults.
-- [ ] Profile deletion requires confirmation, scope warning and backup guidance.
+- [x] Profile removal uses typed confirmation, scope warning, encrypted snapshot deletion and backup guidance (pending manual Windows acceptance).
 
 ### 2C — HTML + JSON adapters
 - [ ] Auto-detect HTML vs JSON inside ZIP; provide a preview of detected/unsupported sections.
