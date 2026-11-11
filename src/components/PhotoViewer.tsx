@@ -31,9 +31,11 @@ export default function PhotoViewer({ entry, index, total, loading, zipPath, onC
         actions.current.onClose();
         return;
       }
-      if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && !dialog.current?.getAttribute("aria-busy")?.includes("true")) {
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
         event.preventDefault();
-        actions.current.onNavigate(event.key === "ArrowLeft" ? -1 : 1);
+        if (dialog.current?.getAttribute("aria-busy") !== "true") {
+          actions.current.onNavigate(event.key === "ArrowLeft" ? -1 : 1);
+        }
         return;
       }
       if (event.key !== "Tab") return;

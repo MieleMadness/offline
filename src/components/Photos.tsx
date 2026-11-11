@@ -186,7 +186,7 @@ export default function Photos({ report, query, zipPath, onConnect, busy }: {
       </div>
     </>}
     {zipPath && viewerIndex !== null && <PhotoViewer
-      entry={selected} index={viewerIndex} total={total} loading={loading || !!error}
+      entry={selected} index={viewerIndex} total={total} loading={loading}
       zipPath={zipPath} onClose={closeViewer} onNavigate={navigatePhoto}/>}
     <p className="soc-soft-caption"><Info size={15} aria-hidden="true"/>
       ZIP filenames are scanned on demand. Each page returns up to {GALLERY_PAGE_SIZE} photo

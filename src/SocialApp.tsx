@@ -247,7 +247,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       return;
     }
     // This Library is keyed by owner ID. An unfinished selection is discarded
-    // when the user switches family profiles; no parsed data is shared.    if (!begin()) return;
+    // when the user switches family profiles; no parsed data is shared.
+    if (!begin()) return;
     try {
       const selected = await open({
         multiple: false,
