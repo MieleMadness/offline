@@ -249,7 +249,7 @@ export default function App() {
           {!report ? (
             <section className="welcome-screen" aria-labelledby="welcome-title">
               <div className="welcome-copy">
-                <div className="welcome-label">WELCOME TO OFFLINE</div>
+                
                 <h1 id="welcome-title">Your history.<br /><em>In your hands.</em></h1>
                 <p>
                   A calm, private place for everything you've saved and shared.
@@ -264,7 +264,7 @@ export default function App() {
               </div>
               <div className="welcome-panel" aria-label="What Offline can inspect">
                 <div className="preview-topline">
-                  <span className="preview-title"><Archive size={18} aria-hidden="true" /> Inside your archive</span>
+                  <span className="preview-title"><Archive size={18} aria-hidden="true" /> What you can explore next</span>
                   <span className="preview-badge">ON THIS DEVICE</span>
                 </div>
                 <div className="preview-list">
@@ -281,7 +281,7 @@ export default function App() {
                     </div>
                   ))}
                 </div>
-                <div className="preview-bottom"><LockKeyhole size={15} aria-hidden="true" /> Read-only inspection. Nothing leaves this computer.</div>
+                <div className="preview-bottom"><LockKeyhole size={15} aria-hidden="true" /> v0.1.0 starts with filenames; richer browsing comes later.</div>
               </div>
               <PrivacyNote />
             </section>
