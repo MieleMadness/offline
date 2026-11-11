@@ -21,6 +21,10 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
 
+## Conversation exploration (next feature batch)
+
+Inside a Messenger conversation, search the thread's own messages, choose a year (including unknown dates), and limit the view to messages with attachments. Messages load in recent batches of 250 with a **Show older messages** action; the reading position is preserved as older history appears. These controls operate only on the current family profile and do not fetch missing or end-to-end encrypted Messenger history.
+
 ## On-demand photo previews (development preview)
 
 Open **Photographs** after importing a Facebook HTML or JSON ZIP to see supported local images. Recognized post photos and Messenger images can also appear inline. Supported previews include JPEG, PNG, GIF and WebP up to 4 MiB each. No photos are extracted to disk or uploaded. Videos, HEIC and some export variations are not supported yet.
