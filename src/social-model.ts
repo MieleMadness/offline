@@ -6,6 +6,7 @@ export interface FeedPost {
   author: string | null;
   text: string;
   mediaCount: number;
+  mediaPaths?: string[];
   sourcePath: string;
 }
 
@@ -15,6 +16,7 @@ export interface ChatMessage {
   timestamp: number | null;
   text: string;
   attachments: number;
+  mediaPaths?: string[];
 }
 
 export interface Conversation {

@@ -33,6 +33,7 @@ pub struct Post {
     pub author: Option<String>,
     pub text: String,
     pub media_count: usize,
+    pub media_paths: Vec<String>,
     pub source_path: String,
 }
 
@@ -44,6 +45,7 @@ pub struct Message {
     pub timestamp: Option<i64>,
     pub text: String,
     pub attachments: usize,
+    pub media_paths: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -158,6 +160,62 @@ fn media_count(value: &Value) -> usize {
         .iter().map(|key| value.get(*key).and_then(Value::as_array).map_or(0, Vec::len)).sum::<usize>()
 }
 
+
+/// Resolve references only within the ZIP root; never fetch external or active URLs.
+/// Relative HTML paths use the export document's directory. JSON paths are root-relative.
+fn image_reference(source: &str, uri: &str, relative: bool) -> Option<String> {
+    let raw = uri.trim().replace('\\', "/");
+    if raw.is_empty() || raw.len() > 2048 || raw.starts_with('/')
+        || raw.starts_with("//") || raw.contains(':') || raw.contains('?') || raw.contains('#')
+        || raw.chars().any(char::is_control) { return None; }
+    let lower = raw.to_ascii_lowercase();
+    if ![".jpg", ".jpeg", ".png", ".gif", ".webp"].iter().any(|ext| lower.ends_with(ext)) {
+        return None;
+    }
+    let mut segments: Vec<&str> = if relative {
+        source.split('/').take(source.split('/').count().saturating_sub(1)).collect()
+    } else { Vec::new() };
+    for segment in raw.split('/') {
+        match segment {
+            "" | "." => continue,
+            ".." => { segments.pop()?; }
+            _ => segments.push(segment),
+        }
+    }
+    let canonical = segments.join("/");
+    if safe_name(&canonical) && !canonical.is_empty() { Some(canonical) } else { None }
+}
+
+fn add_image_path(value: &Value, source: &str, out: &mut Vec<String>) {
+    if out.len() >= 8 { return; }
+    let uri = value.get("uri").and_then(Value::as_str)
+        .or_else(|| value.get("path").and_then(Value::as_str));
+    if let Some(path) = uri.and_then(|raw| image_reference(source, raw, raw.starts_with('.'))) {
+        if !out.contains(&path) { out.push(path); }
+    }
+}
+
+/// Extract only image members whose references were supplied by the export, never web URLs.
+fn media_image_paths(value: &Value, source: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for category in ["photos", "gifs", "attachments", "videos"] {
+        if let Some(items) = value.get(category).and_then(Value::as_array) {
+            for entry in items.iter().take(32) {
+                add_image_path(entry, source, &mut out);
+                if let Some(media) = entry.get("media") { add_image_path(media, source, &mut out); }
+                if let Some(data) = entry.get("data").and_then(Value::as_array) {
+                    for item in data.iter().take(16) {
+                        add_image_path(item, source, &mut out);
+                        if let Some(media) = item.get("media") { add_image_path(media, source, &mut out); }
+                    }
+                }
+                if out.len() >= 8 { break; }
+            }
+        }
+    }
+    out
+}
+
 fn ingest_posts(value: &Value, path: &str, posts: &mut Vec<Post>) {
     for (index, entry) in entries_under(value, &["posts_v2", "posts", "your_posts", "status_updates"])
         .into_iter().enumerate()
@@ -172,6 +230,7 @@ fn ingest_posts(value: &Value, path: &str, posts: &mut Vec<Post>) {
             author: string_at(entry, &["author"]),
             text,
             media_count: media,
+            media_paths: media_image_paths(entry, path),
             source_path: path.to_owned(),
         });
     }
@@ -226,6 +285,7 @@ fn ingest_messages(
             timestamp,
             text: clipped(&body),
             attachments,
+            media_paths: media_image_paths(entry, path),
         });
         *message_total += 1;
     }
