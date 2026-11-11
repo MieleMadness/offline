@@ -15,24 +15,25 @@ import Files from "./components/Files";
 import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ImportSummary from "./components/ImportSummary";
-import LocalSearch from "./components/LocalSearch";
+import QuickSearch from "./components/QuickSearch";
 import VaultForm from "./components/VaultForm";
 import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
 import "./social.css";
 
-type View = "feed" | "messages" | "data" | "files";
+type View = "feed" | "messages" | "data" | "files" | "search";
 const navigation: { id: View; name: string; icon: LucideIcon }[] = [
   { id: "feed", name: "My timeline", icon: CalendarDays },
   { id: "messages", name: "Messages", icon: MessagesSquare },
   { id: "data", name: "Your data", icon: ShieldCheck },
   { id: "files", name: "Archive files", icon: FileArchive },
+  { id: "search", name: "Search library", icon: Search },
 ];
 const labels: Record<View, string> = {
-  feed: "My timeline", messages: "Messages", data: "Your data", files: "Archive files",
+  feed: "My timeline", messages: "Messages", data: "Your data", files: "Archive files", search: "Search library",
 };
 const placeholders: Record<View, string> = {
   feed: "Search posts", messages: "Search people or messages",
-  data: "Search collected data", files: "Search filenames",
+  data: "Search collected data", files: "Search filenames", search: "Search this profile",
 };
 
 export default function SocialApp() {
@@ -199,6 +200,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     messages: archive?.social.conversations.length ?? 0,
     data: archive?.social.dataCategories.length ?? 0,
     files: archive?.report.totalFiles ?? 0,
+    search: archive ? meaningfulCount(archive.social) : 0,
   };
 
   return <div className="soc-shell">
@@ -283,12 +285,12 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
           </div>
           <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
-          <LocalSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive}/>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
+          {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query}/>}
           <footer className="soc-bottom-status"><span><LockKeyhole size={13} aria-hidden="true"/> Files stay on this device</span>
             <span>{formatNumber(archive.social.filesRead)} HTML/JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
           </footer>

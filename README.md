@@ -13,6 +13,7 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | My Timeline | Familiar post cards sorted by month and date, with year filters and attachment references |
 | Messages | Conversation list by name, sender, dates and chronological message bubbles |
 | Your Data | Categorized previews of account, advertising, searches, devices, locations and other exported activity |
+| Search library | Profile-scoped keyword search across recognized posts, messages and data, with date/category filters and source details; no AI required |
 | Archive Files | Read-only ZIP inventory for original filenames, sizes and metadata |
 | Family Profiles (preview) | Create and switch among local family member names; imports belong to one chosen profile |
 
@@ -78,4 +79,4 @@ The application's open-source license is still to be selected. Bundled third-par
 
 ## Workspace PIN and local AI search
 
-v0.5.0 adds a PIN option for encrypted workspaces and a bounded local AI search preview for text and images through installed Ollama models. See [setup, scope and verification](docs/LOCAL_AI_SEARCH.md). Real inference acceptance remains pending because the installed model failed to load on this computer.
+v0.5.0 adds a PIN option for encrypted workspaces, instant keyword search across each active profile’s parsed preview, and optional bounded local AI search for text and images through installed Ollama models. See [setup, scope and verification](docs/LOCAL_AI_SEARCH.md). Real inference acceptance remains pending because the installed model failed to load on this computer.

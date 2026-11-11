@@ -129,6 +129,8 @@ Next, exercise backup/recovery and storage failures before extending durable sto
 
 ## Prioritized v0.5.0 work
 
+- [x] Profile-scoped, in-memory keyword search across the recognized preview with category/year filters and bounded result display. No persistent index or unparsed ZIP search yet.
+
 - Implemented PIN enrollment and changing the unlock secret on an unlocked encrypted workspace.
 - Implemented bounded text and image relevance search using local Ollama models.
 - Pending successful real inference acceptance with a model that fits available memory.
