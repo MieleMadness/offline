@@ -4,16 +4,17 @@ import { fileName, formatNumber, formatSize, type ArchiveEntry } from "../archiv
 import { photoNeighbor } from "../gallery";
 import { ArchivePhoto } from "./ArchivePhoto";
 
-export default function PhotoViewer({ entries, index, zipPath, onClose, onNavigate }: {
-  entries: readonly ArchiveEntry[];
+export default function PhotoViewer({ entry, index, total, loading, zipPath, onClose, onNavigate }: {
+  entry: ArchiveEntry | null;
   index: number;
+  total: number;
+  loading: boolean;
   zipPath: string;
   onClose: () => void;
   onNavigate: (delta: -1 | 1) => void;
 }) {
   const closeButton = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDivElement>(null);
-  // Keep keyboard handlers stable across navigation without refocusing the close button.
   const actions = useRef({onClose, onNavigate});
   actions.current = {onClose, onNavigate};
 
@@ -30,7 +31,7 @@ export default function PhotoViewer({ entries, index, zipPath, onClose, onNaviga
         actions.current.onClose();
         return;
       }
-      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && !dialog.current?.getAttribute("aria-busy")?.includes("true")) {
         event.preventDefault();
         actions.current.onNavigate(event.key === "ArrowLeft" ? -1 : 1);
         return;
@@ -57,19 +58,19 @@ export default function PhotoViewer({ entries, index, zipPath, onClose, onNaviga
     };
   }, []);
 
-  const entry = entries[index];
-  if (!entry) return null;
-  const hasPrevious = photoNeighbor(index, -1, entries.length) >= 0;
-  const hasNext = photoNeighbor(index, 1, entries.length) >= 0;
+  const hasPrevious = photoNeighbor(index, -1, total) >= 0;
+  const hasNext = photoNeighbor(index, 1, total) >= 0;
   return <div className="soc-viewer-backdrop" onMouseDown={event => {
     if (event.target === event.currentTarget) onClose();
   }}>
-    <div ref={dialog} className="soc-viewer" role="dialog" aria-modal="true"
+    <div ref={dialog} className="soc-viewer" role="dialog" aria-modal="true" aria-busy={loading}
       aria-labelledby="soc-viewer-title" aria-describedby="soc-viewer-hint">
       <header className="soc-viewer-header">
         <div className="soc-viewer-title">
-          <strong id="soc-viewer-title" title={entry.path}>{fileName(entry.path)}</strong>
-          <span>{formatNumber(index + 1)} of {formatNumber(entries.length)} photos</span>
+          <strong id="soc-viewer-title" title={entry?.path}>
+            {entry ? fileName(entry.path) : "Opening photograph…"}
+          </strong>
+          <span>{formatNumber(index + 1)} of {formatNumber(total)} photos</span>
         </div>
         <button ref={closeButton} type="button" className="soc-viewer-close"
           aria-label="Close photo viewer" onClick={onClose}>
@@ -77,24 +78,34 @@ export default function PhotoViewer({ entries, index, zipPath, onClose, onNaviga
         </button>
       </header>
       <div className="soc-viewer-content">
-        <button type="button" className="soc-viewer-arrow"
-          onClick={() => onNavigate(-1)} disabled={!hasPrevious} aria-label="Previous photo">
+        <button type="button" className="soc-viewer-arrow" onClick={() => onNavigate(-1)}
+          disabled={loading || !hasPrevious} aria-label="Previous photo">
           <ChevronLeft size={25} aria-hidden="true"/>
         </button>
         <div className="soc-viewer-image" aria-label="Selected archived photo">
-          <ArchivePhoto key={entry.path} member={entry.path} zipPath={zipPath}
-            caption={"Archived photo: " + fileName(entry.path)} compact fullSize/>
+          {entry
+            ? <ArchivePhoto key={entry.path} member={entry.path} zipPath={zipPath}
+                zipIndex={entry.zipIndex}
+                caption={"Archived photo: " + fileName(entry.path)} compact fullSize/>
+            : <div className="soc-viewer-loading" role="status">
+                {loading ? "Opening the next photo from your ZIP…" :
+                  "This image could not be located. Close the viewer and try again."}
+              </div>}
         </div>
-        <button type="button" className="soc-viewer-arrow"
-          onClick={() => onNavigate(1)} disabled={!hasNext} aria-label="Next photo">
+        <button type="button" className="soc-viewer-arrow" onClick={() => onNavigate(1)}
+          disabled={loading || !hasNext} aria-label="Next photo">
           <ChevronRight size={25} aria-hidden="true"/>
         </button>
       </div>
       <footer className="soc-viewer-footer">
-        <div><LockKeyhole size={14} aria-hidden="true"/><span title={entry.path}>{entry.path}</span></div>
-        <span>{formatSize(entry.bytes)} · Local ZIP · Read only</span>
+        <div><LockKeyhole size={14} aria-hidden="true"/>
+          <span title={entry?.path}>{entry?.path ?? "Read-only photo ZIP"}</span>
+        </div>
+        <span>{entry ? formatSize(entry.bytes) : "Loading"} · Local ZIP · Read only</span>
       </footer>
-      <p id="soc-viewer-hint" className="soc-viewer-hint">Use left and right arrow keys to browse. Press Escape to close.</p>
+      <p id="soc-viewer-hint" className="soc-viewer-hint">
+        Use left and right arrow keys to browse. Press Escape to close.
+      </p>
     </div>
   </div>;
 }
