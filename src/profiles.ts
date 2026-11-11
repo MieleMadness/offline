@@ -89,6 +89,75 @@ export function saveProfiles(profiles: readonly FamilyProfile[], selectedId: str
   }
 }
 
+/**
+ * Protected profile operations must prove that the owner ID is durably mapped
+ * before writing or deleting an encrypted IndexedDB snapshot.
+ *
+ * localStorage is separate from IndexedDB, so this is a verified write with
+ * best-effort rollback, NOT a multi-store ACID transaction. Keep both copies
+ * of an encrypted backup until a recovered profile has been reopened.
+ */
+export type ProfileCatalogStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function persistProfileCatalog(
+  profiles: readonly FamilyProfile[], selectedId: string, storage?: ProfileCatalogStorage,
+): void {
+  if (selectedId && !profiles.some(profile => profile.id === selectedId)) {
+    throw new Error("The selected family member is not present in this library.");
+  }
+  if (profiles.length > 20 || deserializeProfiles(JSON.stringify(profiles)).length !== profiles.length) {
+    throw new Error("The family profile list is invalid and was not saved.");
+  }
+  let store: ProfileCatalogStorage;
+  try { store = storage ?? window.localStorage; }
+  catch { throw new Error("Family profile storage is blocked. No saved preview was changed."); }
+
+  const next = JSON.stringify(profiles);
+  let before: string | null;
+  let previousSelected: string | null;
+  try {
+    before = store.getItem(PROFILE_STORAGE_KEY);
+    previousSelected = store.getItem(ACTIVE_PROFILE_KEY);
+  } catch {
+    throw new Error("Family profile storage could not be read. No saved preview was changed.");
+  }
+
+  // Treat a previously corrupt catalog as a recovery issue, not a blank library:
+  // silently overwriting it could strand ciphertext belonging to another owner.
+  if (before !== null) {
+    try {
+      const parsed: unknown = JSON.parse(before);
+      if (!Array.isArray(parsed) || deserializeProfiles(before).length !== parsed.length) {
+        throw new Error("invalid");
+      }
+    } catch {
+      throw new Error("The saved family profile catalog is damaged. Export/recover your saved previews before changing profiles.");
+    }
+  }
+
+  try {
+    store.setItem(PROFILE_STORAGE_KEY, next);
+    store.setItem(ACTIVE_PROFILE_KEY, selectedId);
+    if (store.getItem(PROFILE_STORAGE_KEY) !== next ||
+        store.getItem(ACTIVE_PROFILE_KEY) !== selectedId) {
+      throw new Error("Profile catalog readback did not match.");
+    }
+  } catch {
+    let rolledBack = false;
+    try {
+      if (before === null) store.removeItem(PROFILE_STORAGE_KEY);
+      else store.setItem(PROFILE_STORAGE_KEY, before);
+      if (previousSelected === null) store.removeItem(ACTIVE_PROFILE_KEY);
+      else store.setItem(ACTIVE_PROFILE_KEY, previousSelected);
+      rolledBack = store.getItem(PROFILE_STORAGE_KEY) === before &&
+        store.getItem(ACTIVE_PROFILE_KEY) === previousSelected;
+    } catch { /* Storage may be unavailable altogether. */ }
+    throw new Error(rolledBack
+      ? "The family profile catalog could not be saved. Previous settings were restored; no encrypted preview was changed."
+      : "Family profile storage failed and may be inconsistent. Do not close Offline; keep your original ZIPs and encrypted backups.");
+  }
+}
+
 /** Read only the value explicitly owned by a profile; never fall back to inherited object keys. */
 export function profileOwnedValue<T>(data: Readonly<Record<string, T>>, id: string): T | null {
   return Object.prototype.hasOwnProperty.call(data, id) ? (data[id] ?? null) : null;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  cleanProfileName, createProfile, deserializeProfiles, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
+  cleanProfileName, createProfile, deserializeProfiles, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
   type FamilyProfile,
 } from "./profiles";
 
@@ -60,6 +60,58 @@ describe("family profile isolation helpers", () => {
     });
     expect(withoutFamilyProfile([first], first.id, first.id)).toEqual({ profiles: [], selectedId: "" });
     expect(() => withoutFamilyProfile([first], "unknown", first.id)).toThrow(/no longer exists/);
+  });
+
+  function store(initial: Record<string, string> = {}) {
+    const values = new Map(Object.entries(initial));
+    return {
+      values,
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value); },
+      removeItem: (key: string) => { values.delete(key); },
+    };
+  }
+
+  it("verifies durable catalog writes and selected owner before changing encrypted data", () => {
+    const storage = store();
+    persistProfileCatalog([first], first.id, storage);
+    expect(deserializeProfiles(storage.getItem("offline.familyProfiles.v1"))).toEqual([first]);
+    expect(storage.getItem("offline.activeFamilyProfile.v1")).toBe(first.id);
+    expect(() => persistProfileCatalog([first], "other-profile", storage)).toThrow(/not present/);
+    expect(storage.values.size).toBe(2);
+  });
+
+  it("rolls back an interrupted second write rather than orphaning a snapshot owner", () => {
+    const storage = store();
+    persistProfileCatalog([first], first.id, storage);
+    const oldCatalog = storage.getItem("offline.familyProfiles.v1");
+    const second = createProfile([first], "Taylor", () => "second-profile-uuid", 2);
+    let refuse = true;
+    const failing = {
+      ...storage,
+      setItem(key: string, value: string) {
+        if (key === "offline.activeFamilyProfile.v1" && refuse) {
+          refuse = false;
+          throw new Error("Simulated storage quota or security error");
+        }
+        storage.setItem(key, value);
+      },
+    };
+    expect(() => persistProfileCatalog([first, second], second.id, failing)).toThrow(/Previous settings were restored/);
+    expect(storage.getItem("offline.familyProfiles.v1")).toBe(oldCatalog);
+    expect(storage.getItem("offline.activeFamilyProfile.v1")).toBe(first.id);
+  });
+
+  it("detects silent storage failures and protects corrupt existing owner metadata", () => {
+    const initial = store();
+    const ignoredWrites = {
+      ...initial,
+      setItem(_key: string, _value: string) { /* Storage lies: no write persisted. */ },
+    };
+    expect(() => persistProfileCatalog([first], first.id, ignoredWrites)).toThrow(/could not be saved/);
+    const corrupt = store({"offline.familyProfiles.v1": "{ broken json"});
+    expect(() => persistProfileCatalog([first], first.id, corrupt)).toThrow(/catalog is damaged/);
+    expect(corrupt.getItem("offline.familyProfiles.v1")).toBe("{ broken json");
   });
 
   it("creates independent identities and stable accent assignment", () => {
