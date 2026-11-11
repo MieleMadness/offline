@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.5.1.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.5.2.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -15,9 +15,18 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Your Data | Categorized previews of account, advertising, searches, devices, locations and other exported activity |
 | Search library | Profile-scoped keyword search across recognized posts, messages and data, with date/category filters and source details; no AI required |
 | Archive Files | Read-only ZIP inventory for original filenames, sizes and metadata |
+| Encrypted backup and recovery (preview) | Back up an unlocked saved preview to a local encrypted file and restore it using the original secret; existing saved copies cannot be overwritten |
 | Family Profiles (preview) | Create and switch among local family member names; imports belong to one chosen profile |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Portable backup and recovery (development preview)
+
+Unlock a saved profile and select **Backup** to write a .offlinevault file to a location you choose. The original ZIP and media binaries are not part of the encrypted preview backup. The file contains the already encrypted snapshot plus visible profile name and accent metadata. Store its file and PIN/passphrase separately: losing the secret means it cannot be decrypted.
+
+Select **Restore encrypted backup** from the sidebar, including when you have no profiles on a fresh installation. Choose the backup, enter the original PIN or passphrase, and confirm. Offline validates the decrypted preview before saving and never silently overwrites an existing encrypted snapshot. Recovery recreates the profile ID so the owner-bound ciphertext stays readable.
+
+Backups use a no-overwrite file operation; some filesystems without hard-link support cannot complete it. Keep the original ZIP separately; this is not a complete backup of Facebook media. Native restore acceptance and independent security assessment remain pending.
 
 ## Important family privacy distinction
 

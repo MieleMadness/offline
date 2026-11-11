@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import {
-  Archive, ArrowDownToLine, ArrowRight, CalendarDays, Check,
+  Archive, ArchiveRestore, ArrowDownToLine, ArrowRight, CalendarDays, Check, Download,
   ChevronRight, FileArchive, FolderOpen, Info, LockKeyhole, Menu,
   MessagesSquare, Search, ShieldCheck, X, type LucideIcon,
 } from "lucide-react";
@@ -18,6 +18,8 @@ import ImportSummary from "./components/ImportSummary";
 import QuickSearch from "./components/QuickSearch";
 import VaultForm from "./components/VaultForm";
 import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
+import { recoveredProfileName, serializeBackup, validateRecoveredArchive, type PortableBackup } from "./backup";
+import RestoreBackup from "./components/RestoreBackup";
 import "./social.css";
 
 type View = "feed" | "messages" | "data" | "files" | "search";
@@ -41,6 +43,9 @@ export default function SocialApp() {
   const [activeProfileId, setActiveProfileId] = useState<string>(() => safeActiveId(safeLoadProfiles()));
   // Content is memory-only in the preview; cross-profile indexes are not shared.
   const [archivesByProfile, setArchivesByProfile] = useState<Record<string, ImportedArchive>>({});
+  const [restoring, setRestoring] = useState(false);
+  const [generation, setGeneration] = useState(0);
+  const [restoreNotice, setRestoreNotice] = useState("");
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
   useEffect(() => { saveProfiles(profiles, activeProfileId); }, [profiles, activeProfileId]);
 
@@ -50,7 +55,39 @@ export default function SocialApp() {
     setActiveProfileId(profile.id);
   }
 
-  return <Library key={activeProfileId} profiles={profiles} activeProfile={activeProfile}
+  async function recoverBackup(backup: PortableBackup, secret: string): Promise<void> {
+    const owner = backup.profile;
+    const known = profiles.find(p => p.id === owner.id);
+    if (!known && profiles.length >= 20) throw new Error("This library already has 20 profiles.");
+    // Verify owner-bound decryption and the decoded schema BEFORE a persistent write.
+    const key = await deriveKey(secret, backup.snapshot.salt);
+    let decoded: ImportedArchive;
+    try { decoded = await unseal(owner.id, backup.snapshot, key); }
+    catch { throw new Error("Incorrect PIN or passphrase, or the backup is damaged."); }
+    validateRecoveredArchive(decoded);
+    if (await loadSnapshot(owner.id)) {
+      throw new Error("This profile already has an encrypted saved preview. Nothing was replaced.");
+    }
+    await saveSnapshot(owner.id, backup.snapshot, null);
+    if (!known) {
+      setProfiles(current => [...current, {
+        ...owner, displayName: recoveredProfileName(owner, current),
+      }]);
+    }
+    setArchivesByProfile(current => {
+      const next = { ...current };
+      delete next[owner.id];
+      return next;
+    });
+    setRestoreNotice("Encrypted backup recovered. Enter the original PIN or passphrase to unlock it.");
+    setGeneration(current => current + 1);
+    setActiveProfileId(owner.id);
+    setRestoring(false);
+  }
+
+  if (restoring) return <RestoreBackup onCancel={() => setRestoring(false)} onRestore={recoverBackup}/>;
+
+  return <Library key={activeProfileId + ":" + generation} profiles={profiles} activeProfile={activeProfile}
     sessionArchive={profileOwnedValue(archivesByProfile, activeProfileId)}
     onSessionArchive={archive => setArchivesByProfile(existing => {
       if (archive) return setProfileOwnedValue(existing, activeProfileId, archive);
@@ -58,14 +95,18 @@ export default function SocialApp() {
       delete copy[activeProfileId];
       return copy;
     })}
-    onChoose={setActiveProfileId} onCreate={addFamilyProfile}/>;
+    onChoose={setActiveProfileId} onCreate={addFamilyProfile}
+    onOpenRestore={() => { setRestoreNotice(""); setRestoring(true); }}
+    restoreNotice={restoreNotice} onDismissRestoreNotice={() => setRestoreNotice("")}/>;
 }
 
 // Switching owner unmounts decrypted content, search/filter state and the in-memory key together.
-function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, onChoose, onCreate }: {
+function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, onChoose, onCreate,
+  onOpenRestore, restoreNotice, onDismissRestoreNotice }: {
   profiles: FamilyProfile[]; activeProfile?: FamilyProfile; sessionArchive: ImportedArchive | null;
   onSessionArchive: (value: ImportedArchive | null) => void;
   onChoose: (id: string) => void; onCreate: (name: string) => void;
+  onOpenRestore: () => void; restoreNotice: string; onDismissRestoreNotice: () => void;
 }) {
   const activeProfileId = activeProfile?.id ?? "";
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -79,6 +120,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -195,6 +237,26 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     }
   }
 
+  async function exportBackup() {
+    if (!snapshot || !unlocked || !activeProfile || enrolling) return;
+    if (!begin()) return;
+    try {
+      const suggested = activeProfile.displayName.replace(/[^a-z0-9_-]+/gi, "-").slice(0, 40) || "family";
+      const target = await save({
+        title: "Save encrypted Offline backup",
+        defaultPath: suggested + "-offline-backup.offlinevault",
+        filters: [{ name: "Offline encrypted backups", extensions: ["offlinevault"] }],
+      });
+      if (typeof target !== "string") return;
+      const content = serializeBackup(activeProfile, snapshot);
+      await invoke("save_encrypted_backup_file", { path: target, content });
+      setNotice("Encrypted backup created. Keep the file and its unlock secret in separate safe places.");
+    } catch (cause) {
+      setError(typeof cause === "string" ? cause : cause instanceof Error ? cause.message :
+        "Could not create this backup. Your saved preview was not changed.");
+    } finally { finish(); }
+  }
+
   const counts: Record<View, number> = {
     feed: archive?.social.posts.length ?? 0,
     messages: archive?.social.conversations.length ?? 0,
@@ -228,7 +290,9 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
           <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.5.1 · Development preview</span>
+        <button type="button" className="soc-restore-nav" disabled={busy}
+          onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
+        <span className="soc-version">Offline v0.5.2 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -247,6 +311,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
             <kbd>Ctrl K</kbd>
           </label>}
           {unlocked && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
+            onClick={exportBackup}><Download size={16} aria-hidden="true"/> Backup</button>}
+          {unlocked && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
             onClick={() => setEnrolling(true)}>Change PIN or passphrase</button>}
           {archive && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
             onClick={snapshot ? lock : () => setEnrolling(true)}>{snapshot ? "Lock preview" : "Save encrypted copy"}</button>}
@@ -258,6 +324,11 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       </header>
       {error && <div className="soc-error" role="alert"><Info size={19} aria-hidden="true"/>
         <span>{error}</span><button type="button" aria-label="Dismiss error" onClick={() => setError("")}><X size={18}/></button>
+      </div>}
+      {(notice || restoreNotice) && <div className="soc-success" role="status">
+        <Check size={17} aria-hidden="true"/><span>{restoreNotice || notice}</span>
+        <button type="button" aria-label="Dismiss notice"
+          onClick={() => { setNotice(""); onDismissRestoreNotice(); }}><X size={16}/></button>
       </div>}
       <main className="soc-scroll">
         {!ready ? <p className="soc-soft-caption" role="status">{error ? "Preview unavailable" : "Opening profile…"}</p> :

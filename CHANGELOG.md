@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.5.2 — Windows compile correction
+
+- Fixed an ambiguous Rust `by_ref` call in the portable backup reader found by the on-demand Windows compilation. The same bounded `Read::take` guard remains in place.
+- Synchronized npm, Cargo, Tauri, on-screen and GitHub Actions version labels at 0.5.2. Native build and recovery acceptance are tracked separately.
+
+
+## v0.5.1 — Encrypted backup and recovery (development)
+
+- Export an unlocked encrypted profile snapshot into a portable .offlinevault file without decrypting social content for disk export. The native save operation is bounded and never overwrites a destination.
+- Recover on a fresh family library or into an existing profile only when it has no saved copy. Validate the original secret, restored owner ID and archive structure before writing.
+- Add synthetic tests for serialization, corruption, wrong secrets and owner binding, plus native backup file tests.
+- Still pending: native Windows recovery acceptance, large backup stress tests, security review and full-media storage integration.
+
+
 ## v0.5.1 — Keyword search correction (development)
 
 - Prevented a matching conversation title from returning every message as a false content match. Search yields individual matching messages, or one thread summary when only the title or participants match.

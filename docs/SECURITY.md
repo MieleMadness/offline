@@ -34,3 +34,10 @@ The app keeps the decrypted preview and key in the active profile component. Swi
 A PIN derives the encryption key using the existing KDF. PINs have less entropy than long passphrases and can be guessed offline by someone who copies a snapshot. The enrollment UI requires 8–20 digits. UI attempt throttling would not prevent offline guessing.
 
 Local AI requests send selected content to the installed Ollama service on loopback. Read [the search boundary](LOCAL_AI_SEARCH.md) before enabling it for private data.
+
+
+## Portable encrypted backup (v0.5.1 development)
+
+Unlocked users can copy the already AES-256-GCM encrypted IndexedDB snapshot into a local .offlinevault file. The JSON envelope contains visible profile name, accent, ID and ciphertext length; actual social content stays encrypted using the existing PIN/passphrase-derived key and owner-specific authenticated data. Import verifies decryption and basic schema before creating the saved snapshot; existing saved copies cannot be overwritten. Native backup IO caps files at 128 MiB and uses no-overwrite hard-link finalization.
+
+Threat limits: A copied backup can be attacked offline, especially when protected by an 8-digit PIN. Backup files do not authenticate all visible metadata. Original Facebook ZIP and media files are not included. This is an early recovery mechanism, not a third-party-audited secure backup solution. Filesystems lacking hard-link support may reject backup writes. Never commit backup files to Git.
