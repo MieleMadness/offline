@@ -1,15 +1,16 @@
 import { useState, type FormEvent } from "react";
-import { Plus, Users, X } from "lucide-react";
+import { Plus, Settings2, Users, X } from "lucide-react";
 import type { FamilyProfile } from "../profiles";
 
 export default function ProfilePicker({
-  profiles, activeId, disabled, onChoose, onCreate,
+  profiles, activeId, disabled, onChoose, onCreate, onManage,
 }: {
   profiles: readonly FamilyProfile[];
   activeId: string;
   disabled: boolean;
   onChoose: (id: string) => void;
   onCreate: (name: string) => void;
+  onManage: () => void;
 }) {
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
@@ -54,6 +55,8 @@ export default function ProfilePicker({
       </div>
     </form> : canAdd && <button type="button" className="soc-add-profile" disabled={disabled}
       onClick={() => setAdding(true)}><Plus size={15} aria-hidden="true"/> Add family member</button>}
+    {profiles.length > 0 && <button type="button" className="soc-manage-launch" disabled={disabled}
+      onClick={onManage}><Settings2 size={15} aria-hidden="true"/> Manage family profiles</button>}
     <p className="soc-profile-caution">Session previews are visible to anyone using this library. Saved encrypted previews require their own passphrase.</p>
   </div>;
 }

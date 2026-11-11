@@ -12,12 +12,13 @@ import Feed from "./components/Feed";
 import Messages from "./components/Messages";
 import Data from "./components/Data";
 import Files from "./components/Files";
-import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
+import { createProfile, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
+import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
 import QuickSearch from "./components/QuickSearch";
 import VaultForm from "./components/VaultForm";
-import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
+import { deleteSnapshot, deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
 import { recoveredProfileName, serializeBackup, validateRecoveredArchive, type PortableBackup } from "./backup";
 import RestoreBackup from "./components/RestoreBackup";
 import "./social.css";
@@ -44,6 +45,7 @@ export default function SocialApp() {
   // Content is memory-only in the preview; cross-profile indexes are not shared.
   const [archivesByProfile, setArchivesByProfile] = useState<Record<string, ImportedArchive>>({});
   const [restoring, setRestoring] = useState(false);
+  const [managing, setManaging] = useState(false);
   const [generation, setGeneration] = useState(0);
   const [restoreNotice, setRestoreNotice] = useState("");
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
@@ -53,6 +55,28 @@ export default function SocialApp() {
     const profile = createProfile(profiles, name, () => crypto.randomUUID(), Date.now());
     setProfiles(existing => [...existing, profile]);
     setActiveProfileId(profile.id);
+  }
+
+  function renameProfile(id: string, newName: string) {
+    const next = renameFamilyProfile(profiles, id, newName);
+    setProfiles(next);
+  }
+
+  async function removeProfile(id: string): Promise<void> {
+    const next = withoutFamilyProfile(profiles, id, activeProfileId);
+    const existing = await loadSnapshot(id);
+    // Compare the revision in the same IndexedDB write transaction. A changed
+    // snapshot must not be destroyed by an outdated profile-management screen.
+    await deleteSnapshot(id, existing?.revision ?? null);
+    setArchivesByProfile(current => {
+      const owned = { ...current };
+      delete owned[id];
+      return owned;
+    });
+    setProfiles(next.profiles);
+    setActiveProfileId(next.selectedId);
+    setGeneration(current => current + 1);
+    setRestoreNotice("");
   }
 
   async function recoverBackup(backup: PortableBackup, secret: string): Promise<void> {
@@ -85,6 +109,8 @@ export default function SocialApp() {
     setRestoring(false);
   }
 
+  if (managing) return <ManageProfiles profiles={profiles} activeId={activeProfileId}
+    onDone={() => setManaging(false)} onRename={renameProfile} onDelete={removeProfile}/>;
   if (restoring) return <RestoreBackup onCancel={() => setRestoring(false)} onRestore={recoverBackup}/>;
 
   return <Library key={activeProfileId + ":" + generation} profiles={profiles} activeProfile={activeProfile}
@@ -97,16 +123,17 @@ export default function SocialApp() {
     })}
     onChoose={setActiveProfileId} onCreate={addFamilyProfile}
     onOpenRestore={() => { setRestoreNotice(""); setRestoring(true); }}
+    onOpenManage={() => { setRestoreNotice(""); setManaging(true); }}
     restoreNotice={restoreNotice} onDismissRestoreNotice={() => setRestoreNotice("")}/>;
 }
 
 // Switching owner unmounts decrypted content, search/filter state and the in-memory key together.
 function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, onChoose, onCreate,
-  onOpenRestore, restoreNotice, onDismissRestoreNotice }: {
+  onOpenRestore, onOpenManage, restoreNotice, onDismissRestoreNotice }: {
   profiles: FamilyProfile[]; activeProfile?: FamilyProfile; sessionArchive: ImportedArchive | null;
   onSessionArchive: (value: ImportedArchive | null) => void;
   onChoose: (id: string) => void; onCreate: (name: string) => void;
-  onOpenRestore: () => void; restoreNotice: string; onDismissRestoreNotice: () => void;
+  onOpenRestore: () => void; onOpenManage: () => void; restoreNotice: string; onDismissRestoreNotice: () => void;
 }) {
   const activeProfileId = activeProfile?.id ?? "";
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
@@ -271,7 +298,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <span><strong>offline<span>.</span></strong><small>YOUR DIGITAL HISTORY</small></span>
       </div>
       <ProfilePicker profiles={profiles} activeId={activeProfileId} disabled={busy}
-        onChoose={id => { if (!pending.current) onChoose(id); }} onCreate={name => { if (!pending.current) onCreate(name); }}/>
+        onChoose={id => { if (!pending.current) onChoose(id); }} onCreate={name => { if (!pending.current) onCreate(name); }}
+        onManage={() => { if (!pending.current) onOpenManage(); }}/>
       <div className="soc-side-label">YOUR LIBRARY</div>
       <nav className="soc-nav" aria-label="Archive sections">
         {navigation.map(({ id, name, icon: Icon }) => <button key={id}
