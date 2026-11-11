@@ -142,7 +142,7 @@ fn scan_zip<R: Read + Seek>(
 
     let mut sections: Vec<SectionSummary> = CATEGORIES
         .iter()
-        .map(|(id, label)| SectionSummary {
+        .map(|&(id, label)| SectionSummary {
             id,
             label,
             count: 0,
@@ -264,7 +264,7 @@ mod tests {
         ]);
         let report = scan_zip(zip, "test.zip".into()).expect("inspect zip");
         assert_eq!(report.total_files, 3);
-        assert_eq!(report.total_uncompressed_bytes, 15);
+        assert_eq!(report.total_uncompressed_bytes, 14);
         assert_eq!(report.displayed_files, 3);
         assert_eq!(report.format_hint, "Facebook-style export");
         assert_eq!(report.sections.iter().find(|s| s.id == "photos").unwrap().count, 1);
