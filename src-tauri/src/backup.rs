@@ -19,12 +19,12 @@ fn checked_path(path: &Path) -> Result<(), String> {
 
 fn read_backup(path: &Path) -> Result<String, String> {
     checked_path(path)?;
-    let mut input = File::open(path).map_err(|_| "The backup file could not be opened.".to_string())?;
+    let input = File::open(path).map_err(|_| "The backup file could not be opened.".to_string())?;
     if input.metadata().map_err(|_| "Cannot inspect this backup.".to_string())?.len() > MAX_BACKUP_BYTES {
         return Err("This backup exceeds the 128 MiB safety limit.".into());
     }
     let mut contents = Vec::new();
-    input.by_ref().take(MAX_BACKUP_BYTES + 1).read_to_end(&mut contents)
+    input.take(MAX_BACKUP_BYTES + 1).read_to_end(&mut contents)
         .map_err(|_| "The backup file could not be read.".to_string())?;
     if contents.len() as u64 > MAX_BACKUP_BYTES {
         return Err("This backup exceeds the 128 MiB safety limit.".into());
