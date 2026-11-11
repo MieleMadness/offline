@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.10.0 — Safer imports, coverage review and export-date compatibility (development)
+
+- New import assessment detects empty/navigation-only ZIP previews before replacing current content. Media-only ZIPs are labeled as inventory previews, not decoded social histories.
+- Add explicit side-by-side comparison before replacing an existing session or encrypted snapshot; saved-copy replacement requires typing REPLACE. Original ZIPs remain read-only and untouched.
+- Saved preview replacement still uses AES-GCM and IndexedDB expected-revision checking. Cancel or failed import leaves the current preview intact.
+- Import status now reports posts, messages, actual data records, media files, text-file counts and parser/skipped-file warnings.
+- Normalize seconds, named millisecond fields, numeric timestamp strings and common explicit HTML date patterns; invalid/ambiguous dates remain unknown.
+- Add synthetic import-health, date compatibility and archive replacement regression coverage. Native Windows and real-export acceptance remain pending.
+
+
 ## v0.9.0 — Explain and protect account data previews (development)
 
 - Added readable, cautious explanations of exported advertising, searches, location, device/security, app, connections, engagement and account data categories.

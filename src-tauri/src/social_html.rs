@@ -39,6 +39,10 @@ fn time_from_html(raw: &str) -> Option<i64> {
         "%B %e, %Y %I:%M %p",
         "%b %e, %Y at %I:%M:%S %p",
         "%B %e, %Y at %I:%M:%S %p",
+        "%b %e, %Y at %I:%M %p",
+        "%B %e, %Y at %I:%M %p",
+        "%b %e, %Y, %I:%M %p",
+        "%B %e, %Y, %I:%M %p",
         "%Y-%m-%d %H:%M:%S",
         "%Y-%m-%dT%H:%M:%S",
     ];
@@ -174,6 +178,17 @@ pub(super) fn ingest_html(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn accepts_common_explicit_html_dates_but_not_ambiguous_strings() {
+        let a = time_from_html("May 12, 2024 at 5:30 PM");
+        let b = time_from_html("May 12, 2024, 5:30 PM");
+        let c = time_from_html("2024-05-12T17:30:00Z");
+        assert_eq!(a, b);
+        assert_eq!(b, c);
+        assert_eq!(time_from_html("05/12/24"), None);
+        assert_eq!(time_from_html("yesterday"), None);
+    }
 
     #[test]
     fn parses_familiar_html_post_cards() {
