@@ -66,3 +66,8 @@ Recognized JSON photo and attachment-media URI fields and HTML image src fields 
 - Import coverage includes post/message/record counts, media inventory, text-file counts and skipped parsing warnings. Unsupported records and partial archives must never be presented as complete Facebook history.
 - When a profile already has an archive, newly parsed data is staged in memory. The user must explicitly choose to replace the existing preview, and an encrypted saved copy requires typing REPLACE. This does not merge multiple ZIP exports.
 - Timestamp adapters accept valid Unix seconds, explicitly named millisecond timestamps, unambiguous 13-digit numeric millisecond values and numeric strings. Common explicit English HTML timestamps are supported. Invalid or ambiguous dates remain unknown. Any local date without a timezone is currently interpreted as UTC for approximate sorting, documented as a limitation.
+
+
+## Reproducible synthetic acceptance archives
+
+Offline tracks a privacy-safe Python standard-library generator and tests for fictional Facebook-style JSON, HTML, multipart Messenger, media-only, navigation-only, malformed JSON and mixed timestamp cases. See [Synthetic test archives](SYNTHETIC_FIXTURES.md). These fixtures exercise known parser paths but cannot establish universal compatibility with real Meta export formats.

@@ -1,6 +1,6 @@
-# Offline v0.8.0 — Family archive acceptance checklist
+# Offline — Family archive acceptance checklist
 
-Use synthetic archives for development and public CI. Never commit real Facebook exports, photos, private chats, passwords, PINs or .offlinevault backups.
+Start with the [reproducible fictional Facebook ZIP generator](SYNTHETIC_FIXTURES.md). Use synthetic archives for development and public CI. Never commit real Facebook exports, photos, private chats, passwords, PINs or .offlinevault backups.
 
 ## Automated and interactive gates
 

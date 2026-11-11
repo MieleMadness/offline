@@ -31,3 +31,6 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# Reproducible, fictional ZIP acceptance output
+fixtures/generated/

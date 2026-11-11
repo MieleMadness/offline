@@ -8,6 +8,8 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
+**Privacy-safe acceptance fixtures:** Generate [fictional HTML, JSON, media-only, malformed and 10k-photo ZIPs](docs/SYNTHETIC_FIXTURES.md) without an account or internet access.
+
 ## The experience
 
 | Area | What you'll see |
