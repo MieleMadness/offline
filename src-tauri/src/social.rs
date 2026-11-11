@@ -1,6 +1,9 @@
-//! Bounded, local-only reader of supported Facebook JSON exports.
+//! Bounded, local-only reader of supported Facebook JSON and HTML exports.
 //! ZIP members are read into memory under strict per-file and aggregate budgets.
 //! Source ZIPs are never extracted or modified.
+
+#[path = "social_html.rs"]
+mod html;
 
 use serde::Serialize;
 use serde_json::Value;
@@ -13,9 +16,9 @@ use std::{
 use zip::ZipArchive;
 
 const MAX_ENTRIES: usize = 250_000;
-const MAX_JSON_FILES: usize = 1_000;
-const MAX_JSON_FILE_BYTES: u64 = 4 * 1024 * 1024;
-const MAX_TOTAL_JSON_BYTES: u64 = 48 * 1024 * 1024;
+const MAX_TEXT_FILES: usize = 1_000;
+const MAX_TEXT_FILE_BYTES: u64 = 4 * 1024 * 1024;
+const MAX_TOTAL_TEXT_BYTES: u64 = 48 * 1024 * 1024;
 const MAX_POSTS: usize = 3_000;
 const MAX_CONVERSATIONS: usize = 500;
 const MAX_MESSAGES: usize = 12_000;
@@ -78,6 +81,9 @@ pub struct SocialArchive {
     pub conversations: Vec<Conversation>,
     pub data_categories: Vec<DataCategory>,
     pub files_read: usize,
+    pub json_files_read: usize,
+    pub html_files_read: usize,
+    pub format_hint: String,
     pub files_skipped: usize,
     pub warnings: Vec<String>,
 }
@@ -251,7 +257,7 @@ fn category_for(path: &str) -> (&'static str, &'static str) {
 
 fn friendly_file_name(path: &str) -> String {
     let name = path.rsplit('/').next().unwrap_or(path);
-    name.trim_end_matches(".json").replace('_', " ").replace('-', " ")
+    name.trim_end_matches(".json").trim_end_matches(".html").trim_end_matches(".htm").replace('_', " ").replace('-', " ")
 }
 
 fn collect_data(
@@ -335,6 +341,8 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
     let mut categories = BTreeMap::new();
     let mut warnings = Vec::new();
     let mut files_read = 0_usize;
+    let mut json_files_read = 0_usize;
+    let mut html_files_read = 0_usize;
     let mut attempts = 0_usize;
     let mut files_skipped = 0_usize;
     let mut bytes_read = 0_u64;
@@ -350,9 +358,11 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
             return Err("Unsafe path found in archive. No content was imported.".into());
         }
         let lower = path.to_ascii_lowercase();
-        if !lower.ends_with(".json") { continue; }
-        if attempts >= MAX_JSON_FILES || file.size() > MAX_JSON_FILE_BYTES
-            || bytes_read.saturating_add(file.size()) > MAX_TOTAL_JSON_BYTES
+        let is_json = lower.ends_with(".json");
+        let is_html = lower.ends_with(".html") || lower.ends_with(".htm");
+        if !is_json && !is_html { continue; }
+        if attempts >= MAX_TEXT_FILES || file.size() > MAX_TEXT_FILE_BYTES
+            || bytes_read.saturating_add(file.size()) > MAX_TOTAL_TEXT_BYTES
         {
             files_skipped += 1;
             continue;
@@ -360,13 +370,30 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
         attempts += 1;
         let mut bytes = Vec::with_capacity(file.size() as usize);
         // A checked upper bound also protects against inaccurate ZIP directory sizes.
-        file.by_ref().take(MAX_JSON_FILE_BYTES + 1).read_to_end(&mut bytes)
+        file.by_ref().take(MAX_TEXT_FILE_BYTES + 1).read_to_end(&mut bytes)
             .map_err(|_| "A JSON member could not be read safely.".to_owned())?;
-        if bytes.len() as u64 > MAX_JSON_FILE_BYTES {
+        if bytes.len() as u64 > MAX_TEXT_FILE_BYTES {
             files_skipped += 1;
             continue;
         }
         bytes_read += bytes.len() as u64;
+        if is_html {
+            let html_text = match std::str::from_utf8(&bytes) {
+                Ok(value) => value,
+                Err(_) => {
+                    files_skipped += 1;
+                    if warnings.len() < 8 {
+                        warnings.push(format!("Could not decode HTML as UTF-8: {}", friendly_file_name(&path)));
+                    }
+                    continue;
+                }
+            };
+            html::ingest_html(&path, html_text, &mut posts, &mut conversations,
+                &mut categories, &mut message_total, &mut record_total);
+            html_files_read += 1;
+            files_read += 1;
+            continue;
+        }
         let value: Value = match serde_json::from_slice(&bytes) {
             Ok(v) => v,
             Err(_) => {
@@ -378,6 +405,7 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
             }
         };
         files_read += 1;
+        json_files_read += 1;
         if is_message_file(&lower) {
             ingest_messages(&value, &path, &mut conversations, &mut message_total);
         } else if lower.contains("posts/") || lower.contains("/posts") || lower.contains("status_update") {
@@ -414,9 +442,15 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
     if files_skipped > 0 {
         warnings.push(format!("{files_skipped} JSON files were skipped because they were unsupported, invalid, or exceeded import safety limits."));
     }
+    let format_hint = match (json_files_read > 0, html_files_read > 0) {
+        (true, true) => "Mixed JSON and HTML",
+        (true, false) => "JSON",
+        (false, true) => "HTML",
+        (false, false) => "No supported files",
+    }.to_owned();
     Ok(SocialArchive {
         posts, conversations: threads, data_categories,
-        files_read, files_skipped, warnings,
+        files_read, json_files_read, html_files_read, format_hint, files_skipped, warnings,
     })
 }
 
