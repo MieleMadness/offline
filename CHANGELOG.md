@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.1 — Keyword search correction (development)
+
+- Prevented a matching conversation title from returning every message as a false content match. Search yields individual matching messages, or one thread summary when only the title or participants match.
+- Corrected synthetic search test expectations, kept results profile-scoped, and synchronized package, Cargo, Tauri, desktop and CI versions after the failed 0.5.0 fast test.
+
 ## v0.5.0 — Workspace PIN and local search preview
 
 - Added a unified Search library screen with instant keyword lookup across a single unlocked profile’s imported posts, messages and data records. Date and section filters, provenance and bounded results work without Ollama.

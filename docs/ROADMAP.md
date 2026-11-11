@@ -129,7 +129,7 @@ Next, exercise backup/recovery and storage failures before extending durable sto
 
 ## Prioritized v0.5.0 work
 
-- [x] Profile-scoped, in-memory keyword search across the recognized preview with category/year filters and bounded result display. No persistent index or unparsed ZIP search yet.
+- [x] Profile-scoped, in-memory keyword search across the recognized preview with category/year filters and bounded result display. No persistent index or unparsed ZIP search yet. The first v0.5.0 fast test exposed overmatching of thread titles; v0.5.1 corrects this and updates regression coverage.
 
 - Implemented PIN enrollment and changing the unlock secret on an unlocked encrypted workspace.
 - Implemented bounded text and image relevance search using local Ollama models.

@@ -31,6 +31,12 @@ describe("profile-scoped quick search", () => {
     expect(results.hits[1]?.source).toBe("posts/one.json");
   });
 
+  it("finds one thread by its title without showing every message in the thread", () => {
+    const matches = searchPreview(archive, "Beach friends", "message");
+    expect(matches.total).toBe(1);
+    expect(matches.hits[0]).toMatchObject({ id: "conversation:chat1", title: "Beach friends" });
+  });
+
   it("filters by section and date, including undated records", () => {
     expect(searchPreview(archive, "beach", "post", "2023").total).toBe(1);
     expect(searchPreview(archive, "beach", "post", "2020").total).toBe(0);

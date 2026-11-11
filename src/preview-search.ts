@@ -58,10 +58,12 @@ export function searchPreview(
   }
   if (kind === "all" || kind === "message") {
     for (const chat of archive.conversations) {
+      let foundMessage = false;
       for (let index = 0; index < chat.messages.length; index++) {
         const message = chat.messages[index]!;
-        if (accepts("message", message.timestamp,
-          [chat.title, chat.participants.join(" "), message.sender, message.text].join(" "))) {
+        // Searching a thread title must not turn all of its messages into matches.
+        if (accepts("message", message.timestamp, [message.sender, message.text].join(" "))) {
+          foundMessage = true;
           matches.push({
             id: "message:" + chat.id + ":" + message.id + ":" + index, kind: "message",
             title: message.sender + " · " + chat.title,
@@ -69,6 +71,18 @@ export function searchPreview(
             source: "Conversation: " + chat.title, timestamp: message.timestamp,
           });
         }
+      }
+      // Keep thread names searchable, but return one summary when the message text did not match.
+      if (!foundMessage && accepts("message", chat.lastTimestamp,
+        [chat.title, chat.participants.join(" ")].join(" "))) {
+        matches.push({
+          id: "conversation:" + chat.id, kind: "message",
+          title: chat.title,
+          excerpt: chat.participants.length
+            ? "Conversation with " + chat.participants.join(", ")
+            : "A conversation from this profile's archive.",
+          source: "Conversation: " + chat.title, timestamp: chat.lastTimestamp,
+        });
       }
     }
   }
@@ -97,7 +111,10 @@ export function searchPreview(
 export function availableSearchYears(archive: SocialArchive): string[] {
   const years = new Set<string>();
   archive.posts.forEach(post => years.add(yearOf(post.timestamp)));
-  archive.conversations.forEach(chat => chat.messages.forEach(message => years.add(yearOf(message.timestamp))));
+  archive.conversations.forEach(chat => {
+    years.add(yearOf(chat.lastTimestamp));
+    chat.messages.forEach(message => years.add(yearOf(message.timestamp)));
+  });
   archive.dataCategories.forEach(category => category.records.forEach(record => years.add(yearOf(record.timestamp))));
   return [...years].sort((a, b) => a === "unknown" ? 1 : b === "unknown" ? -1 : Number(b) - Number(a));
 }

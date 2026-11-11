@@ -228,7 +228,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
           <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.5.0 · Development preview</span>
+        <span className="soc-version">Offline v0.5.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
