@@ -5,8 +5,9 @@ import { imageDataUrl, type ArchiveImageResponse } from "../archive-images";
 import { fileName } from "../archive";
 
 /** The active Library owns the ZIP path. Source paths and decoded images never persist. */
-export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSize = false }: {
+export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSize = false, zipIndex }: {
   zipPath: string | null; member: string; caption?: string; compact?: boolean; fullSize?: boolean;
+  zipIndex?: number;
 }) {
   const node = useRef<HTMLDivElement>(null);
   const [url, setUrl] = useState("");
@@ -23,7 +24,7 @@ export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSi
       if (!active) return;
       setStatus("loading");
       try {
-        const response = await invoke<ArchiveImageResponse>("read_archive_image", { path: zipPath, member });
+        const response = await invoke<ArchiveImageResponse>("read_archive_image", { path: zipPath, member, index: zipIndex ?? null });
         if (active) { setUrl(imageDataUrl(response)); setStatus("ready"); }
       } catch {
         if (active) setStatus("failed");
@@ -40,7 +41,7 @@ export function ArchivePhoto({ zipPath, member, caption, compact = false, fullSi
     }, { rootMargin: "160px" });
     observer.observe(target);
     return () => { active = false; observer.disconnect(); };
-  }, [zipPath, member]);
+  }, [zipPath, member, zipIndex]);
 
   return <div ref={node} className={"soc-photo-frame " + (compact ? "soc-photo-compact " : "") + (fullSize ? "soc-photo-full" : "")}>
     {status === "ready" && url

@@ -84,3 +84,15 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 5. Navigate a large synthetic photo library while observing RAM and CPU. The 24-item page limit bounds mounted components but does not guarantee overall memory usage, decoder correctness or ZIP scan speed; report regressions before release.
 
 **Why:** A family photo archive needs efficient browsing, accessible controls and truthful failures rather than unlimited decoded media in one WebView.
+
+
+## v0.12.0 — Complete archive photo paging and import races
+
+1. Generate the fictional ZIP inventory with at least 10,125 photos using [Synthetic test archives](SYNTHETIC_FIXTURES.md). Import it into a fresh family profile, connect the original ZIP and confirm **Photographs** reports all eligible image paths, not merely the first 5,000.
+2. Browse to an image beyond index 5,000. Verify it renders through the native ZIP index, then open the viewer, cross a page boundary with arrow keys and close. Confirm the returned page number matches the selected photo and focus is restored appropriately.
+3. Search for a unique filename near the end of the ZIP and confirm the server-side query returns it. Change searches during a slow page request and switch profiles; no stale photos should display in another family profile.
+4. Test an unavailable/moved ZIP, an overlong query, a mismatched native index, unsafe member names, unsupported types and a photo larger than 4 MiB. The app must show a bounded error state without extraction or changing the original ZIP.
+5. Rapidly trigger the import picker twice while parsing a ZIP and verify the in-flight import guard prevents overlapping dialogs and the existing preview remains intact until replacement confirmation.
+6. Record CPU/RAM and page-query latency for 10k/100k-entry ZIPs. A successful synthetic path test does not establish production-scale performance; keep that release blocker open until measured.
+
+**Why:** families can have exports far larger than 5,000 files, but indexing must not sacrifice privacy, UI responsiveness or recoverability.

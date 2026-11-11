@@ -68,3 +68,12 @@ A native ZIP can pass filename and UTF-8 checks yet decode no useful social cont
 ## v0.11.0 — Full-screen viewer and photo memory lifecycle
 
 Photo pages now render at most 24 gallery image components at once; changing pages unmounts previous image components and releases their React-held base64/data URLs. The full-screen viewer renders only the currently selected image. This reduces unbounded gallery memory retention but is not a formal process-wide memory limit or a native-thumbnail decoding pipeline. The ZIP path stays in the active profile's mounted Library session and disconnects on lock/profile switch. Viewer keyboard Escape, arrow navigation and focus management are local UI operations. Unsupported image decodes show a fallback; image parser/codec security remains an external review item.
+
+
+## v0.12.0 — Bounded complete-ZIP photo directory and source binding
+
+The native photo-list command reads only ZIP directory metadata from a user-selected local file, within 250,000 ZIP entries, limiting output to 1–100 photos (the UI requests 24), search text to 256 UTF-8 bytes and eligible MIME extensions to JPEG/PNG/GIF/WebP. It excludes candidates above 4 MiB and rejects unsafe/ambiguous photo paths when the ZIP library exposes them. It never extracts image bytes, uploads content or writes a persistent index.
+
+The list includes exact ZIP directory indices to avoid a repeated linear filename scan for every gallery photo. The image reader verifies the index still identifies the requested filename, validates size and basic MIME signatures, then bounds the read. Inline post/message image paths retain the conservative full-scan lookup. These are **same-file consistency checks, not cryptographic source authentication**: another local process can replace the ZIP, and the library does not independently authenticate duplicate central-directory entries. Opening each image still reparses ZIP metadata; benchmark real-world large archives before v1.0. A disconnected profile can only show photos from its saved, bounded first-5,000-file inventory.
+
+The v0.12.0 review also restored the active import operation guard, protecting against overlapping local imports. This is a user-experience/race prevention step, not a privilege boundary.

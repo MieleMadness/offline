@@ -17,6 +17,8 @@ export interface ArchiveEntry {
   section: SectionId;
   bytes: number;
   kind: string;
+  /** Directory index from a fresh native photo page, not a persisted ZIP reference. */
+  zipIndex?: number;
 }
 
 export interface ArchiveReport {

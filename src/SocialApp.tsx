@@ -247,7 +247,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       return;
     }
     // This Library is keyed by owner ID. An unfinished selection is discarded
-    // when the user switches family profiles; no parsed data is shared.    if (!begin()) return;
+    // when the user switches family profiles; no parsed data is shared.
+    if (!begin()) return;
     try {
       const selected = await open({
         multiple: false,
@@ -387,7 +388,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
-        <span className="soc-version">Offline v0.11.0 · Development preview</span>
+        <span className="soc-version">Offline v0.12.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">

@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.11.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.12.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The previous v0.11.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43082252636). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -24,6 +24,14 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Complete photo-directory paging (v0.12.0 development)
+
+When you connect the original ZIP, **Photographs** can now browse supported images from anywhere in its directory, including beyond the first **5,000 imported file records**. The gallery requests only 24 filenames at a time, with a count for the currently searched images. Search operates across all eligible ZIP image paths, and Next/Previous can reach photos beyond the saved inventory. The selected photo's exact ZIP entry index is checked when loading its bytes, reducing repeat directory searches.
+
+If the original ZIP is not connected, the gallery still shows only images from the saved first-5,000-file inventory, with a clear prompt to reconnect. Full ZIP photo discovery is read-only and session-scoped; names and images are not stored in an unencrypted persistent index. This does not remove the per-image 4 MiB cap, provide video/HEIC playback, authenticate the ZIP cryptographically or guarantee large-archive performance. Photo-directory scanning still traverses ZIP metadata on each page request, and the ZIP reader reopens directory metadata for each image.
+
+The import path also restores a missing in-flight operation guard found in code review, preventing overlapping file-picker/import work from proceeding simultaneously.
 
 ## Bounded photograph gallery and full-size viewer (v0.11.0 development)
 

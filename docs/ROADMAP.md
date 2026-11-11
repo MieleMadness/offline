@@ -98,7 +98,8 @@
 
 - [x] Initial Photographs gallery from indexed ZIP paths, bounded image loading without extraction (v0.7.0, duplicate ZIP fixture constraints documented in v0.7.2; Windows and real-export acceptance pending).
 - [x] Recognized local image references under supported HTML/JSON posts and Messenger messages, with safe fallbacks.
-- [ ] HEIC and video previews, full album relationship support, image codec security and 10k+ file stress tests.
+- [x] v0.12.0: Native on-demand complete ZIP photo directory pagination and filtering beyond the first 5,000 imported inventory records (synthetic Rust test, Windows/native acceptance pending).
+- [ ] HEIC/video previews, albums, image codec security and 10k+ file stress measurements.
 
 ### Understand Your Data follow-ups
 - [x] Recognized exported categories shown with cautious explanations, record counts and source-file provenance (v0.9.0; not all Meta schemas are supported).
@@ -134,7 +135,8 @@
 - [x] v0.10.0 timestamp normalization for common Meta JSON seconds/milliseconds and common English HTML date patterns with synthetic regression tests.
 - [ ] Full compatibility matrix for real-world redacted HTML/JSON export variations, import validation and source mapping.
 - [x] v0.11.0: Paginate Photographs in bounded groups of 24 mounted image views, instead of indefinitely accumulating full-size decoded images.
-- [ ] 10k/100k+ content performance benchmarks, thumbnail budgets, search scale and stress tests.
+- [x] v0.12.0: Bounded page responses and validated ZIP indices for full-directory media navigation, avoiding one full path scan per preview after page discovery.
+- [ ] 10k/100k+ content performance benchmarks, native thumbnail budgets, ZIP directory caching, full-text search scale and stress tests.
 - [ ] Browser-like accessibility audit, dark/light focus and contrast, 900/1280/1440 resolutions.
 - [ ] Backup/restore testing, corrupted archive and crash recovery, disk-space management.
 - [ ] Developer-facing instructions and end-user help for every feature.
@@ -154,7 +156,7 @@
 - Cross-device family sync only if opt-in encryption and trustworthy sharing can be built.
 
 ## Next coding order
-Next, verify v0.7.0 native photo/gallery integration and image codec safety; exercise backup/recovery storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+Next, verify v0.12.0 large-ZIP native page navigation, image codec safety and ZIP metadata scan latency; exercise backup/recovery storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
 
 ## Prioritized v0.5.0 work
 

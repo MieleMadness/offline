@@ -24,10 +24,10 @@ The command generates ZIP archives and a `manifest.json` containing a file count
 | `invalid-json.zip` | Malformed post JSON, no useful records. Import must reject it with a skipped-file warning |
 | `timestamp-variants.zip` | Seconds, millisecond values, numeric strings and an unknown date |
  
-For an optional performance trial with 10,000 fictional 1×1 images:
+For an optional performance trial with **10,125** fictional 1×1 images, including images beyond the first 5,000 ZIP members:
 
 ```powershell
-py -3 scripts/generate_facebook_fixtures.py --output fixtures/generated --large-count 10000
+py -3 scripts/generate_facebook_fixtures.py --output fixtures/generated --large-count 10125
 ```
 
 This tests ZIP directory handling and gallery paging; it does **not** prove full-resolution 10,000-photo performance or real-world HEIC/JPEG/video safety.
