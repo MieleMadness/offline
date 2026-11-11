@@ -14,11 +14,13 @@ function monthLabel(timestamp: number | null): string {
 export default function Feed({ archive, query }: { archive: ImportedArchive; query: string }) {
   const [year, setYear] = useState("all");
   const [mediaOnly, setMediaOnly] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(80);
   const years = useMemo(() => availableYears(archive.social.posts), [archive]);
   const posts = useMemo(
     () => filterPosts(archive.social.posts, query, year, mediaOnly),
     [archive, query, year, mediaOnly],
   );
+  const visiblePosts = posts.slice(0, visibleCount);
   let previousMonth = "";
   return <div className="soc-content soc-feed-layout">
     <section className="soc-feed-main" aria-labelledby="feed-title">
@@ -42,7 +44,7 @@ export default function Feed({ archive, query }: { archive: ImportedArchive; que
         {archive.social.posts.length
           ? "Try another year, clear the search, or show posts without attachments."
           : "We couldn't find supported Facebook post records in this ZIP. Export posts as JSON, with your complete date range, to build your timeline."}
-      </EmptyState> : <div className="soc-feed-list">{posts.map((post) => {
+      </EmptyState> : <div className="soc-feed-list">{visiblePosts.map((post) => {
         const month = monthLabel(post.timestamp);
         const showMonth = previousMonth !== month;
         previousMonth = month;
@@ -66,7 +68,10 @@ export default function Feed({ archive, query }: { archive: ImportedArchive; que
               <span>Original ZIP unchanged</span></footer>
           </article>
         </div>;
-      })}</div>}
+      })}{visiblePosts.length < posts.length && <button type="button" className="soc-show-more"
+        onClick={() => setVisibleCount((current) => current + 80)}>
+        Show more posts ({formatNumber(posts.length - visiblePosts.length)} remaining)
+      </button>}</div>}
     </section>
     <aside className="soc-feed-rail" aria-label="Archive summary">
       <div className="soc-side-panel">
