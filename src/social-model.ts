@@ -118,6 +118,54 @@ export function filterConversations(conversations: readonly Conversation[], sear
   );
 }
 
+
+/** Profile-scoped, pure filtering: the UI never indexes other family members' threads. */
+export function availableMessageYears(messages: readonly ChatMessage[]): string[] {
+  return [...new Set(messages.map(message => yearOf(message.timestamp)))]
+    .sort((a, b) => a === "unknown" ? 1 : b === "unknown" ? -1 : Number(b) - Number(a));
+}
+
+export interface ThreadFilterOptions {
+  sender?: string;
+  fromDate?: string;
+  throughDate?: string;
+}
+
+export function availableMessageSenders(messages: readonly ChatMessage[]): string[] {
+  return [...new Set(messages.map(message => message.sender))].sort((a,b) => a.localeCompare(b));
+}
+
+/** Date picker dates are local calendar days, matching rendered message dates. */
+function dayBoundary(input: string, nextDay: boolean): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input)) return null;
+  const [year, month, day] = input.split("-").map(Number);
+  const checked = new Date(year!, month! - 1, day);
+  if (checked.getFullYear() !== year || checked.getMonth() + 1 !== month || checked.getDate() !== day) {
+    return null;
+  }
+  return new Date(year!, month! - 1, day! + (nextDay ? 1 : 0)).getTime() / 1000;
+}
+
+export function filterThreadMessages(
+  messages: readonly ChatMessage[], search: string, year: string, withAttachments: boolean,
+  options: ThreadFilterOptions = {},
+): ChatMessage[] {
+  const needle = search.trim().toLocaleLowerCase();
+  const from = options.fromDate ? dayBoundary(options.fromDate, false) : null;
+  const until = options.throughDate ? dayBoundary(options.throughDate, true) : null;
+  if ((options.fromDate && from === null) || (options.throughDate && until === null)) return [];
+  if (from !== null && until !== null && from >= until) return [];
+  return messages.filter(message => {
+    if (year !== "all" && yearOf(message.timestamp) !== year) return false;
+    if (withAttachments && message.attachments < 1) return false;
+    if (options.sender && options.sender !== "all" && message.sender !== options.sender) return false;
+    if (from !== null && (message.timestamp === null || message.timestamp < from)) return false;
+    if (until !== null && (message.timestamp === null || message.timestamp >= until)) return false;
+    return !needle || message.text.toLocaleLowerCase().includes(needle) ||
+      message.sender.toLocaleLowerCase().includes(needle);
+  });
+}
+
 export interface MessageDay {
   key: string;
   label: string;

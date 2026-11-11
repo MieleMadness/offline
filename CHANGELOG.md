@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.8.0 — Messenger browsing and date filters (development)
+
+- Added within-conversation search, year and attachment filters, participant selection and inclusive local start/end date filtering.
+- Made older messages accessible in batches of 250 with scroll-position preservation when prepending history.
+- Added synthetic tests for date boundaries, invalid date ranges, sender filtering, undated messages and owner-local pure filtering.
+- Merged verified v0.7.2 photo preview fixes, maintaining the original ZIP safety bounds and native reader tests.
+- Hands-on Messenger UI, real Facebook exports and large-history performance tests are still required.
+
+
 ## v0.7.2 — ZIP parser compatibility test correction
 
 - Removed a brittle synthetic duplicate-member test that assumed the ZIP reader would expose both identical central-directory names. Its iterator behavior may collapse aliases, so the test could not reliably assert the media reader saw two candidates.

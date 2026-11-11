@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  availableYears, avatarInitials, filterConversations, filterPosts,
+  availableMessageSenders, availableMessageYears, availableYears, avatarInitials, filterConversations, filterPosts, filterThreadMessages,
   meaningfulCount, messageDays, type Conversation, type FeedPost, type SocialArchive,
 } from "./social-model";
 
@@ -28,6 +28,44 @@ describe("social archive UI helpers", () => {
     expect(filterConversations(chats, "PAT")).toHaveLength(1);
     expect(filterConversations(chats, "coffee")).toHaveLength(1);
     expect(filterConversations(chats, "unmatched")).toHaveLength(0);
+  });
+
+  it("filters one thread by year, participant text and attachment status", () => {
+    const items = [
+      { id: "a", sender: "Ari", timestamp: 1600000000, text: "Old photo", attachments: 1 },
+      { id: "b", sender: "Bea", timestamp: 1700000000, text: "New conversation", attachments: 0 },
+      { id: "c", sender: "Ari", timestamp: null, text: "Undated photo", attachments: 2 },
+    ];
+    expect(availableMessageYears(items)).toEqual(["2023", "2020", "unknown"]);
+    expect(filterThreadMessages(items, "photo", "all", true).map(m => m.id)).toEqual(["a", "c"]);
+    expect(filterThreadMessages(items, "ari", "2020", false).map(m => m.id)).toEqual(["a"]);
+    expect(filterThreadMessages(items, "", "unknown", false).map(m => m.id)).toEqual(["c"]);
+    expect(filterThreadMessages(items, "", "2023", true)).toEqual([]);
+    expect(items).toHaveLength(3);
+  });
+
+  it("filters participants and inclusive local date ranges without leaking adjacent messages", () => {
+    const start = Math.floor(new Date(2022, 5, 10, 0, 0, 0).getTime() / 1000);
+    const next = Math.floor(new Date(2022, 5, 11, 0, 0, 0).getTime() / 1000);
+    const messages = [
+      { id: "at-start", sender: "Robin", text: "photo", timestamp: start, attachments: 1 },
+      { id: "at-end", sender: "Robin", text: "end of day", timestamp: next - 1, attachments: 0 },
+      { id: "next-day", sender: "Robin", text: "tomorrow", timestamp: next, attachments: 0 },
+      { id: "other-person", sender: "Pat", text: "another voice", timestamp: start + 60, attachments: 0 },
+      { id: "undated", sender: "Robin", text: "unknown date", timestamp: null, attachments: 0 },
+    ];
+    expect(availableMessageSenders(messages)).toEqual(["Pat", "Robin"]);
+    expect(filterThreadMessages(messages, "", "all", false,
+      {sender:"Robin",fromDate:"2022-06-10",throughDate:"2022-06-10"}).map(m=>m.id))
+      .toEqual(["at-start","at-end"]);
+    expect(filterThreadMessages(messages, "", "all", true,
+      {sender:"Robin",fromDate:"2022-06-10",throughDate:"2022-06-10"}).map(m=>m.id))
+      .toEqual(["at-start"]);
+    expect(filterThreadMessages(messages, "", "all", false,
+      {fromDate:"2022-06-11",throughDate:"2022-06-10"})).toEqual([]);
+    expect(filterThreadMessages(messages, "", "all", false,
+      {fromDate:"2022-02-30"})).toEqual([]);
+    expect(messages).toHaveLength(5);
   });
 
   it("groups chronological messages by local date", () => {

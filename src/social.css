@@ -589,3 +589,69 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   .soc-photo-frame img { transition: none; }
 }
+
+/* Bounded, accessible controls within one Messenger thread. */
+.soc-chat-filters { display: flex; align-items: stretch; flex-wrap: wrap; gap: 7px;
+  padding: 12px 16px; background: var(--panel); border-bottom: 1px solid var(--border); }
+.soc-chat-search { display: flex; align-items: center; gap: 9px; min-width: 150px; flex: 1 1 190px;
+  padding: 0 10px; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--accent); background: var(--canvas); }
+.soc-chat-search input { width: 100%; min-width: 0; height: 39px; border: 0; outline-offset: 3px;
+  background: transparent; color: var(--ink); font: inherit; font-size: 12px; }
+.soc-chat-year { display: flex; align-items: center; gap: 6px; padding: 0 8px;
+  border: 1px solid var(--border); border-radius: 8px; color: var(--accent); background: var(--canvas); }
+.soc-chat-year select { min-height: 39px; padding-right: 4px; border: 0; color: var(--ink);
+  background: transparent; font: inherit; font-size: 12px; }
+.soc-chat-attachments { display: inline-flex; gap: 7px; align-items: center; padding: 0 10px;
+  min-height: 41px; border: 1px solid var(--border); border-radius: 8px;
+  color: var(--subtle); font-size: 11px; cursor: pointer; }
+.soc-chat-attachments.selected { color: var(--ink); background: var(--accent-soft); border-color: var(--accent); }
+.soc-chat-attachments input { accent-color: var(--accent); }
+.soc-chat-filter-status { padding: 9px 16px; background: var(--panel); border-bottom: 1px solid var(--border);
+  color: var(--subtle); font-size: 11px; font-variant-numeric: tabular-nums; }
+.soc-chat-load-older { display: grid; justify-items: center; gap: 4px;
+  min-height: 43px; margin: 12px auto 22px; padding: 9px 19px;
+  border: 1px solid var(--border); border-radius: 999px; background: var(--panel);
+  color: var(--accent); font-size: 12px; font-weight: 740; }
+.soc-chat-load-older span { font-size: 10px; color: var(--subtle); font-weight: 450; }
+.soc-chat-load-older:hover { background: var(--accent-soft); }
+@media (max-width: 680px) {
+ .soc-chat-filters { padding: 10px 12px; }
+ .soc-chat-search { flex: 1 1 100%; }
+ .soc-chat-year, .soc-chat-attachments { flex: 1 1 auto; }
+}
+
+
+/* Optional Messenger date and sender controls: keep basic search visible by default. */
+.soc-chat-advanced-toggle { display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; min-height: 41px; padding: 0 12px; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--ink); background: var(--panel);
+  font-size: 11px; font-weight: 710; }
+.soc-chat-advanced-toggle:hover, .soc-chat-advanced-toggle.active {
+  border-color: var(--accent); background: var(--accent-soft); }
+.soc-chat-advanced-toggle.active > svg:last-child { transform: rotate(180deg); }
+.soc-chat-advanced { display: grid; grid-template-columns: minmax(160px,1.5fr)
+  repeat(2,minmax(135px,1fr)) auto; gap: 10px; align-items: end;
+  padding: 13px 16px 17px; border-bottom: 1px solid var(--border); background: var(--panel); }
+.soc-chat-advanced > label { display: grid; gap: 7px; min-width: 0; color: var(--subtle);
+  font-size: 11px; font-weight: 690; }
+.soc-chat-advanced input, .soc-chat-advanced select { width: 100%; min-width: 0; height: 41px;
+  padding: 0 9px; background: var(--canvas); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; font: inherit; font-size: 12px; color-scheme: light dark; }
+.soc-chat-clear { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 41px; padding: 0 12px; background: transparent; color: var(--accent);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 11px; font-weight: 720; }
+.soc-chat-clear:not(:disabled):hover { background: var(--accent-soft); }
+.soc-chat-clear:disabled { opacity: .52; cursor: not-allowed; }
+.soc-chat-filter-error { margin: 0; padding: 9px 16px; color: #963e34;
+  background: #fff2ee; border-bottom: 1px solid #edd3ce; font-size: 12px; }
+@media (prefers-color-scheme: dark) {
+  .soc-chat-filter-error { color: #ffd3cb; background: #462c2a; border-color: #77534d; }
+}
+@media (max-width: 1250px) {
+  .soc-chat-advanced { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 680px) {
+  .soc-chat-advanced { grid-template-columns: minmax(0,1fr); padding: 12px; }
+  .soc-chat-clear { justify-self: start; }
+}

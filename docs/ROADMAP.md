@@ -84,7 +84,9 @@
 ### Conversation work (remaining)
 
 - [ ] Messenger conversation history complete with sender, dates, media attachments and thread parts.
-- [ ] Search across people/conversations; filter by date, attachments and participant.
+- [x] Initial in-thread keyword/year and attachment filters; incremental older-message browsing (pending native UI acceptance).
+- [x] In-thread participant selector and inclusive local date-range inputs with bounds checking (v0.8.0).
+- [ ] Full indexed archive search and large-thread scrolling performance acceptance.
 - [ ] Friend/follower/group/event relationship views from exported data.
 - [ ] Conversation output (readable HTML/PDF/text) for the archive owner; no accidental sharing.
 - [ ] Explicit missing encrypted-chat warnings and documented import limitations.
@@ -106,7 +108,12 @@
 
 **Exit gate:** The app clearly distinguishes what was supplied in the ZIP from what may exist on Meta's systems.
 
-## Phase 7 — v0.8.x: Family Memories & strong private vaults
+## Phase 7 — v0.8.x: Messenger browsing and Family Memories
+
+- [x] v0.8.0: Search within conversations and filter by year, participant, attachments and local date range; progressive older-message display (native/UI acceptance pending).
+- [ ] Thread export, larger-message virtualization, cross-export deduplication and full attachment compatibility.
+
+### Family Memories and private vaults
 - [ ] Per-profile encryption at rest and vetted key management; strong isolation even under a shared Windows account if a profile password is used.
 - [ ] Family Memories view built from **explicitly selected** posts/media. Consent and revocation are mandatory.
 - [ ] No automatic sharing of messages, searches, precise locations, logins or advertising activity.
