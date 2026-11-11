@@ -53,6 +53,25 @@ export interface SocialArchive {
   warnings: string[];
 }
 
+
+/** Data records only describe content contained in the active profile's export. */
+export function availableRecordYears(records: readonly DataRecord[]): string[] {
+  return [...new Set(records.map(record => yearOf(record.timestamp)))]
+    .sort((a, b) => a === "unknown" ? 1 : b === "unknown" ? -1 : Number(b) - Number(a));
+}
+
+export function filterDataRecords(
+  records: readonly DataRecord[], search: string, year: string, categoryMatches = false,
+): DataRecord[] {
+  const needle = search.trim().toLocaleLowerCase();
+  return records.filter(record => {
+    if (year !== "all" && yearOf(record.timestamp) !== year) return false;
+    return !needle || categoryMatches ||
+      (record.title + " " + record.detail + " " + record.sourcePath)
+        .toLocaleLowerCase().includes(needle);
+  });
+}
+
 export interface ImportedArchive {
   report: ArchiveReport;
   social: SocialArchive;
