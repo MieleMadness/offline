@@ -101,11 +101,13 @@ export default function Data({ archive, query }: { archive: ImportedArchive; que
               {record.timestamp !== null && <time dateTime={timeISOString(record.timestamp)}>
                 {dateLabel(record.timestamp)}</time>}</div>
             <p>{concealed ? "Content hidden for privacy." : record.detail}</p>
-            <details className="soc-record-provenance">
-              <summary><FileText size={13} aria-hidden="true"/> Source: {fileName(record.sourcePath)}</summary>
-              <code>{record.sourcePath}</code>
-              <span>Shown exactly as found in the imported file inventory; no external link is opened.</span>
-            </details>
+            {concealed
+              ? <span className="soc-record-source"><FileText size={13} aria-hidden="true"/> Source hidden until values are revealed</span>
+              : <details className="soc-record-provenance">
+                <summary><FileText size={13} aria-hidden="true"/> Source: {fileName(record.sourcePath)}</summary>
+                <code>{record.sourcePath}</code>
+                <span>Source path from the downloaded export; no external link is opened.</span>
+              </details>}
           </article>)}
           {records.length === 0 && <div className="soc-record-empty">No records match the selected year and search.</div>}
           {visibleCount < records.length && <button type="button" className="soc-show-more"

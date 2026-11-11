@@ -655,3 +655,36 @@ button:disabled { cursor: not-allowed; }
   .soc-chat-advanced { grid-template-columns: minmax(0,1fr); padding: 12px; }
   .soc-chat-clear { justify-self: start; }
 }
+
+
+/* Privacy-first account data explorer. Values and paths are concealed together. */
+.soc-data-detail-head > div { min-width: 0; flex: 1; }
+.soc-data-guidance { max-width: 64ch; margin: 9px 0 0; color: var(--subtle);
+  font-size: 12px; font-weight: 450; line-height: 1.65; }
+.soc-data-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  padding: 13px 24px; background: var(--panel); border-bottom: 1px solid var(--border); }
+.soc-data-tools > label { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); }
+.soc-data-tools select { min-height: 40px; padding: 0 12px; border-radius: 9px;
+  border: 1px solid var(--border); color: var(--ink); background: var(--canvas);
+  font: inherit; font-size: 12px; }
+.soc-data-reveal { display: inline-flex; align-items: center; gap: 8px; min-height: 40px;
+  padding: 0 12px; border: 1px solid var(--border); border-radius: 9px;
+  background: var(--canvas); color: var(--accent); font-size: 12px; font-weight: 700; }
+.soc-data-reveal:hover { background: var(--accent-soft); }
+.soc-data-privacy { display: flex; align-items: flex-start; gap: 10px;
+  margin: 0; padding: 13px 24px; background: var(--accent-soft);
+  color: var(--ink); font-size: 11px; line-height: 1.7; border-bottom: 1px solid var(--border); }
+.soc-data-privacy svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent); }
+.soc-record-provenance { max-width: 100%; margin-top: 10px; font-size: 11px; color: var(--subtle); }
+.soc-record-provenance summary { display: inline-flex; align-items: center; gap: 7px;
+  min-height: 30px; cursor: pointer; color: var(--accent); font-weight: 650; }
+.soc-record-provenance[open] { padding: 8px 11px 12px; border-radius: 8px; background: var(--canvas); }
+.soc-record-provenance code { display: block; margin: 8px 0 4px; padding: 8px; border-radius: 5px;
+  background: var(--panel); color: var(--ink); overflow-wrap: anywhere; white-space: normal; }
+.soc-record-provenance > span { display: block; color: var(--subtle); line-height: 1.6; }
+.soc-data-details > .soc-show-more { margin: 18px auto; }
+@media (max-width: 720px) {
+  .soc-data-detail-head { align-items: flex-start; }
+  .soc-data-detail-head > span { flex: 0 0 auto; }
+  .soc-data-tools, .soc-data-privacy { padding-left: 17px; padding-right: 17px; }
+}
