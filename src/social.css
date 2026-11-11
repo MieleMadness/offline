@@ -620,3 +620,38 @@ button:disabled { cursor: not-allowed; }
  .soc-chat-search { flex: 1 1 100%; }
  .soc-chat-year, .soc-chat-attachments { flex: 1 1 auto; }
 }
+
+
+/* Optional Messenger date and sender controls: keep basic search visible by default. */
+.soc-chat-advanced-toggle { display: inline-flex; align-items: center; justify-content: center;
+  gap: 7px; min-height: 41px; padding: 0 12px; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--ink); background: var(--panel);
+  font-size: 11px; font-weight: 710; }
+.soc-chat-advanced-toggle:hover, .soc-chat-advanced-toggle.active {
+  border-color: var(--accent); background: var(--accent-soft); }
+.soc-chat-advanced-toggle.active > svg:last-child { transform: rotate(180deg); }
+.soc-chat-advanced { display: grid; grid-template-columns: minmax(160px,1.5fr)
+  repeat(2,minmax(135px,1fr)) auto; gap: 10px; align-items: end;
+  padding: 13px 16px 17px; border-bottom: 1px solid var(--border); background: var(--panel); }
+.soc-chat-advanced > label { display: grid; gap: 7px; min-width: 0; color: var(--subtle);
+  font-size: 11px; font-weight: 690; }
+.soc-chat-advanced input, .soc-chat-advanced select { width: 100%; min-width: 0; height: 41px;
+  padding: 0 9px; background: var(--canvas); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; font: inherit; font-size: 12px; color-scheme: light dark; }
+.soc-chat-clear { display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 41px; padding: 0 12px; background: transparent; color: var(--accent);
+  border: 1px solid var(--border); border-radius: 8px; font-size: 11px; font-weight: 720; }
+.soc-chat-clear:not(:disabled):hover { background: var(--accent-soft); }
+.soc-chat-clear:disabled { opacity: .52; cursor: not-allowed; }
+.soc-chat-filter-error { margin: 0; padding: 9px 16px; color: #963e34;
+  background: #fff2ee; border-bottom: 1px solid #edd3ce; font-size: 12px; }
+@media (prefers-color-scheme: dark) {
+  .soc-chat-filter-error { color: #ffd3cb; background: #462c2a; border-color: #77534d; }
+}
+@media (max-width: 1250px) {
+  .soc-chat-advanced { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 680px) {
+  .soc-chat-advanced { grid-template-columns: minmax(0,1fr); padding: 12px; }
+  .soc-chat-clear { justify-self: start; }
+}

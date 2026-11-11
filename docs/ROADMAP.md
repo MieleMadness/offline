@@ -85,7 +85,8 @@
 
 - [ ] Messenger conversation history complete with sender, dates, media attachments and thread parts.
 - [x] Initial in-thread keyword/year and attachment filters; incremental older-message browsing (pending native UI acceptance).
-- [ ] Full search indexing, date-range picker and large-thread performance acceptance.
+- [x] In-thread participant selector and inclusive local date-range inputs with bounds checking (v0.8.0).
+- [ ] Full indexed archive search and large-thread scrolling performance acceptance.
 - [ ] Friend/follower/group/event relationship views from exported data.
 - [ ] Conversation output (readable HTML/PDF/text) for the archive owner; no accidental sharing.
 - [ ] Explicit missing encrypted-chat warnings and documented import limitations.

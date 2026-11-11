@@ -23,7 +23,7 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 ## Conversation exploration (next feature batch)
 
-Inside a Messenger conversation, search the thread's own messages, choose a year (including unknown dates), and limit the view to messages with attachments. Messages load in recent batches of 250 with a **Show older messages** action; the reading position is preserved as older history appears. These controls operate only on the current family profile and do not fetch missing or end-to-end encrypted Messenger history.
+Inside a Messenger conversation, search the thread's own messages, choose a year (including unknown dates), limit the view to messages with attachments, and use **More filters** for a participant and inclusive local start/end dates. Messages load in recent batches of 250 with a **Show older messages** action; the reading position is preserved as older history appears. These controls operate only on the current family profile and do not fetch missing or end-to-end encrypted Messenger history.
 
 ## On-demand photo previews (development preview)
 
