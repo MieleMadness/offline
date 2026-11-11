@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  cleanProfileName, createProfile, deserializeProfiles, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
+  cleanProfileName, commitCatalogBackedChange, createProfile, deserializeProfiles, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
   type FamilyProfile,
 } from "./profiles";
 
@@ -112,6 +112,33 @@ describe("family profile isolation helpers", () => {
     const corrupt = store({"offline.familyProfiles.v1": "{ broken json"});
     expect(() => persistProfileCatalog([first], first.id, corrupt)).toThrow(/catalog is damaged/);
     expect(corrupt.getItem("offline.familyProfiles.v1")).toBe("{ broken json");
+  });
+
+  it("does not touch ciphertext if the family catalog cannot be saved", async () => {
+    const storage = store();
+    const blocked = {...storage, setItem() { throw new Error("synthetic quota failure"); }};
+    let touched = false;
+    await expect(commitCatalogBackedChange([], "", [first], first.id,
+      async () => { touched = true; }, blocked)).rejects.toThrow(/catalog could not be saved/);
+    expect(touched).toBe(false);
+  });
+
+  it("stages owner metadata before the encrypted operation and rolls back on failure", async () => {
+    const storage = store();
+    persistProfileCatalog([first], first.id, storage);
+    const second = createProfile([first], "Taylor", () => "second-profile-uuid", 2);
+    const steps: string[] = [];
+    await expect(commitCatalogBackedChange([first], first.id, [first, second], second.id,
+      async () => {
+        const current = deserializeProfiles(storage.getItem("offline.familyProfiles.v1"));
+        expect(current.some(profile => profile.id === second.id)).toBe(true);
+        expect(storage.getItem("offline.activeFamilyProfile.v1")).toBe(second.id);
+        steps.push("owner mapping exists");
+        throw new Error("synthetic IndexedDB transaction rejected");
+      }, storage)).rejects.toThrow(/transaction rejected/);
+    expect(steps).toEqual(["owner mapping exists"]);
+    expect(deserializeProfiles(storage.getItem("offline.familyProfiles.v1"))).toEqual([first]);
+    expect(storage.getItem("offline.activeFamilyProfile.v1")).toBe(first.id);
   });
 
   it("creates independent identities and stable accent assignment", () => {

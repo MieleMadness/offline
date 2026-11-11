@@ -158,6 +158,28 @@ export function persistProfileCatalog(
   }
 }
 
+/**
+ * Stages the family catalog before an IndexedDB vault operation. The operation
+ * must resolve only after its transaction commits; on rejection, restore the
+ * old catalog. This is compensation, not an atomic cross-storage transaction.
+ */
+export async function commitCatalogBackedChange(
+  before: readonly FamilyProfile[], beforeSelected: string,
+  next: readonly FamilyProfile[], nextSelected: string,
+  commit: () => Promise<void>, storage?: ProfileCatalogStorage,
+): Promise<void> {
+  persistProfileCatalog(next, nextSelected, storage);
+  try {
+    await commit();
+  } catch (cause) {
+    try { persistProfileCatalog(before, beforeSelected, storage); }
+    catch {
+      throw new Error("The encrypted operation did not complete, but family profile settings could not be restored. Keep your original ZIPs and backups and reopen Offline.");
+    }
+    throw cause;
+  }
+}
+
 /** Read only the value explicitly owned by a profile; never fall back to inherited object keys. */
 export function profileOwnedValue<T>(data: Readonly<Record<string, T>>, id: string): T | null {
   return Object.prototype.hasOwnProperty.call(data, id) ? (data[id] ?? null) : null;

@@ -12,7 +12,7 @@ import Feed from "./components/Feed";
 import Messages from "./components/Messages";
 import Data from "./components/Data";
 import Files from "./components/Files";
-import { createProfile, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
+import { commitCatalogBackedChange, createProfile, persistProfileCatalog, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
@@ -74,20 +74,11 @@ export default function SocialApp() {
   async function removeProfile(id: string): Promise<void> {
     const next = withoutFamilyProfile(profiles, id, activeProfileId);
     const existing = await loadSnapshot(id);
-    // Persist the desired catalog before deletion. If storage cannot commit,
-    // never delete ciphertext under an ID the profile picker cannot retain.
-    // IndexedDB and localStorage cannot participate in one transaction;
-    // a failed ciphertext deletion triggers a best-effort catalog rollback.
-    persistProfileCatalog(next.profiles, next.selectedId);
-    try {
-      await deleteSnapshot(id, existing?.revision ?? null);
-    } catch (cause) {
-      try { persistProfileCatalog(profiles, activeProfileId); }
-      catch {
-        throw new Error("The encrypted preview was not deleted, but the family catalog could not be restored. Retain your backups and reopen Offline before retrying.");
-      }
-      throw cause;
-    }
+    // Persist the desired catalog before deletion and restore it if the
+    // revision-checked IndexedDB transaction does not commit.
+    await commitCatalogBackedChange(profiles, activeProfileId,
+      next.profiles, next.selectedId,
+      () => deleteSnapshot(id, existing?.revision ?? null));
     setArchivesByProfile(current => {
       const owned = { ...current };
       delete owned[id];
@@ -115,18 +106,11 @@ export default function SocialApp() {
     const recoveredProfiles = known ? profiles : [...profiles, {
       ...owner, displayName: recoveredProfileName(owner, profiles),
     }];
-    // Establish a readable, verified owner mapping BEFORE the ciphertext is
-    // written. Otherwise a blocked localStorage write can orphan a valid vault.
-    persistProfileCatalog(recoveredProfiles, owner.id);
-    try {
-      await saveSnapshot(owner.id, backup.snapshot, null);
-    } catch (cause) {
-      try { persistProfileCatalog(profiles, activeProfileId); }
-      catch {
-        throw new Error("Recovery stopped before the encrypted backup was saved, but family profile settings could not be restored. Keep the original backup and reopen Offline.");
-      }
-      throw cause;
-    }
+    // Establish a verified owner mapping before writing ciphertext. If the
+    // snapshot cannot be saved, restore the previous family catalog.
+    await commitCatalogBackedChange(profiles, activeProfileId,
+      recoveredProfiles, owner.id,
+      () => saveSnapshot(owner.id, backup.snapshot, null));
     if (!known) setProfiles(recoveredProfiles);
     setArchivesByProfile(current => {
       const next = { ...current };
