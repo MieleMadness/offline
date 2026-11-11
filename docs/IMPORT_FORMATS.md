@@ -52,3 +52,8 @@ v0.4.1 accepts a leading UTF-8 BOM in JSON and reads machine-readable HTML time 
 - **Not supported:** categorized/skipped with clear explanation and link to file inventory.
 
 **Initial 0.2.0 status:** JSON preview only. **0.3.0 target:** first HTML post/message/data adapter, common import report, and profile-specific ownership; no claim of universal HTML/JSON compatibility until test matrix passes.
+
+
+## v0.7.0 — Image preview scope
+
+Recognized JSON photo and attachment-media URI fields and HTML image src fields are resolved only to local ZIP member paths. Remote URLs, data URLs, scripts, SVG and paths escaping the ZIP root are never loaded. The dedicated Photographs gallery uses the existing bounded inventory of up to 5,000 ZIP paths and does not require a post association. Supported images are JPEG/PNG/GIF/WebP up to 4 MiB uncompressed. Video/HEIC files, images with unsupported references and members outside the indexed inventory remain unpreviewable. Media is read only when needed in the current profile session, never stored inside an encrypted saved preview or portable backup.
