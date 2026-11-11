@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  availableMessageSenders, availableMessageYears, availableYears, avatarInitials, filterConversations, filterPosts, filterThreadMessages,
+  availableMessageSenders, availableMessageYears, availableRecordYears, availableYears, avatarInitials, filterDataRecords, filterConversations, filterPosts, filterThreadMessages,
   meaningfulCount, messageDays, type Conversation, type FeedPost, type SocialArchive,
 } from "./social-model";
 
@@ -71,6 +71,21 @@ describe("social archive UI helpers", () => {
   it("groups chronological messages by local date", () => {
     const days = messageDays(chats[0]!.messages);
     expect(days.reduce((sum, day) => sum + day.messages.length, 0)).toBe(2);
+  });
+
+  it("filters only observed data entries by year and source without fabricating missing records", () => {
+    const records = [
+      {title:"Device login",detail:"Windows browser",timestamp:1600000000,sourcePath:"security/logins.json"},
+      {title:"Local search",detail:"synthetic cake",timestamp:null,sourcePath:"search/history.json"},
+      {title:"Advertisement",detail:"synthetic ad",timestamp:1700000000,sourcePath:"ads/ads.json"},
+    ];
+    expect(availableRecordYears(records)).toEqual(["2023","2020","unknown"]);
+    expect(filterDataRecords(records,"login","2020").map(x=>x.title)).toEqual(["Device login"]);
+    expect(filterDataRecords(records,"history","unknown").map(x=>x.title)).toEqual(["Local search"]);
+    expect(filterDataRecords(records,"", "2023").map(x=>x.title)).toEqual(["Advertisement"]);
+    expect(filterDataRecords(records,"anything","2023",true).map(x=>x.title)).toEqual(["Advertisement"]);
+    expect(filterDataRecords(records,"missing","all")).toEqual([]);
+    expect(records).toHaveLength(3);
   });
 
   it("provides fallback avatars and bounded content counts", () => {

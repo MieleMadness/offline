@@ -53,3 +53,8 @@ The ZIP connection path exists only in the mounted active-profile component memo
 ### ZIP duplicate-member qualification (v0.7.2)
 
 The image reader rejects multiple matching names **when the ZIP library exposes them as distinct entries**. The library may resolve or collapse ambiguous duplicate-name members before the reader's scan; the current reader does not independently parse the raw central directory. This edge case requires separate ZIP parser acceptance and should not be advertised as comprehensive duplicate-directory protection.
+
+
+## v0.9.0: Sensitive account-data display controls
+
+The Your Data panel conceals names, details and source paths by default for data categories classified as searches, locations, security, connected-app/off-platform activity and personal account details. The global Search library also conceals the corresponding data result titles, snippets and paths until the user explicitly reveals them. Reveal state clears on search or category changes. These are UI display controls, **not an encryption boundary**: parsed data still exists in the unlocked workspace memory. Messages, posts and optional opt-in local model inference may show sensitive content. Do not claim that a masked category hides all private data within Offline; lock a saved profile to protect access, and avoid sharing an unlocked screen.

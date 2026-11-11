@@ -50,3 +50,14 @@ Use synthetic archives for development and public CI. Never commit real Facebook
 ## Release blockers
 
 This is a planned checklist, **not evidence the interactive tests have passed**. Real-world redacted Facebook format acceptance, image codec security, large archive performance, backup/storage failure, accessibility and independent security review remain incomplete. The desktop preview is not a general-availability installer.
+
+
+## Your Data privacy and provenance acceptance (v0.9.0)
+
+1. Open a synthetic export containing a login event, search query, location, advertising record and reaction. Verify categories and counts derive only from records in the ZIP.
+2. Confirm search/location/security/off-platform/account values and source paths start hidden. Reveal them intentionally; switch category or change the global search and verify masking returns.
+3. In Search library, find an imported sensitive data record. Its title, excerpt and source should be hidden by default, and revealed only after pressing Show private values.
+4. Select a record year, including an undated record, and verify only matching entries appear. Expand source provenance for a non-concealed item and confirm the original ZIP path is shown, without opening web URLs.
+5. Load over 60 synthetic data records; the list should initially show 50 and support Show more. Confirm private values never appear in logs, error notices or public tests.
+
+**Why:** Data may include security and location details. An understandable account-data explorer must not silently expose those fields during ordinary search or screen sharing.

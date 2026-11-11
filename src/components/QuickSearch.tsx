@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
-import { CalendarDays, FileText, MessageCircle, Search, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CalendarDays, Eye, EyeOff, FileText, LockKeyhole, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { formatNumber } from "../archive";
 import { dateLabel, type ImportedArchive } from "../social-model";
 import { availableSearchYears, searchPreview, type PreviewSearchKind } from "../preview-search";
 import LocalSearch from "./LocalSearch";
+import { isPrivateDataCategory } from "../data-privacy";
 import { timeISOString } from "./Shared";
 
 const filters: { value: PreviewSearchKind; name: string }[] = [
@@ -20,12 +21,21 @@ export default function QuickSearch({ archive, query }: { archive: ImportedArchi
   const [filter, setFilter] = useState<PreviewSearchKind>("all");
   const [year, setYear] = useState("all");
   const [shown, setShown] = useState(50);
+  const [revealedSearchKey, setRevealedSearchKey] = useState("");
   const years = useMemo(() => availableSearchYears(archive.social), [archive.social]);
   const results = useMemo(
     () => searchPreview(archive.social, query, filter, year, shown),
     [archive.social, query, filter, year, shown],
   );
   const hasQuery = !!query.trim();
+  // A reveal only applies to the exact search/filter combination that was confirmed.
+  const searchKey = query.trim().toLocaleLowerCase() + "\u0000" + filter + "\u0000" + year;
+  const privateVisible = revealedSearchKey === searchKey;
+  // Any query or filter change clears an earlier disclosure, even when a user later
+  // returns to the same search. Data excerpts never persist beyond this view.
+  useEffect(() => { setRevealedSearchKey(""); }, [searchKey]);
+  const hasPrivateHits = results.hits.some(hit =>
+    hit.kind === "data" && isPrivateDataCategory(hit.categoryId));
 
   return <div className="soc-content soc-search-page">
     <header className="soc-page-heading">
@@ -47,6 +57,15 @@ export default function QuickSearch({ archive, query }: { archive: ImportedArchi
         </select>
       </label>
     </section>
+    {hasQuery && hasPrivateHits && <div className="soc-search-private" role="status">
+      <LockKeyhole size={17} aria-hidden="true"/>
+      <span>{privateVisible ? "Private account-data excerpts are visible in this search."
+        : "Sensitive account-data results are concealed until you choose to reveal them."}</span>
+      <button type="button" onClick={() => setRevealedSearchKey(privateVisible ? "" : searchKey)}>
+        {privateVisible ? <EyeOff size={15} aria-hidden="true"/> : <Eye size={15} aria-hidden="true"/>}
+        {privateVisible ? "Hide private values" : "Show private values"}
+      </button>
+    </div>}
     {!hasQuery ? <div className="soc-search-intro">
       <Search size={28} aria-hidden="true"/>
       <h2>What would you like to revisit?</h2>
@@ -63,14 +82,16 @@ export default function QuickSearch({ archive, query }: { archive: ImportedArchi
       </div> : <div className="soc-search-results">
         {results.hits.map(hit => {
           const Icon = icons[hit.kind];
+          const concealed = hit.kind === "data" && isPrivateDataCategory(hit.categoryId) && !privateVisible;
           return <article className="soc-search-hit" key={hit.id}>
             <div className="soc-search-hit-top">
               <span className="soc-search-type"><Icon size={15} aria-hidden="true"/>{labels[hit.kind]}</span>
               {hit.timestamp !== null ? <time dateTime={timeISOString(hit.timestamp)}>{dateLabel(hit.timestamp)}</time> : <span>Undated</span>}
             </div>
-            <h2>{hit.title}</h2>
-            <p>{hit.excerpt}</p>
-            <div className="soc-search-source"><FileText size={14} aria-hidden="true"/><span title={hit.source}>{hit.source}</span></div>
+            <h2>{concealed ? "Private data record" : hit.title}</h2>
+            <p>{concealed ? "Content hidden. Use Show private values to view this result." : hit.excerpt}</p>
+            <div className="soc-search-source"><FileText size={14} aria-hidden="true"/>
+              <span title={concealed ? undefined : hit.source}>{concealed ? "Source hidden" : hit.source}</span></div>
           </article>;
         })}
         {results.total > results.hits.length && shown < 250 && <button className="soc-show-more" type="button"

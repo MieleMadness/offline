@@ -29,6 +29,7 @@ describe("profile-scoped quick search", () => {
     expect(results.hits.map(hit => hit.kind)).toEqual(["message", "post", "data"]);
     expect(results.hits[0]?.source).toBe("Conversation: Beach friends");
     expect(results.hits[1]?.source).toBe("posts/one.json");
+    expect(results.hits[2]?.categoryId).toBe("locations");
   });
 
   it("finds one thread by its title without showing every message in the thread", () => {
