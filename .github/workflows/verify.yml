@@ -11,6 +11,11 @@ on:
 permissions:
   contents: read
 
+# Only the newest commit on the same development branch needs a full Windows build.
+concurrency:
+  group: offline-verify-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   frontend:
     name: 0.1.0 · Frontend checks
