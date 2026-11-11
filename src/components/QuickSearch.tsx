@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Eye, EyeOff, FileText, LockKeyhole, MessageCircle, Search, ShieldCheck } from "lucide-react";
 import { formatNumber } from "../archive";
 import { dateLabel, type ImportedArchive } from "../social-model";
@@ -31,6 +31,9 @@ export default function QuickSearch({ archive, query }: { archive: ImportedArchi
   // A reveal only applies to the exact search/filter combination that was confirmed.
   const searchKey = query.trim().toLocaleLowerCase() + "\u0000" + filter + "\u0000" + year;
   const privateVisible = revealedSearchKey === searchKey;
+  // Any query or filter change clears an earlier disclosure, even when a user later
+  // returns to the same search. Data excerpts never persist beyond this view.
+  useEffect(() => { setRevealedSearchKey(""); }, [searchKey]);
   const hasPrivateHits = results.hits.some(hit =>
     hit.kind === "data" && isPrivateDataCategory(hit.categoryId));
 
