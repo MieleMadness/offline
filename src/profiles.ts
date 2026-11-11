@@ -29,7 +29,7 @@ export function deserializeProfiles(raw: string | null): FamilyProfile[] {
       if (
         typeof v.id !== "string" ||
         typeof v.displayName !== "string" ||
-        v.id.length < 4 || v.id.length > 100 ||
+        !/^[A-Za-z0-9-]{8,100}$/.test(v.id) ||
         typeof v.createdAt !== "number" || !Number.isFinite(v.createdAt) ||
         !PROFILE_COLORS.some((color) => color === v.accent) ||
         seenIds.has(v.id)
@@ -87,4 +87,19 @@ export function saveProfiles(profiles: readonly FamilyProfile[], selectedId: str
     // WebView localStorage can be blocked. Family profiles still work for this session;
     // callers should communicate that persistence may be unavailable.
   }
+}
+
+/** Read only the value explicitly owned by a profile; never fall back to inherited object keys. */
+export function profileOwnedValue<T>(data: Readonly<Record<string, T>>, id: string): T | null {
+  return Object.prototype.hasOwnProperty.call(data, id) ? (data[id] ?? null) : null;
+}
+
+/** Persist a new in-session value under exactly one owner, leaving other owners unchanged. */
+export function setProfileOwnedValue<T>(
+  data: Readonly<Record<string, T>>,
+  id: string,
+  value: T,
+): Record<string, T> {
+  if (!id || !/^[A-Za-z0-9-]{8,100}$/.test(id)) throw new Error("Invalid family profile ID.");
+  return { ...data, [id]: value };
 }
