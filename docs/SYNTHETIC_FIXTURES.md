@@ -62,3 +62,6 @@ Remove-Item Env:OFFLINE_ACCEPTANCE_FIXTURES
 ```
 
 The Windows milestone workflow generates the same fictional files and sets `OFFLINE_ACCEPTANCE_FIXTURES` automatically. Normal local Cargo tests without the variable remain self-contained; the specialized generated-fixture tests skip when the variable is absent. A passing fixture test confirms supported parser paths, **not** universal Meta export compatibility.
+
+
+**CI optimization:** Add `[rust]` to the draft pull-request title for a one-time Windows Rust test run with fictional ZIPs, without rebuilding the desktop executable. Use `[windows]` only for a full milestone compile. Ordinary PRs run the fast frontend and Python checks only.

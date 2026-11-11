@@ -7,7 +7,8 @@ on:
 permissions:
   contents: read
 
-# Fast checks run on PRs; Windows compilation is explicitly opt-in.
+# Fast checks run on PRs. Use [rust] for targeted Windows Rust tests;
+# [windows] or workflow_dispatch builds the full desktop executable.
 concurrency:
   group: offline-0.12.0-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
@@ -34,9 +35,9 @@ jobs:
         run: npm run build
 
   windows:
-    # Dispatch manually for release, or add [windows] to a PR title.
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
-    name: 0.12.0 · Windows compile (on demand)
+    # Full compile for [windows]; Rust-only importer acceptance for [rust].
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]') || contains(github.event.pull_request.title, '[rust]')
+    name: 0.12.0 · Windows native checks (on demand)
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
@@ -54,4 +55,5 @@ jobs:
           OFFLINE_ACCEPTANCE_FIXTURES: ${{ github.workspace }}/fixtures/generated
         run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: Build Windows desktop executable
+        if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
         run: npx tauri build --no-bundle
