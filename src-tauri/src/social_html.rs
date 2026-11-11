@@ -55,6 +55,16 @@ fn time_from_html(raw: &str) -> Option<i64> {
     None
 }
 
+fn card_time(block: ElementRef<'_>, selector: &Selector) -> Option<i64> {
+    for node in block.select(selector) {
+        if let Some(date) = node.attr("datetime").and_then(time_from_html) {
+            return Some(date);
+        }
+        if let Some(date) = time_from_html(&text(node)) { return Some(date); }
+    }
+    None
+}
+
 pub(super) fn ingest_html(
     path: &str, contents: &str,
     posts: &mut Vec<Post>,
@@ -96,7 +106,7 @@ pub(super) fn ingest_html(
             thread.messages.push(Message {
                 id: format!("{path}#{index}"),
                 sender: if sender.is_empty() { "Unknown sender".into() } else { sender },
-                timestamp: time_from_html(&first_text(block, &timestamp)),
+                timestamp: card_time(block, &timestamp),
                 text: message,
                 attachments,
             });
@@ -114,7 +124,7 @@ pub(super) fn ingest_html(
             if content.is_empty() && attachments == 0 { continue; }
             posts.push(Post {
                 id: format!("{path}#{index}"),
-                timestamp: time_from_html(&first_text(block, &timestamp)),
+                timestamp: card_time(block, &timestamp),
                 author: if heading_text.is_empty() { None } else { Some(heading_text) },
                 text: content,
                 media_count: attachments,
@@ -138,7 +148,7 @@ pub(super) fn ingest_html(
         if title.is_empty() && detail.is_empty() { continue; }
         cat.records.push(DataRecord {
             title: if title.is_empty() { "Exported entry".into() } else { title },
-            detail, timestamp: time_from_html(&first_text(block, &timestamp)),
+            detail, timestamp: card_time(block, &timestamp),
             source_path: path.into(),
         });
         *record_total += 1;

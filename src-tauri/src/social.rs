@@ -394,7 +394,7 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
             files_read += 1;
             continue;
         }
-        let value: Value = match serde_json::from_slice(&bytes) {
+        let value: Value = match serde_json::from_slice(bytes.strip_prefix(b"\xEF\xBB\xBF").unwrap_or(&bytes)) {
             Ok(v) => v,
             Err(_) => {
                 files_skipped += 1;
@@ -537,6 +537,24 @@ mod tests {
         assert_eq!(result.conversations.len(), 1);
         assert_eq!(result.conversations[0].title, "Morgan");
         assert_eq!(result.conversations[0].messages[0].sender, "Morgan");
+    }
+
+    #[test]
+    fn archived_message_parts_agree_on_sender_and_date_across_formats() {
+        let archive = fixture(&[
+            ("messages/archived_threads/example/message_1.json",
+                "\u{feff}{\"messages\":[{\"sender_name\":\"Example\",\"timestamp_ms\":1609459200000,\"content\":\"JSON part\"}]}"),
+            ("messages/archived_threads/example/message_2.html",
+                r#"<article class="_a6-g"><b class="_a6-h">Example</b><p class="_a6-p">HTML part</p><time datetime="2021-01-01T00:00:00Z">localized date</time></article>"#),
+        ]);
+        let result = scan(archive).unwrap();
+        assert_eq!(result.files_skipped, 0);
+        assert_eq!(result.conversations.len(), 1);
+        let messages = &result.conversations[0].messages;
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0].sender, messages[1].sender);
+        assert_eq!(messages[0].timestamp, Some(1609459200));
+        assert_eq!(messages[1].timestamp, messages[0].timestamp);
     }
 
     #[test]

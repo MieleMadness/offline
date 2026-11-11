@@ -43,7 +43,7 @@ export default function Feed({ archive, query }: { archive: ImportedArchive; que
       {posts.length === 0 ? <EmptyState icon={CalendarDays} title={archive.social.posts.length ? "No posts match those filters" : "Your timeline is ready"}>
         {archive.social.posts.length
           ? "Try another year, clear the search, or show posts without attachments."
-          : "We couldn't find supported Facebook post records in this ZIP. Export posts as JSON, with your complete date range, to build your timeline."}
+          : "We couldn't find supported Facebook post records in this ZIP. Export posts as HTML or JSON, with your complete date range, to build your timeline."}
       </EmptyState> : <div className="soc-feed-list">{visiblePosts.map((post) => {
         const month = monthLabel(post.timestamp);
         const showMonth = previousMonth !== month;

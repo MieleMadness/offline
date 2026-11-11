@@ -1,6 +1,15 @@
 # Changelog
 
-## v0.3.0 — In development (family and HTML/JSON import)
+## v0.4.1 — Encrypted saved previews (development)
+
+- Optional per-profile encrypted snapshot. Enrollment locks the preview immediately. Unlocking restores posts, conversations, account records and the ZIP inventory. Switching owners unmounts the unlocked view.
+- Hold the import owner from file selection through completion. A replacement commits to local storage before the new preview is displayed.
+- Read UTF-8 JSON with a byte-order mark and HTML machine-readable timestamps in supported layouts.
+- The initial 0.4.0 local test run failed on a raw ArrayBuffer comparison. The 0.4.1 test compares ciphertext bytes and checks rejection of the wrong owner, wrong password and altered ciphertext.
+
+Local Windows verification passed 14 frontend tests and 14 Rust tests, the production frontend bundle, and a native debug executable with packaged assets. Three synthetic profiles exercised HTML, JSON and mixed imports. The encrypted snapshot required the passphrase after manual lock, switching and process restart. No installer or security audit is included.
+
+## v0.3.0 — Native-verified family and HTML/JSON preview
 
 - Introduced family profile names, selectable accent avatars and a visible profile switcher.
 - Assigned each in-memory ZIP preview to an explicit family profile; separated content on switching.
@@ -11,7 +20,7 @@
 - Added a brand guide, family access/privacy specification, format compatibility plan and phased roadmap through 1.0.
 - Synced package, Tauri, Rust and CI labels at 0.3.0. Full Windows verification is on demand.
 
-**Known limits:** Profiles are organizational, not password locks; content is in memory and resets on exit. HTML parser only recognizes selected layouts; imported HTML is never executed. No actual media previews, persistent family vault, broad format compatibility, or release installer. Full verification pending.
+**Known limits:** Profiles are organizational, not password locks; content is in memory and resets on exit. HTML parser only recognizes selected layouts; imported HTML is never executed. No actual media previews, persistent family vault, broad format compatibility, or release installer. Frontend checks, Rust tests and Windows compilation passed on PR #8.
 
 ## v0.2.0 — Verified technical baseline
 

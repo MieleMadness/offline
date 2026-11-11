@@ -15,6 +15,8 @@ import Files from "./components/Files";
 import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ImportSummary from "./components/ImportSummary";
+import VaultForm from "./components/VaultForm";
+import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
 import "./social.css";
 
 type View = "feed" | "messages" | "data" | "files";
@@ -38,7 +40,39 @@ export default function SocialApp() {
   // Content is memory-only in the preview; cross-profile indexes are not shared.
   const [archivesByProfile, setArchivesByProfile] = useState<Record<string, ImportedArchive>>({});
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId);
-  const archive = activeProfile ? profileOwnedValue(archivesByProfile, activeProfileId) : null;
+  useEffect(() => { saveProfiles(profiles, activeProfileId); }, [profiles, activeProfileId]);
+
+  function addFamilyProfile(name: string) {
+    const profile = createProfile(profiles, name, () => crypto.randomUUID(), Date.now());
+    setProfiles(existing => [...existing, profile]);
+    setActiveProfileId(profile.id);
+  }
+
+  return <Library key={activeProfileId} profiles={profiles} activeProfile={activeProfile}
+    sessionArchive={profileOwnedValue(archivesByProfile, activeProfileId)}
+    onSessionArchive={archive => setArchivesByProfile(existing => {
+      if (archive) return setProfileOwnedValue(existing, activeProfileId, archive);
+      const copy = { ...existing };
+      delete copy[activeProfileId];
+      return copy;
+    })}
+    onChoose={setActiveProfileId} onCreate={addFamilyProfile}/>;
+}
+
+// Switching owner unmounts decrypted content, search/filter state and the in-memory key together.
+function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, onChoose, onCreate }: {
+  profiles: FamilyProfile[]; activeProfile?: FamilyProfile; sessionArchive: ImportedArchive | null;
+  onSessionArchive: (value: ImportedArchive | null) => void;
+  onChoose: (id: string) => void; onCreate: (name: string) => void;
+}) {
+  const activeProfileId = activeProfile?.id ?? "";
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [ready, setReady] = useState(false);
+  const [unlocked, setUnlocked] = useState<{ key: CryptoKey; archive: ImportedArchive } | null>(null);
+  const [enrolling, setEnrolling] = useState(false);
+  const pending = useRef(false);
+  const locked = !!snapshot && !unlocked;
+  const archive = ready ? (snapshot ? unlocked?.archive ?? null : sessionArchive) : null;
   const [view, setView] = useState<View>("feed");
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
@@ -46,28 +80,60 @@ export default function SocialApp() {
   const [menuOpen, setMenuOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
 
+
   useEffect(() => {
-    saveProfiles(profiles, activeProfileId);
-  }, [profiles, activeProfileId]);
+    let current = true;
+    if (!activeProfileId) { setReady(true); return; }
+    loadSnapshot(activeProfileId).then(saved => {
+      if (current) { setSnapshot(saved); setReady(true); }
+    }).catch(() => {
+      if (current) setError("Saved previews could not be opened. Reopen this profile to retry.");
+    });
+    return () => { current = false; };
+  }, [activeProfileId]);
 
-  const addFamilyProfile = (name: string) => {
-    const profile = createProfile(profiles, name, () => crypto.randomUUID(), Date.now());
-    setProfiles((existing) => [...existing, profile]);
-    setActiveProfileId(profile.id);
-    setView("feed");
-    setQuery("");
+  function begin() {
+    if (pending.current) return false;
+    pending.current = true;
+    setBusy(true);
     setError("");
-    setMenuOpen(false);
-  };
+    return true;
+  }
+  function finish() { pending.current = false; setBusy(false); }
+  function lock() {
+    setUnlocked(null);
+    setQuery("");
+    setView("feed");
+    setError("");
+  }
 
-  const chooseFamilyProfile = (id: string) => {
-    if (busy || !profiles.some((profile) => profile.id === id)) return;
-    setActiveProfileId(id);
-    setView("feed");
-    setQuery("");
-    setError("");
-    setMenuOpen(false);
-  };
+  async function submitPassphrase(password: string) {
+    if (!begin()) return false;
+    try {
+      if (snapshot) {
+        const key = await deriveKey(password, snapshot.salt);
+        const decoded = await unseal(activeProfileId, snapshot, key);
+        setUnlocked({ key, archive: decoded });
+      } else {
+        if (!sessionArchive || !safeLoadProfiles().some(p => p.id === activeProfileId)) {
+          throw new Error("Profile preferences must be available before saving a preview.");
+        }
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const key = await deriveKey(password, salt);
+        const next = await seal(activeProfileId, sessionArchive, key, salt);
+        await saveSnapshot(activeProfileId, next, null);
+        setSnapshot(next);
+        onSessionArchive(null);
+        setEnrolling(false);
+        lock();
+      }
+      return true;
+    } catch {
+      setError(snapshot ? "Could not unlock this preview. Check the passphrase. A damaged copy also cannot be opened." :
+        "The encrypted preview could not be saved. Your session preview is still open.");
+      return false;
+    } finally { finish(); }
+  }
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
@@ -91,14 +157,14 @@ export default function SocialApp() {
   }
 
   async function importZip() {
-    if (busy) return;
+    if (!ready || locked || enrolling) return;
     if (!activeProfile) {
       setError("Create a family profile before importing an archive.");
       return;
     }
     // Capture owner before any asynchronous file reading; never assign a result to a switched user.
     const ownerId = activeProfile.id;
-    setError("");
+    if (!begin()) return;
     try {
       const selected = await open({
         multiple: false,
@@ -106,17 +172,24 @@ export default function SocialApp() {
         filters: [{ name: "ZIP archives", extensions: ["zip"] }],
       });
       if (!selected || typeof selected !== "string") return;
-      setBusy(true);
       const report = await invoke<ArchiveReport>("inspect_archive", { path: selected });
       const social = await invoke<SocialArchive>("read_social_archive", { path: selected });
-      setArchivesByProfile((existing) => setProfileOwnedValue(existing, ownerId, { report, social }));
+      const imported = { report, social };
+      if (snapshot && unlocked) {
+        const next = await seal(ownerId, imported, unlocked.key, snapshot.salt);
+        await saveSnapshot(ownerId, next, snapshot.revision);
+        setSnapshot(next);
+        setUnlocked({ key: unlocked.key, archive: imported });
+      } else {
+        onSessionArchive(imported);
+      }
       setView("feed");
       setQuery("");
     } catch (cause) {
       setError(typeof cause === "string"
         ? cause : "Offline couldn't open this ZIP. Check the file and try again.");
     } finally {
-      setBusy(false);
+      finish();
     }
   }
 
@@ -133,7 +206,7 @@ export default function SocialApp() {
         <span><strong>offline<span>.</span></strong><small>YOUR DIGITAL HISTORY</small></span>
       </div>
       <ProfilePicker profiles={profiles} activeId={activeProfileId} disabled={busy}
-        onChoose={chooseFamilyProfile} onCreate={addFamilyProfile}/>
+        onChoose={id => { if (!pending.current) onChoose(id); }} onCreate={name => { if (!pending.current) onCreate(name); }}/>
       <div className="soc-side-label">YOUR LIBRARY</div>
       <nav className="soc-nav" aria-label="Archive sections">
         {navigation.map(({ id, name, icon: Icon }) => <button key={id}
@@ -150,9 +223,9 @@ export default function SocialApp() {
             <small>{formatNumber(archive.report.totalFiles)} files · {formatSize(archive.report.totalUncompressedBytes)}</small></span>
         </div>}
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
-          <span><strong>Local archive preview</strong><small>Profile switch is not a security lock.</small></span>
+          <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.3.0 · Development preview</span>
+        <span className="soc-version">Offline v0.4.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -170,9 +243,11 @@ export default function SocialApp() {
               value={query} onChange={(event) => setQuery(event.target.value)}/>
             <kbd>Ctrl K</kbd>
           </label>}
-          <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile}>
+          {archive && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
+            onClick={snapshot ? lock : () => setEnrolling(true)}>{snapshot ? "Lock preview" : "Save encrypted copy"}</button>}
+          <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile || !ready || locked || enrolling}>
             <ArrowDownToLine size={17} aria-hidden="true"/>
-            <span>{busy ? "Reading…" : activeProfile ? "Import for " + activeProfile.displayName : "Create a profile first"}</span>
+            <span>{busy ? "Reading…" : locked ? "Preview locked" : unlocked ? "Replace saved preview" : activeProfile ? "Import for " + activeProfile.displayName : "Create a profile first"}</span>
           </button>
         </div>
       </header>
@@ -180,7 +255,10 @@ export default function SocialApp() {
         <span>{error}</span><button type="button" aria-label="Dismiss error" onClick={() => setError("")}><X size={18}/></button>
       </div>}
       <main className="soc-scroll">
-        {!archive ? <div className="soc-welcome"><div className="soc-welcome-inner">
+        {!ready ? <p className="soc-soft-caption" role="status">{error ? "Preview unavailable" : "Opening profile…"}</p> :
+          locked || enrolling ? <VaultForm key={locked ? "unlock" : "save"} locked={locked} busy={busy}
+            onSubmit={submitPassphrase} onCancel={enrolling ? () => setEnrolling(false) : undefined}/> :
+          !archive ? <div className="soc-welcome"><div className="soc-welcome-inner">
           <div className="soc-welcome-symbol"><Archive size={27} aria-hidden="true"/></div>
           <h1>{activeProfile ? "Every memory has a place" : "Every story starts somewhere"}<span>.</span></h1>
           <p>{activeProfile
@@ -191,7 +269,7 @@ export default function SocialApp() {
             <ArrowRight size={17} aria-hidden="true"/>
           </button>
           <div className="soc-welcome-facts">
-            <span><Check size={15} aria-hidden="true"/> No password</span>
+            <span><Check size={15} aria-hidden="true"/> No Facebook login</span>
             <span><Check size={15} aria-hidden="true"/> No upload</span>
             <span><Check size={15} aria-hidden="true"/> Read-only source</span>
           </div>
@@ -200,7 +278,7 @@ export default function SocialApp() {
             <div><MessagesSquare size={22} aria-hidden="true"/><strong>Messages</strong><span>People & conversations</span></div>
             <div><ShieldCheck size={22} aria-hidden="true"/><strong>Your data</strong><span>See your export</span></div>
           </div>
-          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Profile switching is organizational, not encrypted access. Actual media previews and more export variants are planned.</p>
+          <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}

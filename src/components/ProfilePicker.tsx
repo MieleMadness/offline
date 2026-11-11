@@ -54,6 +54,6 @@ export default function ProfilePicker({
       </div>
     </form> : canAdd && <button type="button" className="soc-add-profile" disabled={disabled}
       onClick={() => setAdding(true)}><Plus size={15} aria-hidden="true"/> Add family member</button>}
-    <p className="soc-profile-caution">Profile selection organizes local data; it is not a password or privacy lock.</p>
+    <p className="soc-profile-caution">Session previews are visible to anyone using this library. Saved encrypted previews require their own passphrase.</p>
   </div>;
 }

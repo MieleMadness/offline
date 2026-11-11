@@ -31,7 +31,7 @@ export default function Messages({ archive, query }: { archive: ImportedArchive;
           </button>;
         })}
         {chats.length === 0 && <div className="soc-thread-empty"><MessageCircle size={24}/>
-          <strong>No conversations found</strong><p>Try another name or import a Facebook Messages JSON export.</p></div>}
+          <strong>No conversations found</strong><p>Try another name or import a Facebook HTML or JSON export that includes messages.</p></div>}
       </aside>
       <section className="soc-chat" aria-label={current ? "Conversation: " + current.title : "Conversation preview"}>
         {current ? <>

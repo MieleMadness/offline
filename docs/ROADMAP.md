@@ -30,7 +30,7 @@
 
 **Exit gate:** GitHub Windows and frontend success; completed as technical development baseline, not a production release.
 
-## Phase 2 — v0.3.x: Family identities and both import formats (CURRENT)
+## Phase 2 — v0.3.x: Family identities and both import formats (native-verified preview)
 ### 2A — Product/brand contracts
 - [x] Define brand, semantic palette, typography, layout, tone and family identity cues in `docs/BRAND_GUIDE.md`.
 - [x] Define permissions/data ownership, sharing defaults, and actual security boundary in `docs/FAMILY_ARCHITECTURE.md`.
@@ -38,23 +38,25 @@
 
 ### 2B — Family profile foundations
 - [ ] First-run personal vs family library chooser; create, rename and switch local profiles.
-- [ ] Per-profile archive ownership: explicit import target, no automatic cross-profile merging.
+- [x] Per-profile archive ownership: explicit import target, no automatic cross-profile merging.
 - [ ] Persist profile metadata and index scope locally; prevent stale async import from switching owner.
 - [ ] No private data in shared global search, logs, temp files or test fixtures.
-- [ ] UI distinguishes organizational profiles from actual encrypted/password-protected vaults.
+- [x] UI distinguishes organizational profiles from actual encrypted/password-protected vaults.
 - [ ] Profile deletion requires confirmation, scope warning and backup guidance.
 
 ### 2C — HTML + JSON adapters
 - [ ] Auto-detect HTML vs JSON inside ZIP; provide a preview of detected/unsupported sections.
-- [ ] Safe HTML parser (DOM/text, **never** render imported HTML in live WebView).
+- [x] Safe HTML parser (DOM/text, **never** render imported HTML in live WebView).
 - [ ] Extract representative HTML posts, Messenger threads and account/activity entries with timestamps and provenance.
 - [ ] Keep JSON adapter working; normalized output identical by category across formats.
 - [ ] Synthetic fixture matrix for both export formats, missing/ambiguous timestamps, archived threads and multiple parts.
 - [ ] Import health screen: what was found, imported, skipped, incompatible and why.
 
-**Exit gate:** A family of 3+ profiles can import *different* HTML and JSON synthetic exports without data mixing; core screens populated from both. Rust/frontend tests and an on-demand Windows milestone compile green.
+**Exit gate:** A family of 3+ profiles can import *different* HTML and JSON synthetic exports without data mixing; core screens populated from both. Rust/frontend tests and an on-demand Windows milestone compile green. Verified on v0.3.0 commit 9b3ea66 with three synthetic ZIPs (HTML, JSON, mixed) through the native Windows picker. Each profile showed its own post, message, account record and inventory after switching. Remaining checklist items are follow-ups.
 
-## Phase 3 — v0.4.x: Durable local library and search
+## Phase 3 — v0.4.x: Durable local library and search (in progress)
+- [x] Opt-in encrypted per-profile preview with passphrase unlock, manual lock, owner-bound writes and lock on profile switch. One snapshot per person.
+- [ ] Backup/restore, passphrase change, deletion, independent security review and tests for large archives and storage loss.
 - [ ] Profile-scoped SQLite schema, migrations, backups and import/source provenance.
 - [ ] Multiple ZIPs/parts per person and cross-format duplicate detection with review.
 - [ ] Fast full-text search by person, content, date, source and category.
@@ -123,4 +125,4 @@
 - Cross-device family sync only if opt-in encryption and trustworthy sharing can be built.
 
 ## Next coding order
-**First** profile-scoped import ownership and basic profile management. **Then** HTML adapter + common data model. **Then** write regression tests covering family isolation and HTML/JSON parity. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+Next, exercise backup/recovery and storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
