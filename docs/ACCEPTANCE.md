@@ -73,3 +73,14 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 6. Check timestamps from Unix seconds, named millisecond fields, 13-digit millisecond numeric strings and explicit HTML dates. Ambiguous local strings must remain undated.
 
 **Why:** importing another Facebook download must never silently destroy the only saved copy of prior memories.
+
+
+## v0.11.0 — Photo gallery paging and full-size viewer
+
+1. Import a synthetic ZIP with 53 supported small images. Confirm Photographs starts at page 1 with 24 items, page 2 has 24, page 3 has 5. Jump backward and verify the count remains correct. Confirm prior pages do not leave image components mounted.
+2. Open an image with mouse and keyboard. Use Left/Right arrow keys, Previous/Next controls, and Escape. Confirm the first/last image controls are disabled at boundaries, the dialog has accessible labels, focus stays inside while open and returns sensibly when closed.
+3. Search for a filename while on a later gallery page. Confirm navigation resets to the matching first page and the viewer never shows a photo outside the filtered results.
+4. Inspect a corrupted-but-magic-matched JPEG and an unsupported file. The viewer must display Preview unavailable, without attempting a remote fetch or executing active markup.
+5. Navigate a large synthetic photo library while observing RAM and CPU. The 24-item page limit bounds mounted components but does not guarantee overall memory usage, decoder correctness or ZIP scan speed; report regressions before release.
+
+**Why:** A family photo archive needs efficient browsing, accessible controls and truthful failures rather than unlimited decoded media in one WebView.

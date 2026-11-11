@@ -63,3 +63,8 @@ The Your Data panel conceals names, details and source paths by default for data
 ## v0.10.0 — Non-destructive import and source coverage safeguards
 
 A native ZIP can pass filename and UTF-8 checks yet decode no useful social content. The frontend now refuses to replace a preview when the new archive contains no readable records and no media inventory. A previously present preview is staged for explicit review, and an encrypted snapshot cannot be replaced without an extra typed confirmation. Snapshot updates use owner-specific authenticated ciphertext and expected-revision IndexedDB transactions; original ZIP files are never changed. The confirmation is a user-experience protection against accidental data loss, not a security boundary against another person with access to the unlocked Windows session. Media-only exports are honestly labeled as inventory. Full native acceptance, integrity verification and storage-failure tests remain necessary.
+
+
+## v0.11.0 — Full-screen viewer and photo memory lifecycle
+
+Photo pages now render at most 24 gallery image components at once; changing pages unmounts previous image components and releases their React-held base64/data URLs. The full-screen viewer renders only the currently selected image. This reduces unbounded gallery memory retention but is not a formal process-wide memory limit or a native-thumbnail decoding pipeline. The ZIP path stays in the active profile's mounted Library session and disconnects on lock/profile switch. Viewer keyboard Escape, arrow navigation and focus management are local UI operations. Unsupported image decodes show a fallback; image parser/codec security remains an external review item.

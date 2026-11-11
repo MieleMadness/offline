@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.11.0 — Bounded photo navigation and full-size viewer (development)
+
+- Changed the Photographs gallery from cumulative Show More rendering to 24-image page navigation, capping mounted gallery images rather than holding every visited image.
+- Added a full-size local ZIP photo viewer with previous/next arrows, keyboard Left/Right/Escape, focus trapping/restoration, a clear close action, photo count, file path and size details.
+- Preserve the local, read-only JPEG/PNG/GIF/WebP image reader and 4 MiB/member limit; no background extraction or remote requests.
+- Detect image decode errors and display Preview unavailable instead of a broken image.
+- Added synthetic pagination and viewer-boundary tests. Manual keyboard, screen-reader, large-archive and Windows acceptance remain pending.
+
+
 ## v0.10.0 — Safer imports, coverage review and export-date compatibility (development)
 
 - New import assessment detects empty/navigation-only ZIP previews before replacing current content. Media-only ZIPs are labeled as inventory previews, not decoded social histories.

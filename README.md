@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.10.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.11.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -22,6 +22,12 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## Bounded photograph gallery and full-size viewer (v0.11.0 development)
+
+The **Photographs** gallery now shows **24 images per page**, rather than indefinitely adding mounted images as you browse. Use Previous/Next to move between pages, or use filename search to narrow the selection. Click a photo to open the dedicated full-size viewer. Within the viewer, use the arrow keys or side controls to navigate, **Escape** to close, and the close button to return to the library. The viewer traps keyboard focus until closed, restores focus after closing, and opens one image at a time.
+
+Every image continues to be read on demand from the selected original ZIP, not extracted or cached as a persistent copy. Pagination limits how many encoded images are held by the mounted gallery, but this is **not** a thumbnail generator, global memory budget, virtualized index, or 10,000-item performance guarantee. Unsupported or damaged image bytes receive an honest preview-unavailable placeholder.
 
 ## Import safety and coverage (v0.10.0 development)
 
