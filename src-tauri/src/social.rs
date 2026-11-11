@@ -111,11 +111,25 @@ fn clipped(s: &str) -> String {
     if chars.next().is_some() { format!("{limited}…") } else { limited }
 }
 
+const MAX_UNIX_SECONDS: i64 = 253_402_300_799;
+
+/// Only numeric export timestamps with a known unit are accepted; malformed dates
+/// remain unknown rather than being assigned the computer's current time.
+fn timestamp_number(raw: &Value, field: &str) -> Option<i64> {
+    let number = raw.as_i64().or_else(|| raw.as_str()?.trim().parse::<i64>().ok())?;
+    if number < 0 { return None; }
+    let seconds = if field == "timestamp_ms" ||
+        (number >= 1_000_000_000_000 && number <= MAX_UNIX_SECONDS.saturating_mul(1_000).saturating_add(999)) {
+        number / 1_000
+    } else {
+        number
+    };
+    (0..=MAX_UNIX_SECONDS).contains(&seconds).then_some(seconds)
+}
+
 fn time_at(value: &Value) -> Option<i64> {
-    let seconds = value.get("timestamp").and_then(Value::as_i64)
-        .or_else(|| value.get("creation_timestamp").and_then(Value::as_i64))
-        .or_else(|| value.get("timestamp_ms").and_then(Value::as_i64).map(|v| v / 1000));
-    seconds.filter(|t| (0..=253_402_300_799).contains(t))
+    ["timestamp", "creation_timestamp", "timestamp_ms"]
+        .iter().find_map(|field| value.get(*field).and_then(|raw| timestamp_number(raw, field)))
 }
 
 fn entries_under<'a>(value: &'a Value, keys: &[&str]) -> Vec<&'a Value> {
@@ -529,6 +543,25 @@ mod tests {
         }
         let data = writer.finish().unwrap().into_inner();
         ZipArchive::new(Cursor::new(data)).unwrap()
+    }
+
+    #[test]
+    fn normalizes_facebook_json_timestamps_without_inventing_invalid_dates() {
+        assert_eq!(time_at(&serde_json::json!({"timestamp": 1_700_000_000})), Some(1_700_000_000));
+        assert_eq!(time_at(&serde_json::json!({"timestamp": "1700000000"})), Some(1_700_000_000));
+        assert_eq!(time_at(&serde_json::json!({"timestamp_ms": 1_700_000_000_555_i64})), Some(1_700_000_000));
+        assert_eq!(time_at(&serde_json::json!({"timestamp_ms": "1700000000555"})), Some(1_700_000_000));
+        assert_eq!(time_at(&serde_json::json!({"creation_timestamp": 1_700_000_000_555_i64})), Some(1_700_000_000));
+        assert_eq!(time_at(&serde_json::json!({"timestamp": "invalid", "timestamp_ms": 1_600_000_000_000_i64})), Some(1_600_000_000));
+        for bad in [
+            serde_json::json!({"timestamp":"yesterday"}),
+            serde_json::json!({"timestamp":-1}),
+            serde_json::json!({"timestamp":253402300800_i64}),
+            serde_json::json!({"timestamp_ms":-1000}),
+            serde_json::json!({}),
+        ] {
+            assert_eq!(time_at(&bad), None, "accepted invalid value: {bad}");
+        }
     }
 
     #[test]
