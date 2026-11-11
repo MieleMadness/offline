@@ -1,0 +1,33 @@
+# Sensitive local user data
+*.zip
+*.7z
+*.tar
+*.gz
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.log
+*.bak
+.env
+.env.*
+!.env.example
+archives/
+exports/
+imports/
+private-fixtures/
+local-data/
+# Tool/build output
+node_modules/
+dist/
+target/
+out/
+*.exe
+*.msi
+*.msix
+__pycache__/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
