@@ -371,7 +371,7 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
         let mut bytes = Vec::with_capacity(file.size() as usize);
         // A checked upper bound also protects against inaccurate ZIP directory sizes.
         file.by_ref().take(MAX_TEXT_FILE_BYTES + 1).read_to_end(&mut bytes)
-            .map_err(|_| "A JSON member could not be read safely.".to_owned())?;
+            .map_err(|_| "An HTML or JSON member could not be read safely.".to_owned())?;
         if bytes.len() as u64 > MAX_TEXT_FILE_BYTES {
             files_skipped += 1;
             continue;
@@ -440,7 +440,7 @@ fn scan<R: Read + Seek>(mut archive: ZipArchive<R>) -> Result<SocialArchive, Str
         warnings.push(format!("Showing at most {MAX_DATA_RECORDS} data records."));
     }
     if files_skipped > 0 {
-        warnings.push(format!("{files_skipped} JSON files were skipped because they were unsupported, invalid, or exceeded import safety limits."));
+        warnings.push(format!("{files_skipped} HTML/JSON files were skipped because they were unsupported, invalid, or exceeded import safety limits."));
     }
     let format_hint = match (json_files_read > 0, html_files_read > 0) {
         (true, true) => "Mixed JSON and HTML",
@@ -519,4 +519,42 @@ mod tests {
         assert!(!safe_name("/secret.json"));
         assert!(!safe_name("a\0b.json"));
     }
+    #[test]
+    fn reads_html_only_post_and_conversation_from_zip() {
+        let archive = fixture(&[
+            ("index.html", "<html><h1>Private export</h1></html>"),
+            ("your_facebook_activity/posts/your_posts_1.html",
+                r#"<div class="_a6-g"><div class="_a6-h">Alex</div><div class="_a6-p">Family picnic!</div><time>2020-06-01T10:30:00Z</time><img src="../pic.jpg"></div>"#),
+            ("messages/inbox/morgan_004/message_1.html",
+                r#"<h1>Morgan</h1><div class="_a6-g"><div class="_a6-h">Morgan</div><div class="_a6-p">Hello Alex!</div><time>2021-06-01T10:30:00Z</time></div>"#),
+        ]);
+        let result = scan(archive).expect("read HTML export");
+        assert_eq!(result.format_hint, "HTML");
+        assert_eq!(result.html_files_read, 3);
+        assert_eq!(result.json_files_read, 0);
+        assert_eq!(result.posts.len(), 1);
+        assert_eq!(result.posts[0].text, "Family picnic!");
+        assert_eq!(result.conversations.len(), 1);
+        assert_eq!(result.conversations[0].title, "Morgan");
+        assert_eq!(result.conversations[0].messages[0].sender, "Morgan");
+    }
+
+    #[test]
+    fn reads_json_and_html_into_the_same_model() {
+        let archive = fixture(&[
+            ("your_facebook_activity/posts/your_posts_1.json",
+                r#"{"posts":[{"timestamp":1700000000,"text":"Recent JSON post"}]}"#),
+            ("your_facebook_activity/posts/your_posts_2.html",
+                r#"<div class="_a6-g"><div class="_a6-h">Alex</div><div class="_a6-p">Older HTML post</div><time>2020-06-01T10:30:00Z</time></div>"#),
+            ("ads_information/advertisers.json", r#"[{"name":"Example Advertiser"}]"#),
+        ]);
+        let result = scan(archive).expect("read mixed export");
+        assert_eq!(result.format_hint, "Mixed JSON and HTML");
+        assert_eq!(result.json_files_read, 2);
+        assert_eq!(result.html_files_read, 1);
+        assert_eq!(result.posts.len(), 2);
+        assert_eq!(result.posts[0].text, "Recent JSON post");
+        assert!(result.data_categories.iter().any(|cat| cat.id == "advertising"));
+    }
+
 }
