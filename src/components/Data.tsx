@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronRight, Eye, EyeOff, FileText, Info, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { fileName, formatNumber } from "../archive";
 import { availableRecordYears, dateLabel, filterDataRecords, type ImportedArchive } from "../social-model";
@@ -36,6 +36,8 @@ export default function Data({ archive, query }: { archive: ImportedArchive; que
   ), [current, query, year, needle]);
   const privateCategory = isPrivateDataCategory(current?.id);
   const concealed = privateCategory && revealedId !== current?.id;
+  // Revealing one category must never carry across a category or search change.
+  useEffect(() => { setRevealedId(null); }, [query, current?.id]);
 
   function chooseCategory(id: string) {
     setSelected(id);
