@@ -3,6 +3,7 @@ import { CalendarDays, ChevronDown, FileText, Image as ImageIcon, LockKeyhole, S
 import { fileName, formatNumber } from "../archive";
 import { availableYears, dateLabel, filterPosts, type ImportedArchive } from "../social-model";
 import { Avatar, EmptyState, timeISOString } from "./Shared";
+import { MediaStrip } from "./ArchivePhoto";
 
 function monthLabel(timestamp: number | null): string {
   if (timestamp === null) return "Undated memories";
@@ -11,7 +12,7 @@ function monthLabel(timestamp: number | null): string {
   return new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(date);
 }
 
-export default function Feed({ archive, query }: { archive: ImportedArchive; query: string }) {
+export default function Feed({ archive, query, sourceZip }: { archive: ImportedArchive; query: string; sourceZip: string | null }) {
   const [year, setYear] = useState("all");
   const [mediaOnly, setMediaOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(80);
@@ -58,10 +59,11 @@ export default function Feed({ archive, query }: { archive: ImportedArchive; que
               <span className="soc-post-origin">Archived post</span>
             </div>
             {post.text && <p className="soc-post-text">{post.text}</p>}
-            {post.mediaCount > 0 && <div className="soc-media-placeholder">
+            {post.mediaPaths?.length ? <MediaStrip zipPath={sourceZip} paths={post.mediaPaths} count={post.mediaCount}/> : null}
+            {post.mediaCount > 0 && !post.mediaPaths?.length && <div className="soc-media-placeholder">
               <ImageIcon size={27} aria-hidden="true"/>
               <div><strong>{formatNumber(post.mediaCount)} media reference{post.mediaCount === 1 ? "" : "s"}</strong>
-                <span>Media previews are coming in a later version.</span></div>
+                <span>No supported local image reference was found for this post.</span></div>
             </div>}
             <footer className="soc-post-meta"><FileText size={14} aria-hidden="true"/>
               <span title={post.sourcePath}>{fileName(post.sourcePath)}</span>
