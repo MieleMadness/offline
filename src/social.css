@@ -296,3 +296,20 @@ button:disabled { cursor: not-allowed; }
   .soc-readonly-compose, .soc-file-head { background: #26392c; }
   .soc-error { background: #472d2c; color: #ffdfda; border-color: #835854; }
 }
+
+
+.soc-show-more {
+  display: block; min-height: 44px; width: 100%; margin: 22px 0 8px;
+  border: 1px solid #b8d3c1; background: var(--panel); color: var(--accent);
+  font-size: 12px; font-weight: 700; border-radius: 10px;
+}
+.soc-show-more:hover { background: var(--accent-soft); }
+.soc-chat-limited {
+  margin: 2px auto 20px; max-width: 350px; padding: 10px 15px;
+  background: #e8f2e9; color: #345741; border-radius: 8px;
+  text-align: center; font-size: 11px; line-height: 1.5;
+}
+@media (prefers-color-scheme: dark) {
+  .soc-show-more { border-color: #4b7558; }
+  .soc-chat-limited { background: #284832; color: #d9f3e0; }
+}
