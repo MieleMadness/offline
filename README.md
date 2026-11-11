@@ -75,3 +75,7 @@ GitHub runs lightweight frontend checks on pull requests. The full Windows compi
 - [Changelog](CHANGELOG.md)
 
 The application's open-source license is still to be selected. Bundled third-party skill files retain their own licenses.
+
+## Workspace PIN and local AI search
+
+v0.5.0 adds a PIN option for encrypted workspaces and a bounded local AI search preview for text and images through installed Ollama models. See [setup, scope and verification](docs/LOCAL_AI_SEARCH.md). Real inference acceptance remains pending because the installed model failed to load on this computer.

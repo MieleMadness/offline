@@ -15,6 +15,7 @@ import Files from "./components/Files";
 import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ImportSummary from "./components/ImportSummary";
+import LocalSearch from "./components/LocalSearch";
 import VaultForm from "./components/VaultForm";
 import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
 import "./social.css";
@@ -107,21 +108,21 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     setError("");
   }
 
-  async function submitPassphrase(password: string) {
+  async function submitPassphrase(password: string, credential: "passphrase" | "pin") {
     if (!begin()) return false;
     try {
-      if (snapshot) {
+      if (snapshot && !enrolling) {
         const key = await deriveKey(password, snapshot.salt);
         const decoded = await unseal(activeProfileId, snapshot, key);
         setUnlocked({ key, archive: decoded });
       } else {
-        if (!sessionArchive || !safeLoadProfiles().some(p => p.id === activeProfileId)) {
+        if (!archive || !safeLoadProfiles().some(p => p.id === activeProfileId)) {
           throw new Error("Profile preferences must be available before saving a preview.");
         }
         const salt = crypto.getRandomValues(new Uint8Array(16));
         const key = await deriveKey(password, salt);
-        const next = await seal(activeProfileId, sessionArchive, key, salt);
-        await saveSnapshot(activeProfileId, next, null);
+        const next = { ...await seal(activeProfileId, archive, key, salt), credential };
+        await saveSnapshot(activeProfileId, next, snapshot?.revision ?? null);
         setSnapshot(next);
         onSessionArchive(null);
         setEnrolling(false);
@@ -129,7 +130,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       }
       return true;
     } catch {
-      setError(snapshot ? "Could not unlock this preview. Check the passphrase. A damaged copy also cannot be opened." :
+      setError(snapshot && !enrolling ? "Could not unlock this preview. Check the PIN or passphrase. A damaged copy also cannot be opened." :
         "The encrypted preview could not be saved. Your session preview is still open.");
       return false;
     } finally { finish(); }
@@ -176,7 +177,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       const social = await invoke<SocialArchive>("read_social_archive", { path: selected });
       const imported = { report, social };
       if (snapshot && unlocked) {
-        const next = await seal(ownerId, imported, unlocked.key, snapshot.salt);
+        const next = { ...await seal(ownerId, imported, unlocked.key, snapshot.salt), credential: snapshot.credential };
         await saveSnapshot(ownerId, next, snapshot.revision);
         setSnapshot(next);
         setUnlocked({ key: unlocked.key, archive: imported });
@@ -225,7 +226,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
           <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.4.1 · Development preview</span>
+        <span className="soc-version">Offline v0.5.0 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -243,6 +244,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
               value={query} onChange={(event) => setQuery(event.target.value)}/>
             <kbd>Ctrl K</kbd>
           </label>}
+          {unlocked && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
+            onClick={() => setEnrolling(true)}>Change PIN or passphrase</button>}
           {archive && <button type="button" className="soc-vault-action" disabled={busy || enrolling}
             onClick={snapshot ? lock : () => setEnrolling(true)}>{snapshot ? "Lock preview" : "Save encrypted copy"}</button>}
           <button type="button" className="soc-import" onClick={importZip} disabled={busy || !activeProfile || !ready || locked || enrolling}>
@@ -256,7 +259,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       </div>}
       <main className="soc-scroll">
         {!ready ? <p className="soc-soft-caption" role="status">{error ? "Preview unavailable" : "Opening profile…"}</p> :
-          locked || enrolling ? <VaultForm key={locked ? "unlock" : "save"} locked={locked} busy={busy}
+          locked || enrolling ? <VaultForm key={locked ? "unlock" : "save"} locked={locked} busy={busy} credential={snapshot?.credential ?? "passphrase"}
             onSubmit={submitPassphrase} onCancel={enrolling ? () => setEnrolling(false) : undefined}/> :
           !archive ? <div className="soc-welcome"><div className="soc-welcome-inner">
           <div className="soc-welcome-symbol"><Archive size={27} aria-hidden="true"/></div>
@@ -280,6 +283,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
           </div>
           <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
+          <LocalSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive}/>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}

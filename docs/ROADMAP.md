@@ -126,3 +126,10 @@
 
 ## Next coding order
 Next, exercise backup/recovery and storage failures before extending durable storage to indexes or thumbnails. Expand the synthetic compatibility matrix by export layout. Branch per cohesive milestone, batch dependent changes locally, keep Windows CI opt-in until release check. Issue trackers: #5 media, #6 Facebook compatibility, #7 visual acceptance.
+
+## Prioritized v0.5.0 work
+
+- Implemented PIN enrollment and changing the unlock secret on an unlocked encrypted workspace.
+- Implemented bounded text and image relevance search using local Ollama models.
+- Pending successful real inference acceptance with a model that fits available memory.
+- Next extend media indexing, model setup and full-library semantic retrieval, then encrypt persisted embeddings under the workspace key.

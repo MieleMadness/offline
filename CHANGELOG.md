@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.5.0 — Workspace PIN and local AI search preview
+
+- Set an 8–20 digit encryption PIN or change an unlocked workspace’s secret. Older passphrase snapshots remain readable.
+- Search sampled text by meaning and selected ZIP images by visual content through a locally installed Ollama model. No model download occurs automatically.
+- Real inference acceptance is pending. The installed model failed to load with synthetic input on this computer.
+
+
 ## v0.4.1 — Encrypted saved previews (development)
 
 - Optional per-profile encrypted snapshot. Enrollment locks the preview immediately. Unlocking restores posts, conversations, account records and the ZIP inventory. Switching owners unmounts the unlocked view.
