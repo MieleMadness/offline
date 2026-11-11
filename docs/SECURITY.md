@@ -1,6 +1,6 @@
 # Offline security boundaries — development
 
-## Current version v0.4.1
+## Current version v0.6.1
 Offline is an offline-first Windows app that opens user-owned ZIP exports read-only. It never requests Facebook credentials or intentionally sends archive contents to any server. **Do not put private exports in Git, GitHub Actions, automated logs or screenshots.**
 
 ### Input parsing
@@ -34,3 +34,7 @@ The app keeps the decrypted preview and key in the active profile component. Swi
 A PIN derives the encryption key using the existing KDF. PINs have less entropy than long passphrases and can be guessed offline by someone who copies a snapshot. The enrollment UI requires 8–20 digits. UI attempt throttling would not prevent offline guessing.
 
 Local AI requests send selected content to the installed Ollama service on loopback. Read [the search boundary](LOCAL_AI_SEARCH.md) before enabling it for private data.
+
+## v0.6.1 text indexes
+
+Completed text indexes are included in the workspace archive before encryption. They use the same owner-bound authenticated encryption and atomic revision check as archive records. No separate plaintext search index is persisted. See [text index lifecycle](TEXT_INDEXES.md).

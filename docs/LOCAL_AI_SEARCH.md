@@ -15,23 +15,23 @@ The app checks model availability when opening the workspace. Use Check models i
 
 ## Search preview
 
-Describe what to find, then choose Search text or Search images in ZIP. Text search embeds up to the first 30 nonempty posts, messages and account records, limited to 450 Unicode characters each. Image search asks you to select a ZIP for the workspace. It examines up to eight JPEG/PNG images, each at most 4 MiB and 25 megapixels, generates local descriptions and ranks them by semantic similarity.
+Describe what to find, then choose Search text or Search images in ZIP. Choose Build or resume text index to process all imported text in batches, then search its cached vectors. Long records are split into overlapping sections. See [index persistence and limits](TEXT_INDEXES.md). Image search asks you to select a ZIP for the workspace. It examines up to eight JPEG/PNG images, each at most 4 MiB and 25 megapixels, generates local descriptions and ranks them by semantic similarity.
 
-Results retain source paths. Similarity values rank the sample and do not measure probability. Even unrelated records can appear in the ranked results. Generated image descriptions can contain mistakes. Relevant records beyond the sample can be missed.
+Results retain source paths. Similarity values rank the sample and do not measure probability. Even unrelated records can appear in the ranked results. Generated image descriptions can contain mistakes. Text search covers the records supplied by the importer. Image results remain limited to the eight-image sample.
 
-Whole-library indexing, direct image embeddings, OCR, result previews, progress/cancellation and model updates remain follow-ups.
+Direct image embeddings, image-library indexing, OCR, result previews and cancellation of in-flight model calls remain follow-ups.
 
 ## Privacy and limits
 
 The native client uses a fixed loopback address, disables proxies and redirects, and uses two named locally installed models. Download buttons call Ollama's model download endpoint without any archive content or search query. Search uses the local embed/generate endpoints. Ollama's configuration, process memory and diagnostic settings are part of the trusted local environment.
 
-Search results stay in the active workspace component. Locking, switching or replacing the archive removes them from the interface. An already submitted inference request may finish in the local model process. Embeddings and image buffers are currently held only during the request. ZIP members are read without extracting files.
+Search results stay in the active workspace component. Locking, switching or replacing the archive removes them from the interface. An already submitted inference request may finish in the local model process. Completed text embeddings are kept in the workspace index and encrypted with saved archives. Session-only embeddings and image buffers remain in memory. ZIP members are read without extracting files.
 
 A PIN has less entropy than a long passphrase. Someone who copies a snapshot can attempt offline guesses. Original ZIPs retain their Windows file permissions. No password recovery is provided.
 
 ## Verification
 
-v0.5.1 passes frontend and Rust tests and compiles locally for Windows. Synthetic native acceptance covers three workspace owners, PIN enrollment, wrong-PIN rejection, manual and switch locking, changing the PIN, rejection of the previous PIN, and restart.
+v0.6.1 passes 17 frontend tests and 17 Rust tests and compiles locally for Windows. Native text-index checks cover stop/resume, long records after the former 30-record sample, encrypted index commits and cached search after restart. The v0.5.1 image-search checks remain the verified image baseline. Synthetic native acceptance covers three workspace owners, PIN enrollment, wrong-PIN rejection, manual and switch locking, changing the PIN, rejection of the previous PIN, and restart.
 
 Real native AI acceptance used two synthetic posts and two generated images. “Rainy weather” ranked the umbrella post above pasta. “A red square” ranked the red-square image above a blue circle. The smaller models ran locally after the installed Gemma 4 model failed to load. No personal archive was used. These checks establish the tested examples and do not certify search quality across Facebook exports.
 

@@ -3,6 +3,7 @@ import { deriveKey, seal, unseal } from "./vault";
 import type { ImportedArchive } from "./social-model";
 
 const archive: ImportedArchive = {
+  textIndex: { version: 1, fingerprint: "synthetic", modelRevision: "local-model", dimensions: 2, vectors: ["f38="] },
   report: { archiveName: "synthetic-only.zip", formatHint: "HTML", totalFiles: 1, totalUncompressedBytes: 50,
     displayedFiles: 0, entries: [], sections: [] },
   social: { posts: [], conversations: [], dataCategories: [], filesRead: 1, jsonFilesRead: 0,

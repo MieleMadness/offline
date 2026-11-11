@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.6.1 — Workspace text indexes
+
+- Index every imported text record in resumable batches with progress. Long Unicode records are split into overlapping sections.
+- Search compressed cached vectors and keep the best section per record. Invalidate indexes when source content or the model digest changes.
+- Save completed indexes inside the workspace’s existing authenticated ciphertext. Session indexes stay in memory. Older snapshots remain readable.
+- The first 0.6.0 local build found a missing index-save callback prop. Fixed the wiring and synchronized versions at 0.6.1.
+
+
 ## v0.5.1 — Smaller local search models and setup
 
 - Fix the v0.5.0 model-loading dependency by using small text embeddings and local image captions. Add explicit one-time model downloads and setup status.
