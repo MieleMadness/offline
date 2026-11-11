@@ -46,3 +46,19 @@ This tests ZIP directory handling and gallery paging; it does **not** prove full
 - Real Facebook export schemas, HTML selectors, Messenger encoding and media formats evolve. Success on these fixtures demonstrates only the code paths represented here.
 - A synthetic PNG is deliberately one pixel and compresses extremely well. Resource use will differ greatly for real family photos and video.
 - If the app cannot decode a fixture, report the **fictional** fixture filename, app version, expected result, error category and CI run. Do not upload an actual Facebook ZIP for debugging.
+
+
+## Native parser integration tests
+
+In addition to the Python ZIP structure checks, Rust unit tests in `src-tauri/src/social.rs` can open the **generated** ZIPs and run the production HTML/JSON importer. This verifies post counts, multipart Messenger messages, local image references, classified account data, timestamps and malformed-file rejection end to end through the native reader.
+
+From PowerShell, generate ZIP files and enable the fixture tests before running Cargo:
+
+```powershell
+py -3 scripts/generate_facebook_fixtures.py --output fixtures/generated
+$env:OFFLINE_ACCEPTANCE_FIXTURES = (Resolve-Path fixtures/generated).Path
+cargo test --manifest-path src-tauri/Cargo.toml
+Remove-Item Env:OFFLINE_ACCEPTANCE_FIXTURES
+```
+
+The Windows milestone workflow generates the same fictional files and sets `OFFLINE_ACCEPTANCE_FIXTURES` automatically. Normal local Cargo tests without the variable remain self-contained; the specialized generated-fixture tests skip when the variable is absent. A passing fixture test confirms supported parser paths, **not** universal Meta export compatibility.

@@ -96,3 +96,8 @@ This is a planned checklist, **not evidence the interactive tests have passed**.
 6. Record CPU/RAM and page-query latency for 10k/100k-entry ZIPs. A successful synthetic path test does not establish production-scale performance; keep that release blocker open until measured.
 
 **Why:** families can have exports far larger than 5,000 files, but indexing must not sacrifice privacy, UI responsiveness or recoverability.
+
+
+## Native fictional-export integration gate (development)
+
+The Windows milestone job now generates fictional HTML/JSON ZIPs locally and runs the production Rust reader against them. Confirm all native fixture tests report green when the `OFFLINE_ACCEPTANCE_FIXTURES` variable is set: JSON posts/messages/data, HTML posts/messages/media, empty/malformed import cases and mixed seconds/milliseconds dates. This closes a gap between testing the fixture generator and testing the actual import adapter. It does not replace a human Windows UI walkthrough or real-format redacted export acceptance.

@@ -47,7 +47,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install frontend packages
         run: npm install --no-audit --no-fund
-      - name: Rust unit tests
+      - name: Generate fictional ZIPs for native importer acceptance
+        run: python scripts/generate_facebook_fixtures.py --output fixtures/generated
+      - name: Rust unit tests and native fictional-export acceptance
+        env:
+          OFFLINE_ACCEPTANCE_FIXTURES: ${{ github.workspace }}/fixtures/generated
         run: cargo test --manifest-path src-tauri/Cargo.toml
       - name: Build Windows desktop executable
         run: npx tauri build --no-bundle
