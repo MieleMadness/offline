@@ -77,7 +77,12 @@
 
 **Exit gate:** Real synthetic ZIP media appears inside the right dated posts; rendering is safe and performant on large exports.
 
-## Phase 5 — v0.6.x: Conversations and connections
+## Phase 5 — v0.6.x: Family completion and conversations
+
+- [x] v0.6.0: Profile rename and removal with encryption-aware identity retention, compare-before-delete and backup guidance (pending native UI acceptance).
+
+### Conversation work (remaining)
+
 - [ ] Messenger conversation history complete with sender, dates, media attachments and thread parts.
 - [ ] Search across people/conversations; filter by date, attachments and participant.
 - [ ] Friend/follower/group/event relationship views from exported data.

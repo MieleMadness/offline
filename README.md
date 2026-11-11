@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.5.2.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.6.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
@@ -47,7 +47,7 @@ Prerequisites: Node.js 22+, Rust (MSVC), Visual Studio C++ Build Tools, and the 
 ```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
-git checkout feature/unified-preview-search-0.5.0
+git checkout feature/family-profile-management-next
 npm install
 npm run tauri dev
 ```
