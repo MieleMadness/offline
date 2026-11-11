@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  availableYears, avatarInitials, filterConversations, filterPosts,
+  availableMessageYears, availableYears, avatarInitials, filterConversations, filterPosts, filterThreadMessages,
   meaningfulCount, messageDays, type Conversation, type FeedPost, type SocialArchive,
 } from "./social-model";
 
@@ -28,6 +28,20 @@ describe("social archive UI helpers", () => {
     expect(filterConversations(chats, "PAT")).toHaveLength(1);
     expect(filterConversations(chats, "coffee")).toHaveLength(1);
     expect(filterConversations(chats, "unmatched")).toHaveLength(0);
+  });
+
+  it("filters one thread by year, participant text and attachment status", () => {
+    const items = [
+      { id: "a", sender: "Ari", timestamp: 1600000000, text: "Old photo", attachments: 1 },
+      { id: "b", sender: "Bea", timestamp: 1700000000, text: "New conversation", attachments: 0 },
+      { id: "c", sender: "Ari", timestamp: null, text: "Undated photo", attachments: 2 },
+    ];
+    expect(availableMessageYears(items)).toEqual(["2023", "2020", "unknown"]);
+    expect(filterThreadMessages(items, "photo", "all", true).map(m => m.id)).toEqual(["a", "c"]);
+    expect(filterThreadMessages(items, "ari", "2020", false).map(m => m.id)).toEqual(["a"]);
+    expect(filterThreadMessages(items, "", "unknown", false).map(m => m.id)).toEqual(["c"]);
+    expect(filterThreadMessages(items, "", "2023", true)).toEqual([]);
+    expect(items).toHaveLength(3);
   });
 
   it("groups chronological messages by local date", () => {

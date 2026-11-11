@@ -118,6 +118,25 @@ export function filterConversations(conversations: readonly Conversation[], sear
   );
 }
 
+
+/** Profile-scoped, pure filtering: the UI never indexes other family members' threads. */
+export function availableMessageYears(messages: readonly ChatMessage[]): string[] {
+  return [...new Set(messages.map(message => yearOf(message.timestamp)))]
+    .sort((a, b) => a === "unknown" ? 1 : b === "unknown" ? -1 : Number(b) - Number(a));
+}
+
+export function filterThreadMessages(
+  messages: readonly ChatMessage[], search: string, year: string, withAttachments: boolean,
+): ChatMessage[] {
+  const needle = search.trim().toLocaleLowerCase();
+  return messages.filter(message => {
+    if (year !== "all" && yearOf(message.timestamp) !== year) return false;
+    if (withAttachments && message.attachments < 1) return false;
+    return !needle || message.text.toLocaleLowerCase().includes(needle) ||
+      message.sender.toLocaleLowerCase().includes(needle);
+  });
+}
+
 export interface MessageDay {
   key: string;
   label: string;
