@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.7.2 — ZIP parser compatibility test correction
+
+- Removed a brittle synthetic duplicate-member test that assumed the ZIP reader would expose both identical central-directory names. Its iterator behavior may collapse aliases, so the test could not reliably assert the media reader saw two candidates.
+- Preserved the production duplicate-path check for archives that expose ambiguous entries. Added a mislabeled-image rejection to the regression suite and clarified this edge-case limitation in security notes.
+- Synchronized the patch version after the v0.7.1 native test failure. Native Windows verification is requested again.
+
+
 ## v0.7.1 — Windows ZIP fixture test correction
 
 - Fixed the synthetic duplicate-name ZIP test: the ZIP writer itself refuses duplicate names before the reader is invoked. The test now constructs a synthetic duplicate entry by rewriting its two ZIP directory headers; the reader's production duplicate-path guard remains unchanged.
