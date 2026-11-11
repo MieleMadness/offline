@@ -8,7 +8,8 @@ export default function Messages({ archive, query }: { archive: ImportedArchive;
   const chats = useMemo(() => filterConversations(archive.social.conversations, query), [archive, query]);
   const [selected, setSelected] = useState<string | null>(null);
   const current = chats.find((chat) => chat.id === selected) ?? chats[0];
-  const groups = current ? messageDays(current.messages) : [];
+  const visibleMessages = current?.messages.slice(-500) ?? [];
+  const groups = messageDays(visibleMessages);
   const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => { if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight; }, [current?.id]);
 
@@ -40,6 +41,7 @@ export default function Messages({ archive, query }: { archive: ImportedArchive;
             <span className="soc-chat-count">{formatNumber(current.messages.length)} messages</span>
           </header>
           <div className="soc-chat-messages" ref={scroll}>
+            {current.messages.length > visibleMessages.length && <p className="soc-chat-limited">Showing the 500 most recent messages in this conversation.</p>}
             {groups.length === 0 && <EmptyState icon={MessageCircle} title="No readable messages">
               This conversation was exported without messages that Offline can display yet.
             </EmptyState>}
