@@ -50,7 +50,7 @@
 - [x] Safe HTML parser (DOM/text, **never** render imported HTML in live WebView).
 - [ ] Extract representative HTML posts, Messenger threads and account/activity entries with timestamps and provenance.
 - [ ] Keep JSON adapter working; normalized output identical by category across formats.
-- [ ] Synthetic fixture matrix for both export formats, missing/ambiguous timestamps, archived threads and multiple parts.
+- [x] Synthetic HTML/JSON ZIP generator and Rust production importer/inventory integration tests for multipart Messenger, timestamps, malformed files and local image references (native acceptance pending).
 - [ ] Import health screen: what was found, imported, skipped, incompatible and why.
 
 **Exit gate:** A family of 3+ profiles can import *different* HTML and JSON synthetic exports without data mixing; core screens populated from both. Rust/frontend tests and an on-demand Windows milestone compile green. Verified on v0.3.0 commit 9b3ea66 with three synthetic ZIPs (HTML, JSON, mixed) through the native Windows picker. Each profile showed its own post, message, account record and inventory after switching. Remaining checklist items are follow-ups.

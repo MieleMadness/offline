@@ -237,6 +237,48 @@ mod tests {
         ZipArchive::new(Cursor::new(buffer)).expect("open synthetic zip")
     }
 
+    /// Generated archives are loaded only in explicit fictional-acceptance runs.
+    fn generated_zip(name: &str) -> Option<ZipArchive<std::fs::File>> {
+        let root = std::env::var_os("OFFLINE_ACCEPTANCE_FIXTURES")?;
+        let path = std::path::PathBuf::from(root).join(name);
+        let file = std::fs::File::open(&path).unwrap_or_else(|err| {
+            panic!("Missing fictional ZIP fixture {}: {err}", path.display())
+        });
+        Some(ZipArchive::new(file).expect("generated fictional ZIP must be valid"))
+    }
+
+    #[test]
+    fn generated_json_and_html_zips_have_correct_read_only_inventory_counts() {
+        for name in ["family-json.zip", "family-html.zip"] {
+            let Some(zip) = generated_zip(name) else { return; };
+            let report = scan_zip(zip, name.to_owned()).unwrap();
+            assert_eq!(report.archive_name, name);
+            assert!(report.total_files >= 5, "too few files in {name}");
+            assert!(report.entries.iter().any(|entry| entry.section == "photos"),
+                "missing photo inventory in {name}");
+            assert!(report.entries.iter().any(|entry| entry.section == "messages"),
+                "missing Messenger inventory in {name}");
+            assert!(report.entries.iter().any(|entry| entry.section == "posts"),
+                "missing posts inventory in {name}");
+            assert_eq!(report.displayed_files, report.total_files);
+        }
+    }
+
+    #[test]
+    fn generated_media_only_and_navigation_only_zips_are_not_misclassified() {
+        let Some(media) = generated_zip("media-only.zip") else { return; };
+        let report = scan_zip(media, "media-only.zip".to_owned()).unwrap();
+        assert_eq!(report.total_files, 2);
+        assert_eq!(report.sections.iter().find(|x| x.id == "photos").unwrap().count, 2);
+        assert_eq!(report.sections.iter().find(|x| x.id == "messages").unwrap().count, 0);
+
+        let Some(nav) = generated_zip("navigation-only.zip") else { return; };
+        let report = scan_zip(nav, "navigation-only.zip".to_owned()).unwrap();
+        assert_eq!(report.total_files, 1);
+        assert_eq!(report.format_hint, "ZIP archive");
+        assert_eq!(report.entries[0].section, "other");
+    }
+
     #[test]
     fn recognizes_categories() {
         assert_eq!(classify("your_facebook_activity/posts/your_posts_1.json"), "posts");
