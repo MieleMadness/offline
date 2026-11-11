@@ -435,3 +435,59 @@ button:disabled { cursor: not-allowed; }
 @media (prefers-reduced-motion: reduce) {
   .soc-search-tabs button { transition: none; }
 }
+
+
+/* Portable family recovery is a distinct page, not an interrupting modal. */
+.soc-restore-nav { display: flex; align-items: center; gap: 9px; width: 100%; margin-top: 12px;
+  padding: 11px 0; border: 0; background: transparent; color: #d5f1df;
+  font-size: 12px; font-weight: 700; text-align: left; }
+.soc-restore-nav:not(:disabled):hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.soc-restore-nav:disabled { opacity: .6; }
+.soc-vault-action { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.soc-success { display: flex; align-items: center; gap: 10px; padding: 12px 28px;
+  background: var(--accent-soft); border-bottom: 1px solid var(--border);
+  color: var(--ink); font-size: 12px; line-height: 1.6; }
+.soc-success > span { flex: 1; }
+.soc-success > button { display: grid; place-items: center; min-height: 32px; min-width: 32px;
+  border: 0; background: transparent; color: var(--ink); }
+.soc-restore-page { min-height: 100vh; width: 100%; overflow-y: auto; background: var(--canvas); color: var(--ink); }
+.soc-restore-wrap { width: min(700px, 100%); margin: auto; padding: 45px clamp(22px, 6vw, 60px) 60px; }
+.soc-restore-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 55px; }
+.soc-restore-back { display: flex; gap: 9px; align-items: center; min-height: 44px;
+  border: 0; background: transparent; color: var(--subtle); font-size: 13px; font-weight: 680; }
+.soc-restore-back:not(:disabled):hover { color: var(--accent); }
+.soc-restore-wrap h1 { margin: 0 0 16px; letter-spacing: -.035em;
+  font-size: clamp(31px, 4vw, 43px); line-height: 1.12; }
+.soc-restore-wrap h1 span { color: var(--accent); }
+.soc-restore-lead { max-width: 60ch; margin: 0 0 33px; color: var(--subtle); font-size: 14px; line-height: 1.7; }
+.soc-restore-surface { padding: clamp(22px, 4vw, 30px); border: 1px solid var(--border);
+  border-radius: 14px; background: var(--panel); }
+.soc-restore-step { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.soc-restore-step > svg { flex: 0 0 auto; color: var(--accent); }
+.soc-restore-step h2 { margin: 0 0 7px; font-size: 19px; letter-spacing: -.02em; }
+.soc-restore-step p { margin: 0; font-size: 12px; line-height: 1.7; color: var(--subtle); }
+.soc-restore-form { display: grid; gap: 13px; margin-top: 25px; padding-top: 24px;
+  border-top: 1px solid var(--border); }
+.soc-restore-owner { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
+.soc-restore-owner strong { font-size: 15px; }
+.soc-restore-owner span { color: var(--subtle); font-size: 11px; }
+.soc-restore-form label { color: var(--ink); font-size: 13px; font-weight: 720; }
+.soc-restore-form input { width: 100%; min-height: 44px; border: 1px solid var(--border);
+  border-radius: 9px; padding: 0 12px; background: var(--canvas); color: var(--ink); }
+.soc-restore-form > p { margin: 0; font-size: 11px; line-height: 1.65; color: var(--subtle); }
+.soc-restore-form .soc-primary { justify-self: start; }
+.soc-restore-error { display: flex; align-items: center; gap: 9px; margin-top: 15px;
+  padding: 12px; border-radius: 9px; background: #fff0eb; color: #77352f; font-size: 12px; }
+.soc-restore-wrap > .soc-soft-caption { display: flex; align-items: flex-start; gap: 8px;
+  line-height: 1.7; margin-top: 20px; }
+@media (prefers-color-scheme: dark) {
+  .soc-restore-error { background: #472d2c; color: #ffdfda; }
+}
+@media (max-width: 1180px) {
+  .soc-top-controls { gap: 7px; }
+  .soc-top-controls .soc-vault-action { padding: 8px; font-size: 11px; }
+}
+@media (max-width: 650px) {
+  .soc-restore-top { margin-bottom: 35px; }
+  .soc-restore-form .soc-primary { justify-self: stretch; }
+}

@@ -56,7 +56,8 @@
 
 ## Phase 3 — v0.4.x: Durable local library and search (in progress)
 - [x] Opt-in encrypted per-profile preview with passphrase unlock, manual lock, owner-bound writes and lock on profile switch. One snapshot per person.
-- [ ] Backup/restore, passphrase change, deletion, independent security review and tests for large archives and storage loss.
+- [x] Portable encrypted preview backup/restore first pass: separate-file export, no-overwrite recovery, preserved owner IDs and synthetic tests (pending native Windows acceptance).
+- [ ] Native recovery acceptance, large-archive/storage-loss tests, profile deletion and independent security review.
 - [ ] Profile-scoped SQLite schema, migrations, backups and import/source provenance.
 - [ ] Multiple ZIPs/parts per person and cross-format duplicate detection with review.
 - [ ] Fast full-text search by person, content, date, source and category.
