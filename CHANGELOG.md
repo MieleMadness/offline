@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.7.0 — On-demand archive photo previews (development)
+
+- Added Photographs gallery with lazy image display, search and bounded page batches.
+- Native on-demand read-only ZIP image service for JPEG, PNG, GIF and WebP up to 4 MiB, with safety checks on names, signatures, size and duplicate entries.
+- Recognized local image references in selected JSON/HTML post and Messenger export records, displaying them inline when available.
+- Original ZIP connection is temporary, current-profile scoped and rechecked against the saved inventory after unlocking; photos are not included in encrypted backups.
+- Added synthetic path, MIME, ZIP reader and reconnection tests. Full compatibility, codec security, native UI acceptance and video/HEIC remain pending.
+
+
 ## v0.6.0 — Family profile lifecycle (development)
 
 - Added a dedicated family-management screen with accessible rename and removal actions.

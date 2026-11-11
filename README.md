@@ -4,14 +4,15 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.6.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
+> **Development preview v0.7.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
 ## The experience
 
 | Area | What you'll see |
 | --- | --- |
 | My Timeline | Familiar post cards sorted by month and date, with year filters and attachment references |
-| Messages | Conversation list by name, sender, dates and chronological message bubbles |
+| Messages | Conversations organized by sender and date, plus recognized local image attachments |
+| Photographs | Lazy photo gallery from the selected ZIP (JPEG, PNG, GIF and WebP up to 4 MiB) |
 | Your Data | Categorized previews of account, advertising, searches, devices, locations and other exported activity |
 | Search library | Profile-scoped keyword search across recognized posts, messages and data, with date/category filters and source details; no AI required |
 | Archive Files | Read-only ZIP inventory for original filenames, sizes and metadata |
@@ -19,6 +20,12 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 | Family Profiles (preview) | Create, rename and switch between local family members; remove a profile with typed confirmation and backup guidance |
 
 **Import both Facebook export formats:** ZIP bundles with **JSON** or **HTML** content are recognized and routed to format-specific parsers that populate the same views. This is *initial preview support*, not universal compatibility with every Meta export variation. The import summary explains what was scanned or skipped.
+
+## On-demand photo previews (development preview)
+
+Open **Photographs** after importing a Facebook HTML or JSON ZIP to see supported local images. Recognized post photos and Messenger images can also appear inline. Supported previews include JPEG, PNG, GIF and WebP up to 4 MiB each. No photos are extracted to disk or uploaded. Videos, HEIC and some export variations are not supported yet.
+
+When reopening a saved encrypted preview, choose **Connect photos** and reselect the original ZIP. Offline compares the indexed inventory, but this comparison is not a cryptographic signature. The source path stays only in the current profile's memory and is disconnected on lock or profile switch. Encrypted backup files do not include original ZIPs or image binaries.
 
 ## Family profile management (development preview)
 
