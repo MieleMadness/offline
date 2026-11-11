@@ -6,6 +6,8 @@ A privacy-first Windows desktop application for exploring downloadable social hi
 
 > **Development preview v0.8.0.** Adds optional encrypted saved previews, workspace PINs and local keyword/AI discovery. The v0.3.0 baseline passed frontend checks, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43038624307). No public installer.
 
+**Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
+
 ## The experience
 
 | Area | What you'll see |
