@@ -144,7 +144,8 @@
 **Exit gate:** User acceptance against representative redacted exports and offline-first security checklist.
 
 ## Phase 9 — v1.0.0: Public desktop release
-- [ ] Windows installer, icon, publisher details, code signing (when available), reproducible release workflow and checksum.
+- [x] v0.13.0: Opt-in unsigned **test executable artifact** with SHA-256 checksum from verified Windows compilation (artifact workflow pending native verification).
+- [ ] Public Windows installer, publisher details, code signing (when available), reproducible signed release workflow and checksum.
 - [ ] App license decided; third-party skill licenses and bundled runtime attribution retained.
 - [ ] Manual multi-profile acceptance, HTML+JSON acceptance, security/privacy audit, accessibility and uninstall/backup tests.
 - [ ] User guide, supported-format matrix, changelog and issue templates.
