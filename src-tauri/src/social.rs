@@ -532,6 +532,29 @@ mod tests {
     }
 
     #[test]
+    fn links_only_local_json_photo_references_and_rejects_remote_urls() {
+        assert_eq!(
+            image_reference("posts/part_1.json", "photos/synthetic.jpg", false).as_deref(),
+            Some("photos/synthetic.jpg"),
+        );
+        assert_eq!(
+            image_reference("messages/inbox/alex/message_1.json", "../photos/image.png", true).as_deref(),
+            Some("messages/inbox/photos/image.png"),
+        );
+        for bad in ["https://example.com/image.jpg", "data:image/png;base64,a", "/absolute.png",
+            "../../outside.jpg", "photos/evil.svg", "photos/x.jpg?token=abc"] {
+            assert!(image_reference("posts/part_1.json", bad, false).is_none(), "{bad}");
+        }
+        let json = serde_json::json!({
+            "photos": [{"uri": "photos/a.jpg"}, {"uri": "https://remote.test/evil.jpg"}],
+            "attachments": [{"data": [{"media": {"uri": "photos/b.webp"}},
+                                       {"external_context":{"uri":"https://remote.test/pic.jpg"}}]}]
+        });
+        assert_eq!(media_image_paths(&json, "posts/part_1.json"),
+            vec!["photos/a.jpg", "photos/b.webp"]);
+    }
+
+    #[test]
     fn reads_posts_and_merges_messenger_parts_by_folder() {
         let archive = fixture(&[
             ("your_facebook_activity/posts/your_posts_1.json", r#"{"posts_v2":[{"timestamp":1600000000,"data":[{"post":"Hello again!"}],"attachments":[{"data":[{"media":{"uri":"photos/a.jpg"}}]}]}]}"#),

@@ -188,6 +188,7 @@ mod tests {
         assert_eq!(posts[0].text, "The picnic was wonderful!");
         assert_eq!(posts[0].author.as_deref(), Some("Taylor"));
         assert_eq!(posts[0].media_count, 1);
+        assert_eq!(posts[0].media_paths, vec!["your_facebook_activity/photos/image.jpg"]);
         assert!(posts[0].timestamp.is_some());
     }
 
