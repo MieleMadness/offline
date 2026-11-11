@@ -54,6 +54,7 @@ export interface SocialArchive {
 export interface ImportedArchive {
   report: ArchiveReport;
   social: SocialArchive;
+  textIndex?: import("./text-index").TextIndex;
 }
 
 function validDate(seconds: number | null): Date | null {

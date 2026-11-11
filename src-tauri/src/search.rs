@@ -302,6 +302,9 @@ mod tests {
                 })
                 .collect();
             assert!(ai_text_search("weather".into(), candidates).await.is_err());
+            assert!(ai_embed_texts(vec!["synthetic".into(); 17], false).await.is_err());
+            assert!(ai_embed_texts(vec!["one".into(), "two".into()], true).await.is_err());
+            assert!(ai_embed_texts(vec!["x".repeat(2001)], false).await.is_err());
         });
     }
 
@@ -385,4 +388,59 @@ mod tests {
         std::fs::remove_file(path).unwrap();
         assert_eq!(result.unwrap()[0].id, "photos/red-square.png");
     }
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EmbeddingBatch {
+    model_revision: String,
+    vectors: Vec<Vec<f64>>,
+}
+
+#[tauri::command]
+pub async fn ai_text_model_revision() -> Result<String, String> {
+    let response = client()?
+        .get("http://127.0.0.1:11434/api/tags")
+        .send()
+        .await
+        .map_err(|_| "Start Ollama to use local search.")?;
+    let value = read_response(response).await?;
+    value["models"]
+        .as_array()
+        .and_then(|models| models.iter().find(|m| m["name"] == TEXT_MODEL))
+        .and_then(|m| m["digest"].as_str())
+        .map(str::to_owned)
+        .ok_or("Download the text search model first.".into())
+}
+
+#[tauri::command]
+pub async fn ai_embed_texts(texts: Vec<String>, query: bool) -> Result<EmbeddingBatch, String> {
+    if texts.is_empty()
+        || texts.len() > 16
+        || (query && texts.len() != 1)
+        || texts
+            .iter()
+            .any(|text| text.len() > if query { 1000 } else { 2000 })
+    {
+        return Err("The search batch exceeds the supported size.".into());
+    }
+    let revision = ai_text_model_revision().await?;
+    let inputs = texts
+        .into_iter()
+        .map(|text| {
+            if query {
+                format!("task: search result | query: {text}")
+            } else {
+                format!("title: Archive | text: {text}")
+            }
+        })
+        .collect();
+    let vectors = embeddings(&client()?, inputs).await?;
+    if ai_text_model_revision().await? != revision {
+        return Err("The search model changed. Rebuild the workspace index.".into());
+    }
+    Ok(EmbeddingBatch {
+        model_revision: revision,
+        vectors,
+    })
 }

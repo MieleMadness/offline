@@ -15,6 +15,7 @@ import Files from "./components/Files";
 import { createProfile, profileOwnedValue, safeActiveId, safeLoadProfiles, saveProfiles, setProfileOwnedValue, type FamilyProfile } from "./profiles";
 import ProfilePicker from "./components/ProfilePicker";
 import ImportSummary from "./components/ImportSummary";
+import type { TextIndex } from "./text-index";
 import LocalSearch from "./components/LocalSearch";
 import VaultForm from "./components/VaultForm";
 import { deriveKey, loadSnapshot, saveSnapshot, seal, unseal, type Snapshot } from "./vault";
@@ -196,6 +197,22 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     }
   }
 
+  async function saveTextIndex(textIndex: TextIndex) {
+    if (!archive || !begin()) throw new Error("Wait for the current workspace operation to finish.");
+    try {
+      const nextArchive = { ...archive, textIndex };
+      if (snapshot && unlocked) {
+        const next = { ...await seal(activeProfileId, nextArchive, unlocked.key, snapshot.salt),
+          credential: snapshot.credential };
+        await saveSnapshot(activeProfileId, next, snapshot.revision);
+        setSnapshot(next);
+        setUnlocked({ key: unlocked.key, archive: nextArchive });
+      } else {
+        onSessionArchive(nextArchive);
+      }
+    } finally { finish(); }
+  }
+
   const counts: Record<View, number> = {
     feed: archive?.social.posts.length ?? 0,
     messages: archive?.social.conversations.length ?? 0,
@@ -228,7 +245,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <div className="soc-private"><LockKeyhole size={17} aria-hidden="true"/>
           <span><strong>Local archive preview</strong><small>{snapshot ? "Saved preview is encrypted." : "Session preview · no passphrase."}</small></span>
         </div>
-        <span className="soc-version">Offline v0.5.1 · Development preview</span>
+        <span className="soc-version">Offline v0.6.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -285,7 +302,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
           </div>
           <p className="soc-preview-limit">Preview supports recognized Facebook HTML and JSON post, message and selected account-data layouts. Use Save encrypted copy after importing to keep a passphrase-protected preview. Actual media previews and more export variants are planned.</p>
         </div></div> : <>
-          <LocalSearch key={snapshot?.revision ?? previewRevision} archive={archive}/>
+          <LocalSearch key={previewRevision} archive={archive} onSaveIndex={saveTextIndex}/>
           <ImportSummary archive={archive} ownerName={activeProfile?.displayName ?? "Family member"}/>
           {view === "feed" && <Feed archive={archive} query={query}/>}
           {view === "messages" && <Messages archive={archive} query={query}/>}

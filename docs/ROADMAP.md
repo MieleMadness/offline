@@ -132,4 +132,11 @@ Next, exercise backup/recovery and storage failures before extending durable sto
 - Implemented PIN enrollment and changing the unlock secret on an unlocked encrypted workspace.
 - Implemented bounded text and image relevance search using local Ollama models.
 - Verified native text and image inference with EmbeddingGemma and Moondream in v0.5.1. Verified changing the workspace PIN and rejecting the previous PIN.
-- Model setup now offers explicit one-time downloads. Next extend media indexing and full-library semantic retrieval, then encrypt persisted embeddings under the workspace key.
+- Model setup now offers explicit one-time downloads. Full imported-text retrieval and encrypted cached vectors are implemented in v0.6.1. Next extend image indexing and performance/recovery coverage.
+
+## v0.6.x — Workspace text indexing
+
+- Implemented batched indexing for all imported text, overlapping long-record sections, compact cached vectors and model/content invalidation.
+- Completed indexes are saved inside encrypted workspace snapshots. Session indexes stay in memory.
+- Implemented progress and stop/resume within the unlocked session.
+- Next extend image indexing and source previews, then benchmark large imports and add recovery for interrupted indexing.
