@@ -36,6 +36,27 @@ describe("workspace text indexing", () => {
     expect(validIndex({ ...index, vectors: [] }, hash, "revision-one", 1, true)).toBe(true);
   });
 
+  it("includes messages and account records only from the supplied profile snapshot", () => {
+    const first = archiveWithPosts(["Family lunch"]);
+    first.social.conversations = [{
+      id: "thread-1", title: "Fictional Aunt", lastTimestamp: null,
+      participants: ["Fictional Aunt", "Alex"], messages: [{
+        id: "message-1", sender: "Alex", timestamp: null,
+        text: "Synthetic secret message", attachments: 0,
+      }],
+    }];
+    first.social.dataCategories = [{
+      id: "advertising", label: "Ad interests", fileCount: 1,
+      records: [{ title: "Fictional market", detail: "Garden decor",
+        timestamp: null, sourcePath: "ads/interests.json" }],
+    }];
+    const chunks = textChunks(first);
+    expect(chunks.map(chunk => chunk.id)).toContain("message-0-0");
+    expect(chunks.map(chunk => chunk.id)).toContain("data-0-0");
+    const other = archiveWithPosts(["Different household"]);
+    expect(textChunks(other).some(chunk => chunk.text.includes("secret message"))).toBe(false);
+  });
+
   it("ranks compressed vectors, keeps the best section per record and stops a cancelled search", async () => {
     const chunks = [
       { id: "one", source: "umbrella", text: "early section" },

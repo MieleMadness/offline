@@ -18,7 +18,14 @@ export default function LocalSearch({ archive, onSaveIndex }: {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState<SearchStatus | null>(null);
-  const chunks = useMemo(() => textChunks(archive), [archive]);
+  const prepared = useMemo(() => {
+    try { return { chunks: textChunks(archive), error: "" }; }
+    catch (cause) {
+      return { chunks: [], error: cause instanceof Error ? cause.message :
+        "This workspace cannot be indexed safely. Use regular keyword search." };
+    }
+  }, [archive]);
+  const chunks = prepared.chunks;
   const [completed, setCompleted] = useState(Array.isArray(archive.textIndex?.vectors) ? archive.textIndex.vectors.length : 0);
   const alive = useRef(true);
   const pending = useRef(false);
@@ -119,7 +126,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
           throw new Error("Choose the original ZIP for this family profile. This file's inventory does not match.");
         }
         if (stopped()) return;
-        matches = await invoke("ai_image_search", { query, path });
+        matches = await invoke<Match[]>("ai_image_search", { query, path });
       } else {
         const revision = await invoke<string>("ai_text_model_revision");
         const hash = await fingerprint(chunks);
@@ -165,6 +172,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
         cancelled.current = true; setBusy("Stopping after the current batch…");
       }}>Stop indexing</button>}
     </div>
+    {prepared.error && <p className="soc-search-index-warning" role="alert">{prepared.error}</p>}
     <p role="status">{completed} of {chunks.length} text sections indexed.</p>
     <label>Describe what to find
       <input value={query} maxLength={250} disabled={disabled} onChange={e => setQuery(e.target.value)}/>
