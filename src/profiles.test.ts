@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  cleanProfileName, createProfile, deserializeProfiles, profileOwnedValue, setProfileOwnedValue, PROFILE_COLORS,
+  cleanProfileName, createProfile, deserializeProfiles, profileOwnedValue, renameFamilyProfile, withoutFamilyProfile, setProfileOwnedValue, PROFILE_COLORS,
   type FamilyProfile,
 } from "./profiles";
 
@@ -36,6 +36,30 @@ describe("family profile isolation helpers", () => {
     expect(profileOwnedValue(both, "other-profile-uuid")).toBeNull();
     expect(profileOwnedValue({}, "constructor")).toBeNull();
     expect(firstOnly[first.id]).toBe(firstContent);
+  });
+
+
+  it("renames a profile without changing its encrypted owner identity", () => {
+    const second = createProfile([first], "Taylor", () => "second-profile-uuid", 2);
+    const output = renameFamilyProfile([first, second], first.id, "  Alex  Rivera ");
+    expect(output[0]).toMatchObject({ id: first.id, displayName: "Alex Rivera", accent: first.accent, createdAt: 1 });
+    expect(output[1]).toEqual(second);
+    expect(first.displayName).toBe("Alex");
+    expect(() => renameFamilyProfile([first, second], first.id, "TAYLOR")).toThrow(/already uses/);
+    expect(() => renameFamilyProfile([first], first.id, "   ")).toThrow(/Enter a name/);
+    expect(() => renameFamilyProfile([first], "missing-profile", "Sam")).toThrow(/no longer exists/);
+  });
+
+  it("removes just the selected profile and chooses a safe remaining owner", () => {
+    const second = createProfile([first], "Taylor", () => "second-profile-uuid", 2);
+    expect(withoutFamilyProfile([first, second], first.id, first.id)).toEqual({
+      profiles: [second], selectedId: second.id,
+    });
+    expect(withoutFamilyProfile([first, second], second.id, first.id)).toEqual({
+      profiles: [first], selectedId: first.id,
+    });
+    expect(withoutFamilyProfile([first], first.id, first.id)).toEqual({ profiles: [], selectedId: "" });
+    expect(() => withoutFamilyProfile([first], "unknown", first.id)).toThrow(/no longer exists/);
   });
 
   it("creates independent identities and stable accent assignment", () => {
