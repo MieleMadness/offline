@@ -8,7 +8,7 @@
 
 **Timeline.** Posts appear in a familiar social feed, sorted by original date and grouped by month. Search their text, filter by year and identify posts with media references.
 
-**Messages.** Conversations are grouped by people, and messages are presented in date order with sender names, timestamps and text. Multipart \`message_1.json\` / \`message_2.json\` threads are combined by conversation folder.
+**Messages.** Conversations are grouped by people, and messages are presented in date order with sender names, timestamps and text. Multipart `message_1.json` / `message_2.json` threads are combined by conversation folder.
 
 **Your data.** Explore the JSON export categories that were actually found, such as advertising-related information, searches, location/check-ins, devices/login history, connections and off-platform activity. Data coverage depends on the export; Offline doesn't claim to show everything Meta has stored.
 
@@ -20,27 +20,27 @@ The three core views use a desktop-first UI with clear typographic hierarchy, li
 
 Prerequisites: Node.js 22+, Rust stable (MSVC on Windows), Visual Studio C++ Build Tools and Tauri 2 Windows WebView2 prerequisites.
 
-\`\`\`powershell
+```powershell
 git clone https://github.com/MieleMadness/offline.git
 cd offline
 git checkout feature/social-archive-0.2.0
 npm install
 npm run tauri dev
-\`\`\`
+```
 
 For normal development, **test locally**, not in a full GitHub Windows workflow every time:
 
-\`\`\`powershell
+```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1
-\`\`\`
+```
 
 For an on-demand Windows executable build:
 
-\`\`\`powershell
+```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1 -BuildDesktop
-\`\`\`
+```
 
-GitHub runs short frontend checks on pull requests. Full Windows compilation runs only on manual workflow dispatch or a PR explicitly titled with \`[windows]\`. Don't release without verifying the exact commit and testing a Windows installation.
+GitHub runs short frontend checks on pull requests. Full Windows compilation runs only on manual workflow dispatch or a PR explicitly titled with `[windows]`. Don't release without verifying the exact commit and testing a Windows installation.
 
 ## Privacy and current limits
 
