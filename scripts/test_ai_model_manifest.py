@@ -1,6 +1,8 @@
 """Only fictional models/metadata, never private user archive content."""
 import json
 import pathlib
+import os
+import subprocess
 import re
 import unittest
 
@@ -28,6 +30,30 @@ class EmbeddingGemmaLicenseTest(unittest.TestCase):
         self.assertIn('const TEXT_MODEL: &str = "embeddinggemma-2:440m"', rust)
         self.assertNotIn('const IMAGE_MODEL: &str = "moondream:latest"', rust)
         self.assertIn('http://127.0.0.1:11434/api/embed', rust)
+
+    def test_staging_never_packages_an_unreviewed_model(self):
+        # Do not provide real model weights; reject at the independent source-pin gate.
+        environment = dict(os.environ, OFFLINE_COMPLETE_AI="1", OFFLINE_MODEL_FILE="fictional.litertlm")
+        run = subprocess.run(
+            ["node", "scripts/stage-embedded-ai.mjs"], cwd=ROOT,
+            env=environment, capture_output=True, text=True, timeout=30)
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("reviewed upstream model revision", run.stderr)
+        self.assertFalse((ROOT / "public/ai/embedded-bundle.json").exists())
+
+    def test_default_staging_clears_leftover_model_files(self):
+        target = ROOT / "public/ai/model/fictional-sentinel.litertlm"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b"FICTIONAL WEIGHTS, NOT A MODEL")
+        self.assertTrue(target.exists())
+        environment = dict(os.environ)
+        environment.pop("OFFLINE_COMPLETE_AI", None)
+        run = subprocess.run(
+            ["node", "scripts/stage-embedded-ai.mjs"], cwd=ROOT,
+            env=environment, capture_output=True, text=True, timeout=30)
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertFalse(target.exists())
+        self.assertFalse((ROOT / "public/ai/embedded-bundle.json").exists())
 
     def test_not_misrepresenting_standalone_model_pack(self):
         readme = (ROOT / "docs/AI_MODEL_DISTRIBUTION.md").read_text(encoding="utf-8")
