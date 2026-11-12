@@ -4,9 +4,9 @@ Offline is still a **development preview**, not a public release or supported in
 
 ## Build and get the artifact
 
-1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.13.0 · Verify** run whose Windows native checks completed.
-2. Under the run's **Artifacts** section, choose **Offline-v0.13.0-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
-3. Extract the artifact to a temporary test directory. It contains `offline.exe` and `SHA256SUMS.txt`. The artifact is retained for seven days and is not a stable release URL.
+1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.15.1 · Verify** run whose Windows native checks completed.
+2. Under the run's **Artifacts** section, choose **Offline-v0.15.1-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
+3. Extract the artifact to a temporary test directory. It contains `offline.exe`, `SHA256SUMS.txt`, `third_party/licenses/Apache-2.0.txt`, `THIRD_PARTY_NOTICES.md`, and `models/embeddinggemma-2.manifest.json`. The artifact is retained for seven days and is not a stable release URL.
 4. Verify the file fingerprint in PowerShell:
 
 ```powershell
@@ -15,6 +15,12 @@ Get-Content .\SHA256SUMS.txt
 ```
 
 The SHA-256 hex printed by PowerShell must match the checksum file. A checksum detects a mismatch against the build artifact, but it does **not** substitute for code signing or an independent trust review.
+
+## AI and license boundaries
+
+The executable includes an **Open-source model licenses** dialog with offline-readable Apache 2.0 terms and EmbeddingGemma 2 attribution. Open this from the sidebar and verify the contents match the artifact's notice/license files. The bundled app **does not yet include model weights or an inference runtime**; semantic search still requires a separately installed local Ollama and `embeddinggemma-2:440m`. The manifest accurately records the unbundled state.
+
+The SHA-256 checksum is for the executable only. Verify the license/notices are present but do not treat this preview as a complete license/SBOM audit or a self-contained AI installer.
 
 ## Safer test environment
 
