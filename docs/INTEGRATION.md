@@ -72,3 +72,8 @@ The first v0.17.0 TypeScript check failed because the pinned MediaPipe 1.2.2 API
 ## v0.18.0 — Bounded packaged-model photo similarity
 
 Built after the **green v0.17.1 full Windows artifact** at https://github.com/MieleMadness/offline/actions/runs/43138164732 . The new image path reuses the MediaPipe text/vision engine in a future approved Complete build and adds a Rust AI-specific JPEG/PNG/4MiB/25MP read gate. Search stays profile-scoped and compares at most 24 photos from 250 candidates, with progress/stop, while the older Ollama eight-photo path remains. Neither a model bundle nor full-photo indexing is supplied in the development artifact; real Windows inference and publisher trust are still release blockers.
+
+
+### v0.18.1 verification checkpoint
+
+The initial v0.18.0 frontend check reported a missing JSX closing brace in the photo comparison stop control. The v0.18.1 patch fixed this and synchronized npm/Cargo/Tauri/UI/workflow labels. The subsequent [v0.18.1 TypeScript, frontend tests, fictional Facebook ZIP checks, Apache model compliance and production bundle](https://github.com/MieleMadness/offline/actions/runs/43140996160) are all **green**. A single full Windows Rust/native executable milestone is requested on PR #32; until it completes, native photo validation cannot be marked green. Even a successful native build **does not establish real MediaPipe inference** without independently approved model assets and air-gapped Windows testing.
