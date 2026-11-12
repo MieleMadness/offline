@@ -10,6 +10,20 @@ const archive: ImportedArchive = {
 };
 
 describe("encrypted family snapshots", () => {
+  it("encrypts local text embeddings in the owner's saved workspace", async () => {
+    const indexed: ImportedArchive = {...archive, textIndex: {
+      version: 1, modelRevision: "synthetic-model",
+      fingerprint: "a".repeat(64), dimensions: 2, vectors: ["fwA="],
+    }};
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const key = await deriveKey("synthetic owner secret", salt);
+    const sealed = await seal("example-owner", indexed, key, salt);
+    expect(JSON.stringify(Array.from(new Uint8Array(sealed.ciphertext))))
+      .not.toContain("synthetic-model");
+    expect(await unseal("example-owner", sealed, key)).toEqual(indexed);
+    await expect(unseal("different-owner", sealed, key)).rejects.toThrow();
+  });
+
   it("opens only with the owner's passphrase and bound profile ID", async () => {
     const salt = crypto.getRandomValues(new Uint8Array(16));
     const key = await deriveKey("synthetic family passphrase", salt);

@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.14.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.15.1.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -23,6 +23,22 @@ Backup restore still requires the original PIN/passphrase and verifies authentic
 **Important limitation:** Browser localStorage and IndexedDB are independent stores; they do not share an atomic transaction. This mitigation protects common storage failures but does not solve abrupt power loss between separate commits. Keep encrypted backups outside Offline, and do not treat a green automated build as completed Windows recovery acceptance.
 
 The prior [v0.13.0 Windows build](https://github.com/MieleMadness/offline/actions/runs/43088969267) successfully produced a temporary unsigned test executable and SHA-256 file.
+
+## Full-workspace local text index (v0.15.0 development)
+
+**Search library** still provides instant, profile-scoped keyword search without a model. Its optional **Local AI search** panel now builds embeddings for all recognized nonempty text sections (rather than the first 30 records) using locally installed Ollama's `embeddinggemma:latest`. Text is split into overlapping 450-character sections, embedded in 16-section batches, with progress and stop/resume during the unlocked session. The index is tied to its source content and local model digest; changing either requires a rebuild.
+
+For **encrypted saved profiles**, the vector index is included inside the same owner-bound AES-GCM encrypted snapshot, using the existing revision-check storage guard. Ordinary session previews keep their index only in memory. Switching profiles or locking removes active index/search data from the visible view. Each workspace supports at most 20,000 text sections and 48 MiB of encoded index data. Older archives without indexes remain readable.
+
+**AI image search** remains limited to the first eight JPEG/PNG images (4 MiB and 25 megapixels each), but now compares the selected ZIP inventory to the active profile to reduce accidental cross-family searches. This comparison checks metadata and is **not cryptographic ZIP authentication**. Local model files may need to be downloaded once through Ollama; archived data is not intentionally uploaded to the Internet. Real-model indexing/performance and Windows privacy acceptance remain pending.
+
+See the [local AI guide](docs/LOCAL_AI_SEARCH.md) and [release/integration gates](docs/INTEGRATION.md).
+
+## EmbeddingGemma 2 and third-party model notices
+
+We selected **Google DeepMind EmbeddingGemma 2** (Apache-2.0) as the text-and-vision embedding model for Offline. The v0.15.1 development bridge uses the local **`embeddinggemma-2:440m`** model through Ollama and now ranks photo similarity directly, without a separate Moondream model. **This build does not yet include a bundled AI runtime or model weights.** A future Complete Windows installer will provide both after verified air-gapped testing.
+
+The exact Apache 2.0 license text and required model attribution are included in [third_party/licenses/Apache-2.0.txt](third_party/licenses/Apache-2.0.txt) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The [complete offline installer and compliance plan](docs/AI_MODEL_DISTRIBUTION.md) lists remaining requirements. Apache licensing applies to the **model**, not automatically to Offline's application source.
 
 ## The experience
 

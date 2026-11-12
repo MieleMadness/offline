@@ -1,6 +1,6 @@
 [package]
 name = "offline"
-version = "0.14.0"
+version = "0.15.1"
 description = "Private desktop explorer for personal data exports"
 authors = ["Offline contributors"]
 edition = "2021"
@@ -24,3 +24,4 @@ zip = { version = "2", default-features = false, features = ["deflate"] }
 
 reqwest = { version = "0.12", default-features = false, features = ["json"] }
 base64 = "0.22"
+imagesize = "0.13"

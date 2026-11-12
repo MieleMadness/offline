@@ -4,7 +4,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import {
   Archive, ArchiveRestore, ArrowDownToLine, ArrowRight, CalendarDays, Check, Download,
   ChevronRight, FileArchive, FolderOpen, Image as ImageIcon, Info, LockKeyhole, Menu,
-  MessagesSquare, Search, ShieldCheck, X, type LucideIcon,
+  MessagesSquare, ScrollText, Search, ShieldCheck, X, type LucideIcon,
 } from "lucide-react";
 import { formatNumber, formatSize, type ArchiveReport } from "./archive";
 import { meaningfulCount, type ImportedArchive, type SocialArchive } from "./social-model";
@@ -18,7 +18,9 @@ import ManageProfiles from "./components/ManageProfiles";
 import ImportSummary from "./components/ImportSummary";
 import ImportReview from "./components/ImportReview";
 import { requireUsableImport, type ImportHealth } from "./import-health";
+import type { TextIndex } from "./text-index";
 import QuickSearch from "./components/QuickSearch";
+import ThirdPartyLicenses from "./components/ThirdPartyLicenses";
 import Photos from "./components/Photos";
 import { sameInventory, photoEntries } from "./archive-images";
 import VaultForm from "./components/VaultForm";
@@ -158,6 +160,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const locked = !!snapshot && !unlocked;
   const archive = ready ? (snapshot ? unlocked?.archive ?? null : sessionArchive) : null;
   const [view, setView] = useState<View>("feed");
+  const [showLicenses, setShowLicenses] = useState(false);
   // Source ZIP is only a temporary association for this mounted, active profile.
   // Never place a local filesystem path in the encrypted preview or backups.
   const [sourceZip, setSourceZip] = useState<string | null>(null);
@@ -360,6 +363,32 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
     } finally { finish(); }
   }
 
+  async function saveTextIndex(index: TextIndex): Promise<void> {
+    if (!archive || !activeProfile || locked || enrolling || !begin()) {
+      throw new Error("Finish the current profile operation before saving a text index.");
+    }
+    try {
+      const nextArchive: ImportedArchive = { ...archive, textIndex: index };
+      if (snapshot) {
+        if (!unlocked) throw new Error("Unlock this saved profile to protect its search index.");
+        const next: Snapshot = {
+          ...await seal(activeProfileId, nextArchive, unlocked.key, snapshot.salt),
+          credential: snapshot.credential,
+        };
+        // The index is committed within the same authenticated owner-bound
+        // snapshot as all other social records, with optimistic revision checks.
+        await saveSnapshot(activeProfileId, next, snapshot.revision);
+        setSnapshot(next);
+        setUnlocked({ key: unlocked.key, archive: nextArchive });
+      } else {
+        // Session-only profiles never persist unencrypted vectors to disk.
+        onSessionArchive(nextArchive);
+      }
+    } finally {
+      finish();
+    }
+  }
+
   const counts: Record<View, number> = {
     feed: archive?.social.posts.length ?? 0,
     messages: archive?.social.conversations.length ?? 0,
@@ -397,7 +426,8 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
-        <span className="soc-version">Offline v0.14.0 · Development preview</span>
+        <button className="soc-license-link" type="button" onClick={() => setShowLicenses(true)}><ScrollText size={15} aria-hidden="true"/> Open-source model licenses</button>
+        <span className="soc-version">Offline v0.15.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">
@@ -474,12 +504,13 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
             onConnect={connectOriginalZip} busy={busy}/>}
           {view === "data" && <Data archive={archive} query={query}/>}
           {view === "files" && <Files report={archive.report} query={query}/>}
-          {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query}/>}
+          {view === "search" && <QuickSearch key={snapshot?.revision ?? archive.report.archiveName} archive={archive} query={query} onSaveIndex={saveTextIndex}/>}
           <footer className="soc-bottom-status"><span><LockKeyhole size={13} aria-hidden="true"/> Files stay on this device</span>
             <span>{formatNumber(archive.social.filesRead)} HTML/JSON files · {formatNumber(meaningfulCount(archive.social))} preview records</span>
           </footer>
         </>}
       </main>
     </div>
+    {showLicenses && <ThirdPartyLicenses onClose={() => setShowLicenses(false)}/>}
   </div>;
 }

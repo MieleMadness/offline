@@ -42,3 +42,13 @@ These are draft PRs stacked on each other. Merge/review in dependency order; do 
 3. **Manual Windows pass.** Follow [ACCEPTANCE.md](ACCEPTANCE.md) with fictional ZIPs: HTML and JSON, 5k+ photographs, Messenger date bounds, family isolation, blocked storage, encrypted backup recovery and complete keyboard navigation. Do not upload family ZIPs or screenshots containing real conversations.
 4. **Security and performance gate.** Review WebView image decoder limits, filesystem and memory usage, private search/index isolation and recovery when localStorage and IndexedDB commits are interrupted. Tests of synthetic 1×1 PNGs are not real-photo benchmarks.
 5. **Publish only with accurate language.** Unsigned CI executables are disposable test builds; code signing, public installer, independent review and actual export-format compatibility remain outstanding. A successful compile is not proof that an installer is production-safe.
+
+
+## v0.15.0 reconcile of parallel text-index work
+
+A fresh [v0.15.0 index integration branch](https://github.com/MieleMadness/offline/tree/feature/text-index-integration-0.15.0) starts from the **green v0.14.0** head and selectively carries PR #27's new text-index data pipeline, LocalSearch UI and native Ollama embedding commands, while preserving v0.14.0 profile management, encrypted backup/restore, ZIP photos, full Messenger filters and privacy masking. It adds backup-index validation and a source ZIP inventory check to optional image inference. Do not merge the earlier PR #27 wholesale; compare its tests and note it is superseded only once native and manual integration acceptance passes.
+
+
+## v0.15.1 native test and model selection
+
+v0.15.0 [targeted Windows Rust CI](https://github.com/MieleMadness/offline/actions/runs/43121426640) failed because tests referenced binary PNG fixtures missing from the branch. The v0.15.1 patch replaces them with deterministic source-embedded synthetic PNG bytes and moves the development embedding provider to Apache-licensed EmbeddingGemma 2:440m. Complete runtime/weight bundling remains future work and requires license/asset verification; see [AI model distribution](AI_MODEL_DISTRIBUTION.md).

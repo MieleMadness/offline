@@ -55,6 +55,22 @@ describe("portable encrypted backup recovery", () => {
     await expect(unseal(profile.id, restored.snapshot, wrong)).rejects.toThrow();
   });
 
+  it("rejects tampered or oversized optional text indexes and accepts older snapshots", () => {
+    const sample: ImportedArchive = JSON.parse(JSON.stringify(archive));
+    const valid = {
+      version: 1 as const, modelRevision: "local-digest",
+      fingerprint: "a".repeat(64), dimensions: 2, vectors: ["fwA="],
+    };
+    expect(() => validateRecoveredArchive(sample)).not.toThrow();
+    expect(() => validateRecoveredArchive({...sample, textIndex: valid})).not.toThrow();
+    expect(() => validateRecoveredArchive({...sample, textIndex: {...valid, vectors: ["!invalid!"]}}))
+      .toThrow(/search index/);
+    expect(() => validateRecoveredArchive({...sample, textIndex: {...valid, dimensions: 500000}}))
+      .toThrow(/search index/);
+    expect(() => validateRecoveredArchive({...sample, textIndex: {...valid, vectors: Array(20001).fill("fwA=")}}))
+      .toThrow(/search index/);
+  });
+
   it("keeps restored identity stable and handles duplicate profile names", () => {
     const existing = [{ ...profile, id: "other-family-0987" }];
     expect(recoveredProfileName(profile, existing)).toBe("Sam (restored 2)");

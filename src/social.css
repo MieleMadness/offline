@@ -845,3 +845,94 @@ button:disabled { cursor: not-allowed; }
 .soc-viewer-loading { display: grid; place-items: center; width: 100%; height: 100%;
   min-height: 180px; padding: 24px; color: #c1d5ca; text-align: center;
   font-size: 13px; line-height: 1.65; }
+
+
+/* v0.15.0 — Local AI remains secondary to the fast, always-available keyword search. */
+.soc-local-search { margin: 18px 0 0; padding: 18px 20px;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+  max-width: 940px; color: var(--ink); }
+.soc-local-search[open] { padding-bottom: 22px; }
+.soc-local-search > summary { cursor: pointer; color: var(--ink); font-size: 13px;
+  font-weight: 740; line-height: 1.6; min-height: 30px; }
+.soc-local-search > p { margin: 12px 0; max-width: 76ch; font-size: 12px;
+  line-height: 1.75; color: var(--subtle); }
+.soc-local-search label { display: grid; gap: 7px; margin: 18px 0 12px;
+  font-size: 12px; font-weight: 700; color: var(--ink); }
+.soc-local-search input { width: min(100%, 670px); min-height: 44px;
+  padding: 11px 13px; border: 1px solid var(--border);
+  background: var(--canvas); color: var(--ink); border-radius: 9px;
+  font-size: 13px; }
+.soc-search-setup { display: flex; align-items: center; flex-wrap: wrap;
+  gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.soc-search-setup > p { flex-basis: 100%; margin: 0 0 3px; max-width: 72ch;
+  font-size: 12px; line-height: 1.7; color: var(--subtle); }
+.soc-search-setup button, .soc-search-actions button {
+  display: inline-flex; justify-content: center; align-items: center;
+  min-height: 44px; padding: 10px 14px; color: var(--accent);
+  font-weight: 700; font-size: 12px; border: 1px solid var(--border);
+  background: var(--accent-soft); border-radius: 9px; }
+.soc-search-setup button:hover:not(:disabled), .soc-search-actions button:hover:not(:disabled) {
+  background: var(--canvas); }
+.soc-search-setup button:disabled, .soc-search-actions button:disabled {
+  opacity: .52; cursor: not-allowed; }
+.soc-search-actions { display: flex; flex-wrap: wrap; gap: 9px; margin: 14px 0 4px; }
+.soc-local-search > p[role="status"] { font-variant-numeric: tabular-nums; }
+.soc-local-search .soc-search-index-warning { color: var(--ink);
+  border: 1px solid var(--border); background: var(--accent-soft);
+  border-radius: 10px; padding: 12px; }
+.soc-local-search .soc-search-results { margin: 12px 0 0; padding-left: 20px; }
+.soc-local-search .soc-search-results li { margin: 0 0 12px; padding: 0 0 12px;
+  border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+.soc-local-search .soc-search-results li strong { color: var(--ink); font-size: 12px; }
+.soc-local-search .soc-search-results li p { margin: 6px 0 0;
+  color: var(--subtle); font-size: 12px; line-height: 1.7; }
+@media (max-width: 680px) {
+  .soc-local-search { padding: 14px; }
+  .soc-search-setup button, .soc-search-actions button { flex: 1 1 180px; }
+}
+
+
+/* Legal attribution is available even on a fully air-gapped desktop. */
+.soc-license-link { display: inline-flex; gap: 8px; align-items: center;
+  margin: 10px 10px 0; padding: 9px 5px; color: #c5dacf;
+  background: transparent; border: 0; font-size: 11px; text-align: left; }
+.soc-license-link:hover { color: #fff; text-decoration: underline; }
+.soc-licenses-dialog { width: min(840px, calc(100vw - 32px));
+  max-height: min(88vh, 900px); margin: auto; overflow: hidden; padding: 0;
+  border: 1px solid var(--border); border-radius: 17px;
+  background: var(--canvas); color: var(--ink);
+  box-shadow: 0 28px 90px rgb(0 0 0 / .3); }
+.soc-licenses-dialog::backdrop { background: rgb(9 23 16 / .68); }
+.soc-licenses-dialog header { display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px; padding: 22px 24px;
+  border-bottom: 1px solid var(--border); }
+.soc-license-kicker { display: inline-flex; gap: 8px; align-items: center;
+  color: var(--accent); font-size: 10px; letter-spacing: .11em; font-weight: 760; }
+.soc-licenses-dialog h2 { margin: 9px 0 0; font-size: 22px; }
+.soc-licenses-dialog h2 span { color: var(--accent); }
+.soc-licenses-dialog header button { min-width: 44px; min-height: 44px;
+  display: grid; place-items: center; background: var(--accent-soft);
+  border: 1px solid var(--border); color: var(--ink); border-radius: 10px; }
+.soc-license-body { overflow-y: auto; max-height: min(60vh, 660px);
+  padding: 16px 24px; }
+.soc-license-body > p { max-width: 75ch; color: var(--subtle);
+  font-size: 12px; line-height: 1.7; }
+.soc-license-body details { margin: 13px 0; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--panel); }
+.soc-license-body summary { cursor: pointer; min-height: 27px;
+  font-size: 12px; font-weight: 730; }
+.soc-license-body pre { white-space: pre-wrap; overflow-wrap: anywhere;
+  max-height: 400px; overflow: auto; margin: 11px 0 0;
+  font: 11px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: var(--ink); }
+.soc-licenses-dialog footer { border-top: 1px solid var(--border);
+  padding: 13px 24px; text-align: right; }
+.soc-license-done { min-height: 44px; padding: 9px 21px;
+  color: #fff; background: var(--accent); border: 0;
+  border-radius: 9px; font-weight: 720; }
+@media (max-width: 680px) {
+  .soc-licenses-dialog header { padding: 17px; }
+  .soc-license-body { padding: 12px 17px; }
+  .soc-licenses-dialog footer { padding: 10px 17px; }
+}

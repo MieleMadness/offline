@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.15.1 — EmbeddingGemma 2 licensing and Windows native test repairs (development patch)
+
+- Select Google DeepMind **EmbeddingGemma 2:440m**, released under **Apache License 2.0**, for the current text and photo embedding bridge. Retire the legacy EmbeddingGemma 1 + Moondream pairing from active development.
+- Change image search from generative captions to shared-space text/image vector similarity using Ollama's multimodal embedding API.
+- Fix the red Windows Rust test failure by replacing missing binary PNG test fixture files with deterministic, inline, fictional synthetic 2×2 PNG bytes.
+- Add full model license, third-party notices, machine-readable asset manifest, compliance checks, and a staged air-gapped Complete installer plan. **No model weights/runtime are bundled yet.**
+- Require independent checksum, dependency licenses, and actual Windows offline-install acceptance before distributing bundled model weights.
+
+
+## v0.15.0 — Reconciled local search index on current family archive (development)
+
+- Port the optional full-workspace text index from older PR #27 onto the v0.14.0 family/Messenger/photo/import code, without replacing newer features.
+- Embed recognized posts, messages and account data into bounded overlapping 450-character chunks in 16-section batches. Support progress, stopping and session-only continuation.
+- Encrypt saved indexes with the existing family snapshot key and revision-checked IndexedDB writes; keep ordinary session indexes in memory and rebuild when content or local model digest changes.
+- Add explicit caps for index entry count/encoded size; reject malformed restored index metadata; validate source ZIP inventory before optional image search to reduce cross-profile mistakes.
+- Keep keyword search available without local AI; add focused UI polish, search integration and encryption/source-isolation tests.
+- Windows native and real-model performance/security acceptance remain pending.
+
+
 ## v0.14.0 — Verifiable family-profile storage and safer encrypted recovery (development)
 
 - Profile creation and rename now verify local profile metadata persistence before updating the active library. Corrupted existing metadata is not silently overwritten.

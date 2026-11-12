@@ -4,6 +4,7 @@ import { formatNumber } from "../archive";
 import { dateLabel, type ImportedArchive } from "../social-model";
 import { availableSearchYears, searchPreview, type PreviewSearchKind } from "../preview-search";
 import LocalSearch from "./LocalSearch";
+import type { TextIndex } from "../text-index";
 import { isPrivateDataCategory } from "../data-privacy";
 import { timeISOString } from "./Shared";
 
@@ -17,7 +18,9 @@ const filters: { value: PreviewSearchKind; name: string }[] = [
 const labels = { post: "Post", message: "Message", data: "Data record" } as const;
 const icons = { post: CalendarDays, message: MessageCircle, data: ShieldCheck } as const;
 
-export default function QuickSearch({ archive, query }: { archive: ImportedArchive; query: string }) {
+export default function QuickSearch({ archive, query, onSaveIndex }: {
+  archive: ImportedArchive; query: string; onSaveIndex: (index: TextIndex) => Promise<void>;
+}) {
   const [filter, setFilter] = useState<PreviewSearchKind>("all");
   const [year, setYear] = useState("all");
   const [shown, setShown] = useState(50);
@@ -104,7 +107,7 @@ export default function QuickSearch({ archive, query }: { archive: ImportedArchi
     <section className="soc-search-ai" aria-label="Optional AI search">
       <h2>Explore with local AI</h2>
       <p>AI search can help find related ideas or images, but requires a compatible Ollama model installed on this device. The regular search above works without one.</p>
-      <LocalSearch archive={archive}/>
+      <LocalSearch archive={archive} onSaveIndex={onSaveIndex}/>
     </section>
     <p className="soc-soft-caption">Search covers this profile’s currently parsed preview, not every file in Facebook’s export. Imported originals remain unchanged.</p>
   </div>;
