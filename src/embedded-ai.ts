@@ -71,13 +71,11 @@ async function loadEngine(): Promise<UniversalEmbedder> {
     enginePromise = (async () => {
       const { FilesetResolver, UniversalEmbedder } = await import("@mediapipe/tasks-retrieval");
       const retrieval = await FilesetResolver.forRetrievalTasks(assetUrl("wasm"));
-      // Explicit CPU choice: do not require WebGPU to use Offline Complete.
-      // GPU/NPU paths need their own Windows hardware acceptance first.
+      // Version 1.2.2's published type lacks a delegate field here despite
+      // differing prose examples. Runtime backend availability and CPU/GPU
+      // behavior are explicitly unverified until real WebView2 acceptance.
       return UniversalEmbedder.createFromOptions(retrieval, {
-        baseOptions: {
-          modelAssetPath: assetUrl("model/" + MODEL_FILE),
-          delegate: "CPU",
-        },
+        baseOptions: { modelAssetPath: assetUrl("model/" + MODEL_FILE) },
       });
     })().catch(cause => {
       enginePromise = null;

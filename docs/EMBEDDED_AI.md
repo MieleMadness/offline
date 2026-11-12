@@ -1,10 +1,10 @@
-# Embedded MediaPipe / EmbeddingGemma 2 staging — v0.17.0
+# Embedded MediaPipe / EmbeddingGemma 2 staging — v0.17.1
 
 ## What is implemented
 
 Offline's optional semantic text search can select a **packaged MediaPipe Universal Embedder** before the existing Ollama bridge. A separately reviewed, immutable Google DeepMind EmbeddingGemma 2 (440M, text-and-vision) model and fixed MediaPipe WASM runtime are required. This bridge implements **text embeddings only**; the source-ZIP photo search still uses the bounded local Ollama path until the embedded image path receives equivalent safety acceptance.
 
-The app does **not** fetch AI files from the public Internet. The bundled adapter only loads the same-origin `ai/embedded-bundle.json`, `ai/model/embeddinggemma-2-text-vision-440m.litertlm`, and `ai/wasm/` files. It initializes the task through the Google MediaPipe `@mediapipe/tasks-retrieval` SDK version `1.2.2`. The browser request URL is resolved against Offline's packaged application origin; no CDN URL or arbitrary user-selected path is accepted by this adapter. It uses an explicit **CPU** delegate; GPU/NPU acceleration is not claimed until Windows testing.
+The app does **not** fetch AI files from the public Internet. The bundled adapter only loads the same-origin `ai/embedded-bundle.json`, `ai/model/embeddinggemma-2-text-vision-440m.litertlm`, and `ai/wasm/` files. It initializes the task through the Google MediaPipe `@mediapipe/tasks-retrieval` SDK version `1.2.2`. The browser request URL is resolved against Offline's packaged application origin; no CDN URL or arbitrary user-selected path is accepted by this adapter. The pinned 1.2.2 JavaScript package does not expose the documented delegate option in its published type. **CPU/GPU fallback is unverified** until real Windows WebView2 tests; the implementation does not bypass SDK type safety.
 
 ## Development build — default
 

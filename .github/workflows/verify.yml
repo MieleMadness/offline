@@ -1,4 +1,4 @@
-name: Offline 0.17.0 · Verify
+name: Offline 0.17.1 · Verify
 
 on:
   pull_request:
@@ -10,12 +10,12 @@ permissions:
 # Fast checks run on PRs. Use [rust] for targeted Windows Rust tests;
 # [windows] or workflow_dispatch builds the full desktop executable.
 concurrency:
-  group: offline-0.17.0-${{ github.head_ref || github.ref_name }}
+  group: offline-0.17.1-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   frontend:
-    name: 0.17.0 · Fast frontend verification
+    name: 0.17.1 · Fast frontend verification
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,7 +37,7 @@ jobs:
   windows:
     # Full compile for [windows]; Rust-only importer acceptance for [rust].
     if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]') || contains(github.event.pull_request.title, '[rust]')
-    name: 0.17.0 · Windows native checks (on demand)
+    name: 0.17.1 · Windows native checks (on demand)
     runs-on: windows-latest
     timeout-minutes: 55
     steps:
@@ -71,7 +71,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch' || contains(github.event.pull_request.title, '[windows]')
         uses: actions/upload-artifact@v4
         with:
-          name: Offline-v0.17.0-Windows-unsigned-preview
+          name: Offline-v0.17.1-Windows-unsigned-preview
           path: |
             src-tauri/target/release/offline.exe
             src-tauri/target/release/SHA256SUMS.txt

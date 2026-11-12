@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.17.1 — MediaPipe SDK option compatibility (development patch)
+
+- Correct the initial TypeScript failure by removing an unsupported delegate property from the pinned MediaPipe Universal Embedder 1.2.2 TypeScript API.
+- Defer CPU/GPU delegate selection until measured Windows WebView2 inference acceptance rather than treating documentation prose as verified SDK behavior.
+- No unreviewed model assets are shipped, and the Ollama fallback remains unchanged.
+
+
 ## v0.17.0 — Staged embedded MediaPipe inference path (development)
 
 - Add the Apache-2.0 MediaPipe Universal Embedder browser SDK, pinned to version 1.2.2, and a local-only EmbeddingGemma 2 440M text embedding adapter.

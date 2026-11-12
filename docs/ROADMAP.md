@@ -220,3 +220,5 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [x] Tie encrypted text-index revisions to backend identity and model digest; update license/runtime documentation and synthetic tests.
 - [ ] Independently pin the official upstream 440M checkpoint, verify Windows WebView2 WASM/CPU inference and full asset redistribution terms, and build/sign a Complete installer.
 - [ ] Extend the embedded backend to validated image embeddings, then test real 10k+ family archives with no Ollama and no internet.
+
+- [ ] v0.17.1 SDK compatibility: verify actual WebView2 hardware delegate behavior; the published MediaPipe 1.2.2 option type differs from documentation prose. Do not claim CPU fallback until measured.

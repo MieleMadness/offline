@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.17.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.17.1.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -178,6 +178,6 @@ The [fictional archive fixture guide](docs/SYNTHETIC_FIXTURES.md) now includes o
 An upcoming preflight can inspect a candidate .offlineai model pack from disk or USB and check its ZIP structure, file sizes and self-declared SHA-256 values without extracting or executing them. **A pack passing these checks is not publisher-authenticated or installable.** See [the model pack specification](docs/OFFLINE_AI_PACK.md).
 
 
-### v0.17.0 — Embedded AI runtime staging (not a Complete installer)
+### v0.17.1 — Embedded AI runtime staging (not a Complete installer)
 
 A pinned MediaPipe Universal Embedder adapter can perform text embeddings from **verified same-origin packaged files**, without requiring Ollama or a cloud service. The ordinary development build deliberately **does not contain the model or WASM weights** and continues to support Ollama as an optional fallback. Enabling a Complete build fails closed until independent model SHA-256/revision approval and real Windows model inference acceptance. See [embedded AI development instructions](docs/EMBEDDED_AI.md).

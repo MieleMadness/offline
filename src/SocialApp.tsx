@@ -427,7 +427,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
         <button className="soc-license-link" type="button" onClick={() => setShowLicenses(true)}><ScrollText size={15} aria-hidden="true"/> Open-source model licenses</button>
-        <span className="soc-version">Offline v0.17.0 · Development preview</span>
+        <span className="soc-version">Offline v0.17.1 · Development preview</span>
       </div>
     </aside>
     <div className="soc-main">

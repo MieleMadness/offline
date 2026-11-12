@@ -4,8 +4,8 @@ Offline is still a **development preview**, not a public release or supported in
 
 ## Build and get the artifact
 
-1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.17.0 · Verify** run whose Windows native checks completed.
-2. Under the run's **Artifacts** section, choose **Offline-v0.17.0-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
+1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.17.1 · Verify** run whose Windows native checks completed.
+2. Under the run's **Artifacts** section, choose **Offline-v0.17.1-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
 3. Extract the artifact to a temporary test directory. It contains `offline.exe`, `SHA256SUMS.txt`, `third_party/licenses/Apache-2.0.txt`, `THIRD_PARTY_NOTICES.md`, and `models/embeddinggemma-2.manifest.json`. The artifact is retained for seven days and is not a stable release URL.
 4. Verify the file fingerprint in PowerShell:
 
@@ -46,6 +46,6 @@ Provide the exact development version and GitHub Actions run, the fictional fixt
 This workflow does **not** create an installer, apply a publisher signature, auto-update the app, certify a secure desktop build or authorize v1.0 distribution. Security review, redacted real-export compatibility, large-library performance and manual Windows tests remain release blockers.
 
 
-## v0.17.0 binary distinction
+## v0.17.1 binary distinction
 
 The unsigned preview verifies the new MediaPipe adapter can compile but **does not include model weights**; there is no actual embedded AI to test in this artifact. Inspect the artifact and confirm no `ai/model/` or `ai/embedded-bundle.json` appears. The Ollama development fallback is unchanged. The real Complete installer requires a separately approved digest and disconnected Windows inference acceptance.

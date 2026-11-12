@@ -32,14 +32,14 @@
     "specification": "docs/OFFLINE_AI_PACK.md"
   },
   "embeddedRuntimeStage": {
-    "version": "0.17.0",
+    "version": "0.17.1",
     "sdk": "@mediapipe/tasks-retrieval",
     "sdkVersion": "1.2.2",
     "status": "blocked-until-model-pinned-and-tested",
     "approvedHashFile": "models/approved-embeddinggemma2.json",
     "bundleModelWeights": false,
     "modelInVersionedAssets": false,
-    "backend": "CPU-first",
+    "backend": "unverified-sdk-default",
     "supportedStage": "text-adapter",
     "webview2Verified": false,
     "airGapVerified": false
