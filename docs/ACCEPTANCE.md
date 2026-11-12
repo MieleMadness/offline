@@ -142,3 +142,12 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 7. Keep keyword search fully functional without Ollama or models. Confirm no real family data appears in GitHub, CI logs, crashes or shared screenshots.
 
 **Scope:** these are release-blocking **manual Windows tests**. Passing synthetic unit tests or a native compile is not proof of real inference quality, complete privacy, or production-scale indexing.
+
+
+## v0.15.1 — EmbeddingGemma 2 notice and binary acceptance (fictional data)
+
+- [ ] Install or run the unsigned preview in a disposable Windows user profile. Confirm the sidebar's **Open-source model licenses** opens the **entire Apache License 2.0** and the Google DeepMind model attribution with Wi-Fi and Ethernet disconnected.
+- [ ] Verify `SHA256SUMS.txt` matches the executable and the artifact includes `third_party/licenses/Apache-2.0.txt`, `THIRD_PARTY_NOTICES.md`, and `models/embeddinggemma-2.manifest.json`. The manifest must still say `not-built` and `includesModelWeights: false` for this preview.
+- [ ] With no Ollama installed, verify regular keyword search, photos, Messenger and local encrypted profiles work. Optional semantic search should report that a model is unavailable, never attempt a remote data lookup or silently install model files.
+- [ ] Optionally, on a test machine with local Ollama plus **`embeddinggemma-2:440m`**, test text and image embedding similarity with only synthetic content. Document retrieval quality, latency, fallback behavior and memory use. Do not treat compile success as successful real inference.
+- [ ] Before calling any later build `Offline Complete`, run a disconnected **fresh installation with no Ollama** and independently verified bundled model/runtime binaries, plus model weight/hash/NOTICE/SBOM compliance checks. Release must fail closed if model assets are missing or altered.
