@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.17.1.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.18.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -181,3 +181,10 @@ An upcoming preflight can inspect a candidate .offlineai model pack from disk or
 ### v0.17.1 — Embedded AI runtime staging (not a Complete installer)
 
 A pinned MediaPipe Universal Embedder adapter can perform text embeddings from **verified same-origin packaged files**, without requiring Ollama or a cloud service. The ordinary development build deliberately **does not contain the model or WASM weights** and continues to support Ollama as an optional fallback. Enabling a Complete build fails closed until independent model SHA-256/revision approval and real Windows model inference acceptance. See [embedded AI development instructions](docs/EMBEDDED_AI.md).
+
+
+### v0.18.0 — Embedded photo similarity (development)
+
+The approved, packaged EmbeddingGemma 2 text-and-vision adapter now supports **image embeddings** alongside text. For the current family's selected original ZIP, the app verifies its imported inventory before reading up to **24 JPEG/PNG photos per search**, bounded to 4 MiB and 25 megapixels each by a separate Rust AI-input gate. Images are compared to a text query using locally computed 768-dimensional vectors with progress and stop controls. Media is not extracted to disk or sent to a cloud inference service. The separately installed Ollama development fallback still supports up to eight photos.
+
+**This does not yet bundle actual weights or prove offline inference:** the default preview contains no approved model, and the MediaPipe path needs a vetted 440M asset, real WebView2 runtime tests, scaling and a signed air-gapped installer. See the [embedded AI acceptance plan](docs/EMBEDDED_AI.md).

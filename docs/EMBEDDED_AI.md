@@ -37,3 +37,10 @@ npm run build
 - [ ] Support image embeddings through the same backend with media-size/pixel validation and full family isolation, then CPU/GPU/NPU fallback choices.
 
 Links: [MediaPipe Universal Embedder](https://developers.google.com/edge/mediapipe/solutions/retrieval/universal_embedder), [model provenance](https://huggingface.co/litert-community/embeddinggemma-2-text-vision-440m-litert-lm), [licensing and distribution](AI_MODEL_DISTRIBUTION.md).
+
+
+## v0.18.0 — Image retrieval integration
+
+A **packaged and approved** 440M MediaPipe Universal Embedder can now call `embedImage(Uint8Array)` and compare the resulting 768-dimensional photo vector to a text query. The app checks that the selected original ZIP's inventory matches the active family profile, then sends only JPEG/PNG entries through the native `read_archive_ai_image` gate: read-only source ZIP, 4 MiB uncompressed limit, 25-megapixel header limit, exact member/index match. The initial bounded search examines up to 250 candidate photo paths and compares up to 24 valid photos, returns the best eight results, and supports user cancellation. Individual corrupt or unsupported images are skipped; changed/damaged ZIP metadata fails closed. **No photo vectors are stored or shared with other profiles.**
+
+This improves the integrated code path, not production readiness: the default installer still lacks the independently approved weights/WASM, this feature has not run on a true Windows WebView2 model, and scaling to 5,000+ images calls for a separate encrypted, incremental photo-index milestone. The Ollama development path remains available for eight-image searches without a bundled model.

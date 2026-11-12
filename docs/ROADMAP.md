@@ -222,3 +222,12 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [ ] Extend the embedded backend to validated image embeddings, then test real 10k+ family archives with no Ollama and no internet.
 
 - [ ] v0.17.1 SDK compatibility: verify actual WebView2 hardware delegate behavior; the published MediaPipe 1.2.2 option type differs from documentation prose. Do not claim CPU fallback until measured.
+
+
+## v0.18.0 — Bounded embedded photo retrieval
+
+- [x] Implement shared-space text/photo similarity using the packaged MediaPipe adapter, with separate native JPEG/PNG validation and source ZIP inventory check.
+- [x] Keep native photo reads under 4 MiB, headers under 25 MP and compare at most 24 images from the first 250 candidate entries. Include progress, cancellation and per-owner session boundaries.
+- [x] Preserve the existing Ollama fallback, encrypted text index and no-AI keyword search. Add deterministic native/TypeScript tests using fictional photos only.
+- [ ] Pass fast/frontend and Windows native/unsigned executable checks; manually evaluate real model assets on offline Windows without Ollama.
+- [ ] Follow with an incremental, encrypted full-photo vector index and pagination/metadata integration so 5,000+ photos can be searched without recomputing every vector each query.

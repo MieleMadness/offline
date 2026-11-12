@@ -113,3 +113,8 @@ The optional in-app MediaPipe runtime only accepts same-origin assets generated 
 ### v0.17.1 SDK compatibility note
 
 The MediaPipe Universal Embedder 1.2.2 published JavaScript API rejected the documented `baseOptions.delegate` option at TypeScript check. It was removed rather than forced through an unsafe cast. The effective GPU/CPU backend and fallback behavior remain unverified until live Windows WebView2 tests.
+
+
+## v0.18.0 — Local photo embedding inputs
+
+The embedded vision path receives user-selected original ZIP images only after the frontend confirms the current profile's imported inventory. Native `read_archive_ai_image` reads a single exact ZIP member/index without extraction, then requires JPEG or PNG, at most 4 MiB uncompressed bytes and at most 25 million reported pixels via `imagesize` header parsing. GIF/WebP and unsupported formats are excluded; image bytes and vectors are held in memory during the query, not written to public logs or a durable photo-index cache. User cancellation prevents further queued embeddings; an already-running model call may finish. This inventory match **is not a cryptographic ZIP signature**, and in-process decoded media/model libraries still require security review. A future privileged native search API should independently bind source archives to the active owner rather than relying only on a renderer-side inventory check.

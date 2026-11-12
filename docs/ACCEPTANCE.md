@@ -169,3 +169,12 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 - [ ] After independently approving a revision/sha, test a clean Windows 11 machine and real in-app MediaPipe text inference with the network disabled and Ollama absent. Check CPU fallback, memory, model-load errors, and encrypted family-owner isolation.
 - [ ] Validate SHA/model/source pin against independently reviewed provenance, include full runtime dependency notices, and confirm a signed installer bundles model/WASM from exactly that approved release.
 - [ ] Embedded photo search needs 4 MiB/25MP native checks before enabling it; the existing local Ollama image fallback is separate.
+
+
+## v0.18.0 — Bounded photo AI and family isolation
+
+1. With an independently approved model bundle on a **disconnected Windows VM**, index fictional text and search fictional JPEG/PNG photos with a phrase. Verify local-only inference, ranking, no Ollama requirement and no external network requests. A green CI compile alone does not establish success.
+2. Import two different fictional family ZIPs. Image search on Family A must refuse Family B's ZIP **before any image read**; switching profiles while searching must stop additional image calls and expose no A results in B.
+3. Test a ZIP containing JPEG, PNG, GIF, WebP, invalid headers, a 25MP+ PNG, a 4MiB+ JPEG and a mismatch between directory index and member name. Only safe JPEG/PNG should reach the in-app model; the others must fail closed or be explicitly skipped.
+4. Search an archive containing 5,125 synthetic photos: the current embedded path is **bounded to 24 images from the first 250 candidate entries**, not the whole library. Verify progress counts, cancellation, repeated-query behavior, CPU/GPU fallback and memory use.
+5. Verify the Ollama fallback still handles eight images when no approved packaged model exists, and plain keyword search works with no AI installed.
