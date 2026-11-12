@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{fs::File, io::Read, time::Duration};
 
-const TEXT_MODEL: &str = "embeddinggemma:latest";
-const IMAGE_MODEL: &str = "moondream:latest";
+// Google DeepMind EmbeddingGemma 2 (Apache-2.0). Current bridge uses local Ollama.
+const TEXT_MODEL: &str = "embeddinggemma-2:440m";
+const IMAGE_MODEL: &str = TEXT_MODEL;
 const MAX_RESPONSE_BYTES: usize = 2 * 1024 * 1024;
 
 #[derive(Deserialize)]
@@ -253,30 +254,32 @@ pub async fn ai_image_search(query: String, path: String) -> Result<Vec<Match>, 
     if !installed(&client, IMAGE_MODEL).await? {
         return Err("Download the image search model first.".into());
     }
-    // Require the ranking model before sending images to the vision model.
-    if !installed(&client, TEXT_MODEL).await? {
-        return Err("Download the text search model first.".into());
-    }
     let images = tauri::async_runtime::spawn_blocking(move || image_members(&path))
-        .await
-        .map_err(|_| "Image scan interrupted.")??;
-    let mut captions = Vec::new();
+        .await.map_err(|_| "Image scan interrupted.")??;
+    if images.is_empty() { return Ok(Vec::new()); }
+    // EmbeddingGemma 2 maps text and images into one embedding space.
+    // An embedding model does not produce image captions.
+    let query_vector = embeddings(&client, vec![format!("task: search result | query: {query}")])
+        .await?.remove(0);
+    let mut scored = Vec::new();
     for (name, image) in images {
-        let response = client.post("http://127.0.0.1:11434/api/generate")
-            .json(&json!({"model":IMAGE_MODEL,"prompt":"Describe the image briefly.",
-                "images":[image],"stream":false,"options":{"temperature":0,"num_predict":128},"keep_alive":0}))
-            .send().await.map_err(|_| "Local image search interrupted.")?;
+        let response = client.post("http://127.0.0.1:11434/api/embed")
+            .json(&json!({"model":IMAGE_MODEL,"input":[{"image":image}],
+                "truncate":false,"keep_alive":0}))
+            .send().await.map_err(|_| "Local image embedding interrupted.")?;
         let value = read_response(response).await?;
-        let caption = value["response"]
-            .as_str()
-            .filter(|s| !s.trim().is_empty())
-            .ok_or("The image model returned an empty description.")?;
-        captions.push(Candidate {
-            id: name,
-            text: caption.chars().take(450).collect(),
-        });
+        let mut vectors: Vec<Vec<f64>> = serde_json::from_value(value["embeddings"].clone())
+            .map_err(|_| "The local image model returned invalid embeddings.")?;
+        if vectors.len() != 1 || vectors[0].len() != query_vector.len()
+            || vectors[0].iter().any(|x| !x.is_finite()) {
+            return Err("The image model returned incompatible embedding dimensions.".into());
+        }
+        scored.push((cosine(&query_vector, &vectors.remove(0)), name));
     }
-    rank(&client, &query, captions).await
+    scored.sort_by(|a,b| b.0.total_cmp(&a.0));
+    Ok(scored.into_iter().take(8).map(|(score,name)| Match {
+        id: name, reason: format!("Visual similarity {score:.3} · EmbeddingGemma 2"),
+    }).collect())
 }
 
 #[cfg(test)]
@@ -308,6 +311,16 @@ mod tests {
         });
     }
 
+    // Fully synthetic 2x2 test pixels encoded directly in source.
+    fn fixture_png(red: bool) -> Vec<u8> {
+        let encoded = if red {
+            "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg=="
+        } else {
+            "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAD0lEQVR4nGNgYPgPRmAKABf2A/1+6zfzAAAAAElFTkSuQmCC"
+        };
+        base64::engine::general_purpose::STANDARD.decode(encoded).unwrap()
+    }
+
     fn fixture_zip(entries: &[(&str, &[u8])]) -> std::path::PathBuf {
         use std::io::Write;
         use zip::write::SimpleFileOptions;
@@ -332,14 +345,14 @@ mod tests {
 
     #[test]
     fn excludes_unsafe_and_oversized_image_members() {
-        let png = include_bytes!("../tests/fixtures/red-square.png");
+        let png = fixture_png(true);
         let mut oversized = png.to_vec();
         oversized[16..20].copy_from_slice(&100_000_u32.to_be_bytes());
         oversized[20..24].copy_from_slice(&100_000_u32.to_be_bytes());
         let path = fixture_zip(&[
-            ("../private.png", png),
+            ("../private.png", &png),
             ("huge.png", &oversized),
-            ("photos/valid.png", png),
+            ("photos/valid.png", &png),
         ]);
         let result = image_members(path.to_str().unwrap());
         std::fs::remove_file(path).unwrap();
@@ -349,7 +362,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "Requires local Ollama and downloaded EmbeddingGemma"]
+    #[ignore = "Requires local Ollama and EmbeddingGemma 2:440m"]
     fn local_text_inference_ranks_by_meaning() {
         let results = tauri::async_runtime::block_on(ai_text_search(
             "rainy weather".into(),
@@ -369,17 +382,13 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "Requires local Ollama and downloaded EmbeddingGemma and Moondream"]
+    #[ignore = "Requires local Ollama and EmbeddingGemma 2:440m"]
     fn local_image_inference_ranks_by_visual_content() {
+        let red = fixture_png(true);
+        let blue = fixture_png(false);
         let path = fixture_zip(&[
-            (
-                "photos/red-square.png",
-                include_bytes!("../tests/fixtures/red-square.png"),
-            ),
-            (
-                "photos/blue-circle.png",
-                include_bytes!("../tests/fixtures/blue-circle.png"),
-            ),
+            ("photos/red-square.png", &red),
+            ("photos/blue-square.png", &blue),
         ]);
         let result = tauri::async_runtime::block_on(ai_image_search(
             "a red square".into(),

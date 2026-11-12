@@ -157,11 +157,11 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     <p>Index all imported posts, messages and account records in this workspace, then search by meaning.
       Saved workspaces keep their index encrypted with the archive. Session indexes stay in memory.
       Image search checks the selected ZIP against this profile's imported inventory, then examines up to eight JPEG/PNG images (4 MiB and 25 megapixels each) from a ZIP you select.
-      Results may include unrelated items. AI-generated image descriptions can be inaccurate.</p>
+      Results may include unrelated items. Image similarity results may be inaccurate; this model does not generate captions.</p>
     {(!status?.textReady || !status?.imagesReady) && <div className="soc-search-setup">
-      <p>Install Ollama first. Download each search model once. Archive contents stay on this computer.</p>
-      {!status?.textReady && <button type="button" disabled={disabled} onClick={() => install(false)}>Download text model · 622 MB</button>}
-      {!status?.imagesReady && <button type="button" disabled={disabled} onClick={() => install(true)}>Download image model · 1.7 GB</button>}
+      <p>Development preview: Ollama is currently required. Download EmbeddingGemma 2 once, or install it from an offline model pack. A self-contained runtime and model bundle are planned. Archive contents stay on this computer.</p>
+      {!status?.textReady && <button type="button" disabled={disabled} onClick={() => install(false)}>Download EmbeddingGemma 2 · approximately 700 MB</button>}
+
       <button type="button" disabled={disabled} onClick={checkModels}>Check models</button>
     </div>}
     <div className="soc-search-actions">
