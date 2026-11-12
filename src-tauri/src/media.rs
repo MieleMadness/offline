@@ -107,7 +107,7 @@ pub fn list_archive_photos(
 }
 
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveImage {
     mime: &'static str,
