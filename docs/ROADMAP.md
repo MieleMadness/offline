@@ -211,3 +211,12 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [x] Expose preflight in the optional AI area, explicitly **not authenticated and not activatable**; no installation or execution.
 - [x] Add fictional Rust tests for valid fake packs, modified hashes, extra entries, traversal and unsupported metadata.
 - [ ] Verify full Windows CI and manual preflight; before a real offline release, pin independent model/runtime digests, bundle compatible runtime, and test completely disconnected inference.
+
+
+## v0.17.0 — Embedded AI integration staging
+
+- [x] Add MediaPipe SDK 1.2.2 and local text embedding adapter, selected only when verified bundled assets exist, with Ollama fallback in development.
+- [x] Add release-only, SHA-256-pin-checked staging that clears stale weights from normal builds and never downloads a model at runtime.
+- [x] Tie encrypted text-index revisions to backend identity and model digest; update license/runtime documentation and synthetic tests.
+- [ ] Independently pin the official upstream 440M checkpoint, verify Windows WebView2 WASM/CPU inference and full asset redistribution terms, and build/sign a Complete installer.
+- [ ] Extend the embedded backend to validated image embeddings, then test real 10k+ family archives with no Ollama and no internet.

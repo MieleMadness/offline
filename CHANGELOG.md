@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.17.0 — Staged embedded MediaPipe inference path (development)
+
+- Add the Apache-2.0 MediaPipe Universal Embedder browser SDK, pinned to version 1.2.2, and a local-only EmbeddingGemma 2 440M text embedding adapter.
+- Detect only an expected packaged manifest and in-app WASM/model asset locations. Prefer packaged text inference when the build is approved; otherwise retain the local Ollama search bridge and ordinary no-AI keyword search.
+- Stage model and WASM files exclusively at **build time** after independent revision/SHA-256 pin review. Ordinary development builds clear stale AI assets and ship **without bundled weights**.
+- Preserve encrypted per-profile index isolation; model revision includes the embedded SDK and model SHA to invalidate incompatible cached embeddings.
+- Add synthetic manifest and approval-pin tests, security/packaging docs, and the future clean Windows no-Ollama acceptance gate.
+- No approved weights, public Complete installer, real Windows bundled inference, or embedded image-vector pipeline yet.
+
+
 ## v0.16.0 — Air-gapped model-pack preflight (development)
 
 - Introduce local .offlineai ZIP inspection without extraction, installation, inference or activation.

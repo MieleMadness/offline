@@ -160,3 +160,12 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 3. Select an unapproved pack from a USB drive with networking disabled. Confirm it cannot read any family data or modify saved archive keys.
 4. Verify ordinary keyword search still works without Ollama; pack inspection does not enable inference.
 5. Before publishing Offline Complete, test independently authenticated assets and real on-device inference with no Internet/Ollama installed.
+
+
+## v0.17.0 — In-app WebAssembly model staging checks
+
+- [ ] Normal development build contains no `dist/ai/embedded-bundle.json`, LiteRT weights or staged WASM. Verify users cannot accidentally enable unvetted AI by leaving old local files around.
+- [ ] Attempt `OFFLINE_COMPLETE_AI=1` with unapproved model pin, wrong model name, wrong SHA and symlink path; the build must fail before distribution, without printing secrets or copying unverified weights.
+- [ ] After independently approving a revision/sha, test a clean Windows 11 machine and real in-app MediaPipe text inference with the network disabled and Ollama absent. Check CPU fallback, memory, model-load errors, and encrypted family-owner isolation.
+- [ ] Validate SHA/model/source pin against independently reviewed provenance, include full runtime dependency notices, and confirm a signed installer bundles model/WASM from exactly that approved release.
+- [ ] Embedded photo search needs 4 MiB/25MP native checks before enabling it; the existing local Ollama image fallback is separate.

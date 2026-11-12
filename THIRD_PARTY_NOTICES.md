@@ -30,3 +30,12 @@ The Apache 2.0 license permits commercial use and redistribution subject to its 
 The Apache 2.0 model license **does not automatically license Offline source code**. Offline's project-wide license remains a separate release decision; no root application `LICENSE` is added by this model attribution alone.
 
 Reference: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+
+## Google MediaPipe — Universal Embedder web runtime
+
+- Component: `@mediapipe/tasks-retrieval` JavaScript SDK, pinned to 1.2.2 for the proposed embedded model path.
+- Publisher: Google LLC / Google AI Edge MediaPipe project.
+- Source: https://github.com/google-ai-edge/mediapipe
+- License: Apache License 2.0; full text is included in `third_party/licenses/Apache-2.0.txt`.
+- Status: The JavaScript library is a pinned dependency of v0.17.0. WASM files are **not staged** into ordinary preview bundles; only a future separately approved Complete build would package them along with a model. Preserve any additional copyright/NOTICE or dependency licenses accompanying the exact npm package.

@@ -30,3 +30,8 @@ Synthetic frontend tests cover long Unicode records, late messages, compressed-v
 ## Apache 2.0 notices and the future offline installer
 
 The selected **EmbeddingGemma 2** model is Apache-2.0 licensed; the complete license is preserved in `third_party/licenses/Apache-2.0.txt` and its provenance in `THIRD_PARTY_NOTICES.md`. See `docs/AI_MODEL_DISTRIBUTION.md` for an embedded, no-Ollama Complete installer roadmap. **The v0.15.1 development build still uses a separately installed Ollama runtime and model; no fully standalone AI installer has been produced.**
+
+
+## v0.17.0 staged in-app AI adapter
+
+A future approved Complete build can run text embedding inside the app via MediaPipe Universal Embedder with local WASM and model files. When a verified staged bundle is present, the text-indexing UI selects it over Ollama and identifies the provider. Normal development builds intentionally lack the model and continue using separately installed Ollama. Bundled image search, real Windows model execution and air-gapped installer testing remain pending. See [embedded runtime plan](EMBEDDED_AI.md).

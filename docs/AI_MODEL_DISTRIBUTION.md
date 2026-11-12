@@ -38,3 +38,8 @@
 ## Air-gapped model-pack preflight
 
 The next version adds **read-only** .offlineai integrity inspection, not embedded inference. It refuses to activate any pack because the pack's own SHA-256 manifest cannot authenticate its publisher. Review [the pack schema and activation gates](OFFLINE_AI_PACK.md) before completing the bundled runtime or model package.
+
+
+## v0.17.0: staged embedded model adapter
+
+A MediaPipe Universal Embedder 1.2.2 **browser runtime and text-embedding adapter** now exist in code and load **only** if a reviewed model and WASM bundle is packaged with the app. No CDN or dynamic cloud model is a runtime dependency. The ordinary build ships with no model and prefers Ollama if independently installed. An explicit release-only build gate refuses model staging until an independently reviewed upstream Git SHA and model SHA-256 are pinned; see [EMBEDDED_AI.md](EMBEDDED_AI.md). **This is not proof of working offline inference or model redistribution approval.**

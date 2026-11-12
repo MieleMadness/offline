@@ -57,3 +57,8 @@ v0.15.0 [targeted Windows Rust CI](https://github.com/MieleMadness/offline/actio
 ## v0.16.0 — Read-only offline model-pack preflight
 
 This milestone follows the green [v0.15.1 Windows desktop build](https://github.com/MieleMadness/offline/actions/runs/43126496840). It implements a strictly non-activating local .offlineai integrity preflight, with no extraction or execution. **Do not mistake ZIP self-declared hashes for publisher authentication.** Before any inference from these assets, the app must pin externally verified digests/signatures, package a compatible runtime and model weights, and pass air-gapped Windows tests. See [pack security specification](OFFLINE_AI_PACK.md).
+
+
+## v0.17.0 — Embedded runtime candidate (next stacked draft)
+
+The branch `feature/embedded-ai-runtime-stage-0.17.0` extends the green v0.16.0 model-pack preflight with a local MediaPipe Universal Embedder adapter, a release-only approved digest gate, and retention of local Ollama fallback when no model is packaged. This remains a code/integration milestone, not an offline model release. See [embedded AI stages](EMBEDDED_AI.md). After frontend/Rust/native gates pass, stage this draft after #30, not over the old main branch.
