@@ -151,3 +151,12 @@ The Windows milestone job now generates fictional HTML/JSON ZIPs locally and run
 - [ ] With no Ollama installed, verify regular keyword search, photos, Messenger and local encrypted profiles work. Optional semantic search should report that a model is unavailable, never attempt a remote data lookup or silently install model files.
 - [ ] Optionally, on a test machine with local Ollama plus **`embeddinggemma-2:440m`**, test text and image embedding similarity with only synthetic content. Document retrieval quality, latency, fallback behavior and memory use. Do not treat compile success as successful real inference.
 - [ ] Before calling any later build `Offline Complete`, run a disconnected **fresh installation with no Ollama** and independently verified bundled model/runtime binaries, plus model weight/hash/NOTICE/SBOM compliance checks. Release must fail closed if model assets are missing or altered.
+
+
+## v0.16.0 — Read-only AI pack acceptance
+
+1. With synthetic .offlineai data only, verify matching file hashes report integrity but **never trust or activate** the model pack.
+2. Corrupt a hash, add an undeclared file, duplicate a name, include parent traversal/symlink or exceed declared size. Confirm rejection without extraction.
+3. Select an unapproved pack from a USB drive with networking disabled. Confirm it cannot read any family data or modify saved archive keys.
+4. Verify ordinary keyword search still works without Ollama; pack inspection does not enable inference.
+5. Before publishing Offline Complete, test independently authenticated assets and real on-device inference with no Internet/Ollama installed.

@@ -98,3 +98,8 @@ The image-inference file picker now checks that the chosen ZIP directory invento
 ## v0.15.1 — EmbeddingGemma 2 and model provenance
 
 The active local AI development model is Google DeepMind **EmbeddingGemma 2:440m** under Apache License 2.0, used for both textual and JPEG/PNG visual vector similarity instead of the earlier EmbeddingGemma 1 / Moondream development pairing. This is a **local Ollama bridge**, not yet an embedded or independently verified offline runtime; model downloads use an explicit user action. A future air-gapped Complete installer must bundle immutable, hash-verified weights, a license-reviewed native runtime and legally required attribution without querying the Internet. Model artifacts and private exports are excluded from this public repository. See `THIRD_PARTY_NOTICES.md` and `docs/AI_MODEL_DISTRIBUTION.md`.
+
+
+## v0.16.0 — Model-pack trust boundary
+
+Model-pack preflight reads an explicit .offlineai ZIP read-only and hashes assets in bounded buffers without extraction or execution. It rejects unsafe member names, symlinks, duplicate or undeclared members, excessive sizes/compression and self-declared checksum mismatches. **A self-declared SHA-256 manifest is not a publisher signature.** The command always returns publisherAuthenticated:false and readyToActivate:false; the application must never load such assets until a release independently pins their expected hashes or validates a genuine publisher signature. No user archive content or local keys are involved.

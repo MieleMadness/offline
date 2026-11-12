@@ -22,5 +22,13 @@
     "verifiedAirGapped": false,
     "includesModelWeights": false
   },
-  "releaseGate": "Do not claim or publish Offline Complete until all assets, notices and air-gapped tests are verified."
+  "releaseGate": "Do not claim or publish Offline Complete until all assets, notices and air-gapped tests are verified.",
+  "offlineModelPackPreflight": {
+    "schemaVersion": 1,
+    "status": "inspection-only",
+    "trustAnchorConfigured": false,
+    "publisherAuthenticated": false,
+    "canActivate": false,
+    "specification": "docs/OFFLINE_AI_PACK.md"
+  }
 }

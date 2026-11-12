@@ -33,3 +33,8 @@
 - Ollama development package: https://ollama.com/library/embeddinggemma-2
 - LiteRT Universal Embedder (candidate runtime, **not yet approved for Windows release**): https://developers.google.com/edge/mediapipe/solutions/retrieval/universal_embedder
 - Apache License: https://www.apache.org/licenses/LICENSE-2.0.txt
+
+
+## Air-gapped model-pack preflight
+
+The next version adds **read-only** .offlineai integrity inspection, not embedded inference. It refuses to activate any pack because the pack's own SHA-256 manifest cannot authenticate its publisher. Review [the pack schema and activation gates](OFFLINE_AI_PACK.md) before completing the bundled runtime or model package.

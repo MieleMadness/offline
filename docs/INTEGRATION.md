@@ -52,3 +52,8 @@ A fresh [v0.15.0 index integration branch](https://github.com/MieleMadness/offli
 ## v0.15.1 native test and model selection
 
 v0.15.0 [targeted Windows Rust CI](https://github.com/MieleMadness/offline/actions/runs/43121426640) failed because tests referenced binary PNG fixtures missing from the branch. The v0.15.1 patch replaces them with deterministic source-embedded synthetic PNG bytes and moves the development embedding provider to Apache-licensed EmbeddingGemma 2:440m. Complete runtime/weight bundling remains future work and requires license/asset verification; see [AI model distribution](AI_MODEL_DISTRIBUTION.md).
+
+
+## v0.16.0 — Read-only offline model-pack preflight
+
+This milestone follows the green [v0.15.1 Windows desktop build](https://github.com/MieleMadness/offline/actions/runs/43126496840). It implements a strictly non-activating local .offlineai integrity preflight, with no extraction or execution. **Do not mistake ZIP self-declared hashes for publisher authentication.** Before any inference from these assets, the app must pin externally verified digests/signatures, package a compatible runtime and model weights, and pass air-gapped Windows tests. See [pack security specification](OFFLINE_AI_PACK.md).

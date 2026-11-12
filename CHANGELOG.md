@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.16.0 — Air-gapped model-pack preflight (development)
+
+- Introduce local .offlineai ZIP inspection without extraction, installation, inference or activation.
+- Enforce an EmbeddingGemma 2 440M text/vision pack manifest, approved member layout, duplicate/path/symlink limits, decompression bounds and streamed SHA-256 checks.
+- Add an explicit model-pack picker and inspection result to optional AI search, warning that self-declared hashes do not authenticate the pack's publisher.
+- Native results always report publisherAuthenticated: false and readyToActivate: false. The separate local Ollama development bridge is unchanged.
+- Add fictional ZIP tests for tampering, extra or unsafe members, and unsupported metadata; document publisher trust and air-gapped Windows runtime gates.
+- Full Windows desktop and independent publisher/runtime acceptance remain pending.
+
+
 ## v0.15.1 — EmbeddingGemma 2 licensing and Windows native test repairs (development patch)
 
 - Select Google DeepMind **EmbeddingGemma 2:440m**, released under **Apache License 2.0**, for the current text and photo embedding bridge. Retire the legacy EmbeddingGemma 1 + Moondream pairing from active development.

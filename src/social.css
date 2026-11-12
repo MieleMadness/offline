@@ -936,3 +936,26 @@ button:disabled { cursor: not-allowed; }
   .soc-license-body { padding: 12px 17px; }
   .soc-licenses-dialog footer { padding: 10px 17px; }
 }
+
+
+/* Offline model-pack preflight: visible, non-activating verification only. */
+.soc-model-pack { margin: 25px 0 0; padding: 17px; max-width: 920px;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: var(--accent-soft); color: var(--ink); }
+.soc-model-pack-heading { display: flex; gap: 9px; align-items: center;
+  color: var(--accent); font-size: 13px; }
+.soc-model-pack p { margin: 11px 0; line-height: 1.7; font-size: 12px; }
+.soc-model-pack > button { min-height: 44px; padding: 10px 15px;
+  border: 1px solid var(--border); border-radius: 9px; background: var(--panel);
+  color: var(--ink); font-size: 12px; font-weight: 740; }
+.soc-model-pack > button:hover:not(:disabled) { background: var(--canvas); }
+.soc-model-pack > button:disabled { opacity: .6; cursor: not-allowed; }
+.soc-model-pack-result { display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 11px; margin: 10px 0; border-radius: 9px; background: var(--panel);
+  border: 1px solid var(--border); }
+.soc-model-pack-result strong { font-size: 12px; }
+.soc-model-pack-result p { margin: 5px 0 0; }
+.soc-model-pack-result > svg { flex: 0 0 auto; color: var(--accent); }
+.soc-model-pack .soc-model-pack-warning { display: flex; align-items: flex-start; gap: 9px; }
+.soc-model-pack-warning > svg { flex: 0 0 auto; margin-top: 3px; }
+.soc-model-pack .soc-model-pack-error { color: var(--ink); font-weight: 650; }

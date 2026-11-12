@@ -4,8 +4,8 @@ Offline is still a **development preview**, not a public release or supported in
 
 ## Build and get the artifact
 
-1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.15.1 · Verify** run whose Windows native checks completed.
-2. Under the run's **Artifacts** section, choose **Offline-v0.15.1-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
+1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.16.0 · Verify** run whose Windows native checks completed.
+2. Under the run's **Artifacts** section, choose **Offline-v0.16.0-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
 3. Extract the artifact to a temporary test directory. It contains `offline.exe`, `SHA256SUMS.txt`, `third_party/licenses/Apache-2.0.txt`, `THIRD_PARTY_NOTICES.md`, and `models/embeddinggemma-2.manifest.json`. The artifact is retained for seven days and is not a stable release URL.
 4. Verify the file fingerprint in PowerShell:
 
@@ -21,6 +21,12 @@ The SHA-256 hex printed by PowerShell must match the checksum file. A checksum d
 The executable includes an **Open-source model licenses** dialog with offline-readable Apache 2.0 terms and EmbeddingGemma 2 attribution. Open this from the sidebar and verify the contents match the artifact's notice/license files. The bundled app **does not yet include model weights or an inference runtime**; semantic search still requires a separately installed local Ollama and `embeddinggemma-2:440m`. The manifest accurately records the unbundled state.
 
 The SHA-256 checksum is for the executable only. Verify the license/notices are present but do not treat this preview as a complete license/SBOM audit or a self-contained AI installer.
+
+## Offline AI pack preflight — v0.16.0
+
+The optional local AI panel now has **Inspect local .offlineai pack**. If supplied a candidate ZIP on disk/USB, this read-only tool checks its manifest and streamed SHA-256 digests. It **never extracts, installs, executes or activates** the model, and it always reports that the publisher is **not authenticated**. A ZIP and its checksums can be forged together. This does not remove the current separate Ollama dependency for optional semantic search.
+
+For the release-blocking acceptance procedure and future independent source verification, see [the offline AI pack format](OFFLINE_AI_PACK.md). Use only fictional model ZIPs and fictional social archives in this unsigned preview.
 
 ## Safer test environment
 
