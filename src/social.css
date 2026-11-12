@@ -959,3 +959,8 @@ button:disabled { cursor: not-allowed; }
 .soc-model-pack .soc-model-pack-warning { display: flex; align-items: flex-start; gap: 9px; }
 .soc-model-pack-warning > svg { flex: 0 0 auto; margin-top: 3px; }
 .soc-model-pack .soc-model-pack-error { color: var(--ink); font-weight: 650; }
+
+/* Staged on-device MediaPipe provider, no network or Ollama required when bundled. */
+.soc-ai-provider { margin: 15px 0; padding: 13px 15px; background: var(--accent-soft);
+  border: 1px solid var(--border); border-radius: 10px; color: var(--ink);
+  font-size: 12px; line-height: 1.7; }
