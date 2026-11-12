@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "modelId": "google/embeddinggemma-2",
+  "sdkVersion": "1.2.2",
+  "status": "pending-verification",
+  "upstreamRevision": null,
+  "sha256": null,
+  "note": "Release maintainers must independently verify upstream model artifact revision/hash, review runtime licensing, and commit the resulting approved pin before enabling OFFLINE_COMPLETE_AI. Never copy a checksum from an untrusted local pack."
+}
