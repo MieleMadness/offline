@@ -107,7 +107,7 @@ pub fn list_archive_photos(
 }
 
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ArchiveImage {
     mime: &'static str,
@@ -195,6 +195,35 @@ pub fn read_archive_image(
     read_image(open_original_zip(&path)?, &member, index)
 }
 
+/// A separate, strictly bounded decode gate for local embedding inference.
+/// Reject animated, oversized or malformed images before calling MediaPipe.
+/// Original source ZIP is read-only and never extracted.
+fn read_ai_image<R: Read + Seek>(
+    zip: ZipArchive<R>, path: &str, index: Option<usize>,
+) -> Result<ArchiveImage, String> {
+    let image = read_image(zip, path, index)?;
+    if !matches!(image.mime, "image/jpeg" | "image/png") {
+        return Err("AI similarity supports JPEG and PNG images only.".into());
+    }
+    let bytes = STANDARD.decode(&image.data)
+        .map_err(|_| "Could not decode the selected image bytes.")?;
+    let dimensions = imagesize::blob_size(&bytes)
+        .map_err(|_| "This image header is damaged or unsupported.")?;
+    if dimensions.width == 0 || dimensions.height == 0
+        || dimensions.width.saturating_mul(dimensions.height) > 25_000_000
+    {
+        return Err("This image is above the AI 25-megapixel safety limit.".into());
+    }
+    Ok(image)
+}
+
+#[tauri::command]
+pub fn read_archive_ai_image(
+    path: String, member: String, index: Option<usize>
+) -> Result<ArchiveImage, String> {
+    read_ai_image(open_original_zip(&path)?, &member, index)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -213,6 +242,29 @@ mod tests {
     }
 
     const PNG: &[u8] = &[0x89, b'P', b'N', b'G', 13, 10, 26, 10, 0, 0, 0, 0];
+
+    #[test]
+    fn ai_image_gate_rejects_animated_wrong_index_and_oversized_pixels() {
+        // Completely synthetic 2x2 PNG with no family content.
+        let png = STANDARD.decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGP4z8AARAwQCgAf7gP9i18U1AAAAABJRU5ErkJggg==").unwrap();
+        let gif = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\xff\xff\xff";
+        let small = fixture(&[("photos/synthetic.png", &png), ("photos/animated.gif", gif)]);
+        assert_eq!(read_ai_image(small, "photos/synthetic.png", Some(0)).unwrap().mime, "image/png");
+
+        let only_gif = fixture(&[("photos/animated.gif", gif)]);
+        assert!(read_ai_image(only_gif, "photos/animated.gif", Some(0)).unwrap_err().contains("JPEG and PNG"));
+
+        let different = fixture(&[("photos/synthetic.png", &png)]);
+        assert!(read_ai_image(different, "photos/wrong.png", Some(0)).is_err());
+
+        // Valid PNG signature and dimensions header, but exceeds 25 MP.
+        let mut enormous = png.clone();
+        enormous[16..20].copy_from_slice(&100_000_u32.to_be_bytes());
+        enormous[20..24].copy_from_slice(&100_000_u32.to_be_bytes());
+        let oversize_zip = fixture(&[("photos/too-large.png", &enormous)]);
+        assert!(read_ai_image(oversize_zip, "photos/too-large.png", Some(0))
+            .unwrap_err().contains("25-megapixel"));
+    }
 
     #[test]
     fn generated_large_zip_lists_real_photo_bytes_after_five_thousand_members() {

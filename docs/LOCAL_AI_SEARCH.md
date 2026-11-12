@@ -35,3 +35,8 @@ The selected **EmbeddingGemma 2** model is Apache-2.0 licensed; the complete lic
 ## v0.17.0 staged in-app AI adapter
 
 A future approved Complete build can run text embedding inside the app via MediaPipe Universal Embedder with local WASM and model files. When a verified staged bundle is present, the text-indexing UI selects it over Ollama and identifies the provider. Normal development builds intentionally lack the model and continue using separately installed Ollama. Bundled image search, real Windows model execution and air-gapped installer testing remain pending. See [embedded runtime plan](EMBEDDED_AI.md).
+
+
+## v0.18.0 — Local photo similarity in a future Complete build
+
+With an approved packaged EmbeddingGemma 2 text/vision model, the **Search images in ZIP** action compares up to **24 JPEG/PNG photos** from the current family's original export to the text query using local image embeddings. The native reader enforces 4 MiB and 25 MP limits; the directory scan stops after 250 candidate photos. Image comparisons show progress and can be stopped. Each query uses temporary in-memory vectors only—no photo index is persisted yet. In the ordinary development build, no model is bundled and the local Ollama fallback still examines at most eight supported photos. Neither feature contacts a cloud AI service to process archives. See [model staging gates](EMBEDDED_AI.md).

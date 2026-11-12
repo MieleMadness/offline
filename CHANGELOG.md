@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.18.1 — Photo search cancellation JSX fix (development patch)
+
+- Repair a missing JSX closing brace in the photo comparison stop control caught by the initial v0.18.0 TypeScript CI gate.
+- Keep all source ZIP, 4 MiB / 25 MP, profile isolation, and model approval rules unchanged.
+- Re-run the complete frontend/fixture/model-compliance verification before native Windows build.
+
+
+## v0.18.0 — Embedded photo similarity bridge (development)
+
+- Add Universal Embedder image encoding to the existing, packaged-only MediaPipe adapter, so an approved local EmbeddingGemma 2 440M bundle can compare user queries with JPEG/PNG images in the same 768-dimensional space.
+- Add a dedicated Rust `read_archive_ai_image` command that never extracts ZIP entries and rejects other media types, files over 4 MiB or images above 25 megapixels. Exact ZIP directory index and name must match.
+- Reuse current family-profile ZIP inventory comparison before local AI photo inference. Bound embedded comparisons to 24 supported photos, examining at most 250 photo directory candidates; show progress and allow cancellation. No photo vectors are persisted.
+- Preserve the existing eight-photo Ollama image fallback, ordinary keyword search, encrypted family text indexes, and local model licensing/approval gates.
+- Add fictional tests for image dimension limits, native content type, local vector ranking, input caps, cancellation and malformed data.
+- Real-model image quality, full-library indexed photo search, independent model/runtime hashes, air-gapped Windows setup and security acceptance remain **pending**.
+
+
 ## v0.17.1 — MediaPipe SDK option compatibility (development patch)
 
 - Correct the initial TypeScript failure by removing an unsupported delegate property from the pinned MediaPipe Universal Embedder 1.2.2 TypeScript API.

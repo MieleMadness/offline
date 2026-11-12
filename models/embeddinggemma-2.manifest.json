@@ -32,7 +32,7 @@
     "specification": "docs/OFFLINE_AI_PACK.md"
   },
   "embeddedRuntimeStage": {
-    "version": "0.17.1",
+    "version": "0.18.1",
     "sdk": "@mediapipe/tasks-retrieval",
     "sdkVersion": "1.2.2",
     "status": "blocked-until-model-pinned-and-tested",
@@ -40,8 +40,12 @@
     "bundleModelWeights": false,
     "modelInVersionedAssets": false,
     "backend": "unverified-sdk-default",
-    "supportedStage": "text-adapter",
+    "supportedStage": "text-and-bounded-image-adapters",
     "webview2Verified": false,
-    "airGapVerified": false
+    "airGapVerified": false,
+    "imageLimitPerQuery": 24,
+    "imageDirectoryScanLimit": 250,
+    "maxImageUncompressedBytes": 4194304,
+    "maxImagePixels": 25000000
   }
 }

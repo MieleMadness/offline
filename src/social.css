@@ -964,3 +964,12 @@ button:disabled { cursor: not-allowed; }
 .soc-ai-provider { margin: 15px 0; padding: 13px 15px; background: var(--accent-soft);
   border: 1px solid var(--border); border-radius: 10px; color: var(--ink);
   font-size: 12px; line-height: 1.7; }
+
+
+/* Inference may take time on CPU; stopping never hides the progress text. */
+.soc-local-search > .soc-ai-stop { min-height: 44px; padding: 10px 15px;
+  margin: 4px 0 13px; background: var(--accent-soft); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 9px;
+  font-size: 12px; font-weight: 740; cursor: pointer; }
+.soc-local-search > .soc-ai-stop:hover { background: var(--panel); }
+.soc-local-search > .soc-ai-stop:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
