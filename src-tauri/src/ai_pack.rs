@@ -227,7 +227,6 @@ pub async fn inspect_offline_ai_pack(path: String) -> Result<PackInspection, Str
 #[cfg(test)]
 mod tests {
     use super::*;
-    use base64::Engine;
     use std::io::{Cursor, Write};
     use zip::write::SimpleFileOptions;
 
@@ -236,8 +235,8 @@ mod tests {
     }
 
     fn build_zip(tamper: bool, suspicious: bool, extra: bool) -> Vec<u8> {
-        let model = b"FICTIONAL MODEL BYTES — DO NOT RUN";
-        let runtime = b"FICTIONAL WASM BYTES — DO NOT RUN";
+        let model = b"FICTIONAL MODEL BYTES - DO NOT RUN";
+        let runtime = b"FICTIONAL WASM BYTES - DO NOT RUN";
         let license = b"Apache License Version 2.0";
         let notices = b"Google DeepMind EmbeddingGemma 2 fictional attribution";
         let data: Vec<(&str, &[u8])> = vec![
