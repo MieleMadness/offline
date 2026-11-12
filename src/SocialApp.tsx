@@ -4,7 +4,7 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import {
   Archive, ArchiveRestore, ArrowDownToLine, ArrowRight, CalendarDays, Check, Download,
   ChevronRight, FileArchive, FolderOpen, Image as ImageIcon, Info, LockKeyhole, Menu,
-  MessagesSquare, Search, ShieldCheck, X, type LucideIcon,
+  MessagesSquare, ScrollText, Search, ShieldCheck, X, type LucideIcon,
 } from "lucide-react";
 import { formatNumber, formatSize, type ArchiveReport } from "./archive";
 import { meaningfulCount, type ImportedArchive, type SocialArchive } from "./social-model";
@@ -20,6 +20,7 @@ import ImportReview from "./components/ImportReview";
 import { requireUsableImport, type ImportHealth } from "./import-health";
 import type { TextIndex } from "./text-index";
 import QuickSearch from "./components/QuickSearch";
+import ThirdPartyLicenses from "./components/ThirdPartyLicenses";
 import Photos from "./components/Photos";
 import { sameInventory, photoEntries } from "./archive-images";
 import VaultForm from "./components/VaultForm";
@@ -159,6 +160,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
   const locked = !!snapshot && !unlocked;
   const archive = ready ? (snapshot ? unlocked?.archive ?? null : sessionArchive) : null;
   const [view, setView] = useState<View>("feed");
+  const [showLicenses, setShowLicenses] = useState(false);
   // Source ZIP is only a temporary association for this mounted, active profile.
   // Never place a local filesystem path in the encrypted preview or backups.
   const [sourceZip, setSourceZip] = useState<string | null>(null);
@@ -424,6 +426,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </div>
         <button type="button" className="soc-restore-nav" disabled={busy}
           onClick={onOpenRestore}><ArchiveRestore size={17} aria-hidden="true"/> Restore encrypted backup</button>
+        <button className="soc-license-link" type="button" onClick={() => setShowLicenses(true)}><ScrollText size={15} aria-hidden="true"/> Open-source model licenses</button>
         <span className="soc-version">Offline v0.15.1 · Development preview</span>
       </div>
     </aside>
@@ -508,5 +511,6 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
         </>}
       </main>
     </div>
+    {showLicenses && <ThirdPartyLicenses onClose={() => setShowLicenses(false)}/>}
   </div>;
 }
