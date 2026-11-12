@@ -111,3 +111,29 @@ export async function embedWithBundledModel(
   }
   return { modelRevision: embeddedModelRevision(bundle), vectors };
 }
+
+
+/** Use the same approved, locally packaged model for photos and text queries.
+ *  The native caller must enforce JPEG/PNG, 4 MiB and 25 MP before this call.
+ */
+export async function embedImageWithBundledModel(
+  bundle: EmbeddedBundle, bytes: Uint8Array,
+): Promise<{ modelRevision: string; vector: number[] }> {
+  const png = bytes.length >= 8 &&
+    bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71 &&
+    bytes[4] === 13 && bytes[5] === 10 && bytes[6] === 26 && bytes[7] === 10;
+  const jpeg = bytes.length >= 3 &&
+    bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+  if (!validEmbeddedBundle(bundle) || bytes.byteLength < 16 ||
+      bytes.byteLength > 4 * 1024 * 1024 || (!png && !jpeg)) {
+    throw new Error("Embedded photo search requires a bounded JPEG or PNG from the current profile.");
+  }
+  const engine = await loadEngine();
+  const result = await engine.embedImage(bytes);
+  const source = result.embeddings[0]?.floatEmbedding;
+  const vector = source ? Array.from(source) : [];
+  if (vector.length !== OUTPUT_DIMENSIONS || vector.some(x => !Number.isFinite(x))) {
+    throw new Error("The bundled model returned incompatible photo embeddings.");
+  }
+  return { modelRevision: embeddedModelRevision(bundle), vector };
+}
