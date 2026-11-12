@@ -62,3 +62,8 @@ This milestone follows the green [v0.15.1 Windows desktop build](https://github.
 ## v0.17.0 — Embedded runtime candidate (next stacked draft)
 
 The branch `feature/embedded-ai-runtime-stage-0.17.0` extends the green v0.16.0 model-pack preflight with a local MediaPipe Universal Embedder adapter, a release-only approved digest gate, and retention of local Ollama fallback when no model is packaged. This remains a code/integration milestone, not an offline model release. See [embedded AI stages](EMBEDDED_AI.md). After frontend/Rust/native gates pass, stage this draft after #30, not over the old main branch.
+
+
+### v0.17.1 verification checkpoint
+
+The first v0.17.0 TypeScript check failed because the pinned MediaPipe 1.2.2 API rejects the delegate option documented in some prose examples. v0.17.1 removed that unsupported option without an unsafe cast and explicitly **does not claim CPU fallback**. The subsequent [v0.17.1 frontend, ZIP, license and staged-model safety tests](https://github.com/MieleMadness/offline/actions/runs/43137946375) passed. One full Windows native/executable/unsigned-artifact build is requested for the completed batch. A pass verifies buildability, not actual bundled AI inference: `models/approved-embeddinggemma2.json` remains `pending-verification` and the normal build ships no model weights.
