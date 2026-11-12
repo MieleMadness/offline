@@ -171,3 +171,8 @@ v0.5.1 includes a PIN option for encrypted workspaces, instant keyword search ac
 ## Synthetic ZIP importer integration verification
 
 The [fictional archive fixture guide](docs/SYNTHETIC_FIXTURES.md) now includes optional native Rust importer tests. The Windows milestone workflow generates synthetic ZIPs and runs the production parser on them, in addition to the regular Rust unit, frontend and Python tests. No personal Facebook exports are uploaded to GitHub. A fictional fixture is not evidence that every Meta export layout is supported.
+
+
+### Future offline model-pack preflight
+
+An upcoming preflight can inspect a candidate .offlineai model pack from disk or USB and check its ZIP structure, file sizes and self-declared SHA-256 values without extracting or executing them. **A pack passing these checks is not publisher-authenticated or installable.** See [the model pack specification](docs/OFFLINE_AI_PACK.md).

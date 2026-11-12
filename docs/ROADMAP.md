@@ -203,3 +203,11 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [ ] Verify v0.15.1 Windows Rust tests and executable build, then run genuine local EmbeddingGemma 2 inference acceptance.
 - [ ] Bundle an independently redistribution-cleared inference runtime, pinned 440M model weights and notices, then verify an air-gapped Windows installation with **no Ollama installed**. See [AI model distribution plan](AI_MODEL_DISTRIBUTION.md).
 - [ ] Perform a complete license/SBOM audit before distributing a model-equipped Windows installer; model Apache licensing is not a choice of an Offline application license.
+
+
+## v0.16.0 — Air-gapped AI pack preflight
+
+- [x] Add read-only ZIP inspection for EmbeddingGemma 2 text/vision and future browser-WASM assets, with schema, path, duplication, ratio, size, and streamed SHA-256 checks.
+- [x] Expose preflight in the optional AI area, explicitly **not authenticated and not activatable**; no installation or execution.
+- [x] Add fictional Rust tests for valid fake packs, modified hashes, extra entries, traversal and unsupported metadata.
+- [ ] Verify full Windows CI and manual preflight; before a real offline release, pin independent model/runtime digests, bundle compatible runtime, and test completely disconnected inference.
