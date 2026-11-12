@@ -193,3 +193,13 @@ Next, finish v0.14.0 Windows verification and exercise real family backup/restor
 - [x] Add bounded vector storage, protected backup restoration, current-profile ZIP checks and opt-in UX.
 - [ ] Complete full Windows/Rust build, real local Ollama inference, reboot/unlock, storage quota, and cross-profile isolation smoke tests.
 - [ ] Consider an atomic IndexedDB family-catalog migration and separate image thumbnail indexing before v1.0.
+
+
+## v0.15.1 patch — Apache 2.0 EmbeddingGemma 2 selection and packaging gates
+
+- [x] Replace obsolete Ollama model names with Apache-licensed `embeddinggemma-2:440m` for text and image similarity in the development bridge.
+- [x] Record model author, provenance, complete Apache license, third-party notices and machine-readable unbundled model manifest; add compliance regression checks.
+- [x] Repair missing binary PNG fixture references responsible for v0.15.0 Windows Rust test failure (targeted CI required).
+- [ ] Verify v0.15.1 Windows Rust tests and executable build, then run genuine local EmbeddingGemma 2 inference acceptance.
+- [ ] Bundle an independently redistribution-cleared inference runtime, pinned 440M model weights and notices, then verify an air-gapped Windows installation with **no Ollama installed**. See [AI model distribution plan](AI_MODEL_DISTRIBUTION.md).
+- [ ] Perform a complete license/SBOM audit before distributing a model-equipped Windows installer; model Apache licensing is not a choice of an Offline application license.

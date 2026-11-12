@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.15.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.15.1.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 
@@ -33,6 +33,12 @@ For **encrypted saved profiles**, the vector index is included inside the same o
 **AI image search** remains limited to the first eight JPEG/PNG images (4 MiB and 25 megapixels each), but now compares the selected ZIP inventory to the active profile to reduce accidental cross-family searches. This comparison checks metadata and is **not cryptographic ZIP authentication**. Local model files may need to be downloaded once through Ollama; archived data is not intentionally uploaded to the Internet. Real-model indexing/performance and Windows privacy acceptance remain pending.
 
 See the [local AI guide](docs/LOCAL_AI_SEARCH.md) and [release/integration gates](docs/INTEGRATION.md).
+
+## EmbeddingGemma 2 and third-party model notices
+
+We selected **Google DeepMind EmbeddingGemma 2** (Apache-2.0) as the text-and-vision embedding model for Offline. The v0.15.1 development bridge uses the local **`embeddinggemma-2:440m`** model through Ollama and now ranks photo similarity directly, without a separate Moondream model. **This build does not yet include a bundled AI runtime or model weights.** A future Complete Windows installer will provide both after verified air-gapped testing.
+
+The exact Apache 2.0 license text and required model attribution are included in [third_party/licenses/Apache-2.0.txt](third_party/licenses/Apache-2.0.txt) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The [complete offline installer and compliance plan](docs/AI_MODEL_DISTRIBUTION.md) lists remaining requirements. Apache licensing applies to the **model**, not automatically to Offline's application source.
 
 ## The experience
 

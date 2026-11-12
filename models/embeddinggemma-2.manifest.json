@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "component": "EmbeddingGemma 2",
+  "publisher": "Google DeepMind",
+  "upstream": "https://huggingface.co/google/embeddinggemma-2",
+  "modelCard": "https://ai.google.dev/gemma/docs/embeddinggemma/model_card_2",
+  "license": "Apache-2.0",
+  "licenseFile": "third_party/licenses/Apache-2.0.txt",
+  "noticeFile": "THIRD_PARTY_NOTICES.md",
+  "development": {
+    "runtime": "Ollama (user installed)",
+    "model": "embeddinggemma-2:440m",
+    "offlineIfAlreadyInstalled": true
+  },
+  "completeInstaller": {
+    "status": "not-built",
+    "runtime": null,
+    "modelVariant": "text-vision-440m",
+    "modelCheckpoint": null,
+    "modelSha256": null,
+    "runtimeSha256": null,
+    "verifiedAirGapped": false,
+    "includesModelWeights": false
+  },
+  "releaseGate": "Do not claim or publish Offline Complete until all assets, notices and air-gapped tests are verified."
+}

@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.15.1 — EmbeddingGemma 2 licensing and Windows native test repairs (development patch)
+
+- Select Google DeepMind **EmbeddingGemma 2:440m**, released under **Apache License 2.0**, for the current text and photo embedding bridge. Retire the legacy EmbeddingGemma 1 + Moondream pairing from active development.
+- Change image search from generative captions to shared-space text/image vector similarity using Ollama's multimodal embedding API.
+- Fix the red Windows Rust test failure by replacing missing binary PNG test fixture files with deterministic, inline, fictional synthetic 2×2 PNG bytes.
+- Add full model license, third-party notices, machine-readable asset manifest, compliance checks, and a staged air-gapped Complete installer plan. **No model weights/runtime are bundled yet.**
+- Require independent checksum, dependency licenses, and actual Windows offline-install acceptance before distributing bundled model weights.
+
+
 ## v0.15.0 — Reconciled local search index on current family archive (development)
 
 - Port the optional full-workspace text index from older PR #27 onto the v0.14.0 family/Messenger/photo/import code, without replacing newer features.

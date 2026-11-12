@@ -47,3 +47,8 @@ These are draft PRs stacked on each other. Merge/review in dependency order; do 
 ## v0.15.0 reconcile of parallel text-index work
 
 A fresh [v0.15.0 index integration branch](https://github.com/MieleMadness/offline/tree/feature/text-index-integration-0.15.0) starts from the **green v0.14.0** head and selectively carries PR #27's new text-index data pipeline, LocalSearch UI and native Ollama embedding commands, while preserving v0.14.0 profile management, encrypted backup/restore, ZIP photos, full Messenger filters and privacy masking. It adds backup-index validation and a source ZIP inventory check to optional image inference. Do not merge the earlier PR #27 wholesale; compare its tests and note it is superseded only once native and manual integration acceptance passes.
+
+
+## v0.15.1 native test and model selection
+
+v0.15.0 [targeted Windows Rust CI](https://github.com/MieleMadness/offline/actions/runs/43121426640) failed because tests referenced binary PNG fixtures missing from the branch. The v0.15.1 patch replaces them with deterministic source-embedded synthetic PNG bytes and moves the development embedding provider to Apache-licensed EmbeddingGemma 2:440m. Complete runtime/weight bundling remains future work and requires license/asset verification; see [AI model distribution](AI_MODEL_DISTRIBUTION.md).
