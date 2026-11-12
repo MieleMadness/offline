@@ -34,3 +34,8 @@ Thumbs.db
 
 # Reproducible, fictional ZIP acceptance output
 fixtures/generated/
+
+# AI model binaries, generated WASM files, and local release staging
+public/ai/
+*.litertlm
+*.offlineai

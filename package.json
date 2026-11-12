@@ -1,21 +1,24 @@
 {
   "name": "offline-desktop",
   "private": true,
-  "version": "0.16.0",
+  "version": "0.17.1",
   "type": "module",
   "scripts": {
     "dev": "vite --port 1420 --strictPort",
     "build": "tsc --noEmit && vite build",
     "check": "tsc --noEmit",
     "test": "vitest run",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "prebuild": "node scripts/stage-embedded-ai.mjs",
+    "predev": "node scripts/stage-embedded-ai.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",
     "@tauri-apps/plugin-dialog": "^2.0.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@mediapipe/tasks-retrieval": "1.2.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.0.0",

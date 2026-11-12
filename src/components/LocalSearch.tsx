@@ -4,6 +4,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import type { ImportedArchive } from "../social-model";
 import { sameInventory } from "../archive-images";
 import OfflineModelPack from "./OfflineModelPack";
+import { detectEmbeddedBundle, embeddedModelRevision, embedWithBundledModel, type EmbeddedBundle } from "../embedded-ai";
 import type { ArchiveReport } from "../archive";
 import { fingerprint, packVector, searchIndex, textChunks, validIndex, type TextIndex } from "../text-index";
 
@@ -19,6 +20,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState<SearchStatus | null>(null);
+  const [embedded, setEmbedded] = useState<EmbeddedBundle | null>(null);
   const prepared = useMemo(() => {
     try { return { chunks: textChunks(archive), error: "" }; }
     catch (cause) {
@@ -35,11 +37,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
 
   useEffect(() => {
     alive.current = true;
-    invoke<SearchStatus>("ai_search_status").then(value => {
-      if (alive.current) setStatus(value);
-    }).catch(() => {
-      if (alive.current) setError("Start Ollama, then check the search models.");
-    });
+    void checkModels();
     return () => { alive.current = false; cancelled.current = true; };
   }, []);
 
@@ -59,11 +57,32 @@ export default function LocalSearch({ archive, onSaveIndex }: {
 
   async function checkModels() {
     try {
+      const available = await detectEmbeddedBundle();
+      if (!alive.current) return;
+      if (available) {
+        setEmbedded(available);
+        // The bundled text adapter is staged, while image embedding
+        // still requires its own measured ZIP/Windows integration.
+        setStatus({ textReady: true, imagesReady: false });
+        setError("");
+        return;
+      }
+      setEmbedded(null);
       const value = await invoke<SearchStatus>("ai_search_status");
       if (alive.current) { setStatus(value); setError(""); }
     } catch {
-      if (alive.current) setError("Start Ollama, then check the search models.");
+      if (alive.current) setError(
+        "The optional local AI runtime is unavailable. Keyword search still works.");
     }
+  }
+
+  async function modelRevision() {
+    return embedded ? embeddedModelRevision(embedded) : invoke<string>("ai_text_model_revision");
+  }
+
+  async function embedTexts(texts: string[], query: boolean): Promise<EmbeddingBatch> {
+    return embedded ? embedWithBundledModel(embedded, texts, query)
+      : invoke<EmbeddingBatch>("ai_embed_texts", { texts, query });
   }
 
   async function install(images: boolean) {
@@ -80,7 +99,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     if (!start("Indexing text…")) return;
     setResults([]);
     try {
-      const revision = await invoke<string>("ai_text_model_revision");
+      const revision = await modelRevision();
       const hash = await fingerprint(chunks);
       if (stopped()) return;
       if (!validIndex(cache.current, hash, revision, chunks.length, true)) {
@@ -90,9 +109,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       const index = cache.current!;
       for (let offset = index.vectors.length; offset < chunks.length; offset += 16) {
         if (stopped()) return;
-        const batch = await invoke<EmbeddingBatch>("ai_embed_texts", {
-          texts: chunks.slice(offset, offset + 16).map(chunk => chunk.text), query: false,
-        });
+        const batch = await embedTexts(chunks.slice(offset, offset + 16).map(chunk => chunk.text), false);
         if (stopped()) return;
         if (batch.modelRevision !== revision || (index.dimensions && batch.vectors[0]?.length !== index.dimensions)) {
           throw new Error("The model changed. Build the text index again.");
@@ -129,13 +146,13 @@ export default function LocalSearch({ archive, onSaveIndex }: {
         if (stopped()) return;
         matches = await invoke<Match[]>("ai_image_search", { query, path });
       } else {
-        const revision = await invoke<string>("ai_text_model_revision");
+        const revision = await modelRevision();
         const hash = await fingerprint(chunks);
         if (stopped()) return;
         if (!validIndex(cache.current, hash, revision, chunks.length)) {
           throw new Error("Build this workspace’s text index before searching. The archive or model may have changed.");
         }
-        const batch = await invoke<EmbeddingBatch>("ai_embed_texts", { texts: [query], query: true });
+        const batch = await embedTexts([query], true);
         if (stopped()) return;
         if (batch.modelRevision !== revision || batch.vectors[0]?.length !== cache.current!.dimensions) {
           throw new Error("The search model changed. Build the index again.");
@@ -159,10 +176,16 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       Saved workspaces keep their index encrypted with the archive. Session indexes stay in memory.
       Image search checks the selected ZIP against this profile's imported inventory, then examines up to eight JPEG/PNG images (4 MiB and 25 megapixels each) from a ZIP you select.
       Results may include unrelated items. Image similarity results may be inaccurate; this model does not generate captions.</p>
-    {(!status?.textReady || !status?.imagesReady) && <div className="soc-search-setup">
-      <p>Development preview: Ollama is currently required. Download EmbeddingGemma 2 once, or install it from an offline model pack. A self-contained runtime and model bundle are planned. Archive contents stay on this computer.</p>
-      {!status?.textReady && <button type="button" disabled={disabled} onClick={() => install(false)}>Download EmbeddingGemma 2 · approximately 700 MB</button>}
-
+    {embedded ? <p className="soc-ai-provider" role="status">
+      Packaged MediaPipe / EmbeddingGemma 2 assets detected. Text embeddings use the
+      local runtime without Ollama or cloud inference. Model loading is verified when
+      indexing begins; AI image search still requires additional Windows integration.
+    </p> : (!status?.textReady || !status?.imagesReady) && <div className="soc-search-setup">
+      <p>No approved model is bundled in this development build. Optional semantic
+        search currently uses locally installed Ollama. The future Complete installer
+        will include a pinned MediaPipe runtime and model, with no first-run download.</p>
+      {!status?.textReady && <button type="button" disabled={disabled}
+        onClick={() => install(false)}>Download EmbeddingGemma 2 for Ollama</button>}
       <button type="button" disabled={disabled} onClick={checkModels}>Check models</button>
     </div>}
     <div className="soc-search-actions">
