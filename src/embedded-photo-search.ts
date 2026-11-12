@@ -139,8 +139,8 @@ export async function searchBundledPhotos(
 ): Promise<PhotoMatch[]> {
   return rankLocalPhotoMatches({
     path, query, shouldStop, progress,
-    list: (cmd, args) => invoke(cmd, args),
-    read: (cmd, args) => invoke(cmd, args),
+    list: <T>(cmd: string, args: Record<string, unknown>) => invoke<T>(cmd, args),
+    read: <T>(cmd: string, args: Record<string, unknown>) => invoke<T>(cmd, args),
     embedText: async text => {
       const response = await embedWithBundledModel(bundle, [text], true);
       return response.vectors[0] ?? [];

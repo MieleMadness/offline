@@ -5,6 +5,7 @@ import type { ImportedArchive } from "../social-model";
 import { sameInventory } from "../archive-images";
 import OfflineModelPack from "./OfflineModelPack";
 import { detectEmbeddedBundle, embeddedModelRevision, embedWithBundledModel, type EmbeddedBundle } from "../embedded-ai";
+import { MAX_EMBEDDED_PHOTOS, searchBundledPhotos } from "../embedded-photo-search";
 import type { ArchiveReport } from "../archive";
 import { fingerprint, packVector, searchIndex, textChunks, validIndex, type TextIndex } from "../text-index";
 
@@ -61,9 +62,9 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       if (!alive.current) return;
       if (available) {
         setEmbedded(available);
-        // The bundled text adapter is staged, while image embedding
-        // still requires its own measured ZIP/Windows integration.
-        setStatus({ textReady: true, imagesReady: false });
+        // The bundled adapter supports both text and bounded JPEG/PNG
+        // similarity. Actual Windows model loading is verified on use.
+        setStatus({ textReady: true, imagesReady: true });
         setError("");
         return;
       }
@@ -144,7 +145,13 @@ export default function LocalSearch({ archive, onSaveIndex }: {
           throw new Error("Choose the original ZIP for this family profile. This file's inventory does not match.");
         }
         if (stopped()) return;
-        matches = await invoke<Match[]>("ai_image_search", { query, path });
+        matches = embedded
+          ? await searchBundledPhotos(embedded, path, query, stopped, (done, total) => {
+              if (alive.current && !cancelled.current) {
+                setBusy("Comparing local photos " + done + " of " + total + "…");
+              }
+            })
+          : await invoke<Match[]>("ai_image_search", { query, path });
       } else {
         const revision = await modelRevision();
         const hash = await fingerprint(chunks);
@@ -174,12 +181,13 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     <summary>Local AI search</summary>
     <p>Index all imported posts, messages and account records in this workspace, then search by meaning.
       Saved workspaces keep their index encrypted with the archive. Session indexes stay in memory.
-      Image search checks the selected ZIP against this profile's imported inventory, then examines up to eight JPEG/PNG images (4 MiB and 25 megapixels each) from a ZIP you select.
+      Image search first checks that the selected ZIP matches this family profile. The embedded model compares up to {MAX_EMBEDDED_PHOTOS} JPEG/PNG photos per query (4 MiB and 25 megapixels each); the Ollama development fallback checks up to eight.
       Results may include unrelated items. Image similarity results may be inaccurate; this model does not generate captions.</p>
     {embedded ? <p className="soc-ai-provider" role="status">
-      Packaged MediaPipe / EmbeddingGemma 2 assets detected. Text embeddings use the
-      local runtime without Ollama or cloud inference. Model loading is verified when
-      indexing begins; AI image search still requires additional Windows integration.
+      Packaged MediaPipe / EmbeddingGemma 2 assets detected. Text and bounded photo
+      similarity are configured to use the same local model, without Ollama or cloud
+      inference. Windows model loading and hardware behavior are verified only when
+      inference is attempted; this preview is not yet air-gap certified.
     </p> : (!status?.textReady || !status?.imagesReady) && <div className="soc-search-setup">
       <p>No approved model is bundled in this development build. Optional semantic
         search currently uses locally installed Ollama. The future Complete installer
@@ -208,6 +216,11 @@ export default function LocalSearch({ archive, onSaveIndex }: {
         onClick={() => search(true)}>Search images in ZIP</button>
     </div>
     {busy && <p role="status">{busy}</p>}
+    {busy.startsWith("Comparing local photos") && <button
+      className="soc-ai-stop" type="button" onClick={() => {
+        cancelled.current = true;
+        setBusy("Stopping after the current local photo…");
+      }}>Stop photo comparison</button>
     {error && <p role="status">{error}</p>}
     <OfflineModelPack/>
     <ol className="soc-search-results">{results.map((match, i) =>
