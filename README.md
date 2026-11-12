@@ -4,7 +4,7 @@
 
 A privacy-first Windows desktop application for exploring downloadable social history, starting with Facebook. Offline turns exported posts into a chronological feed, organizes Messenger conversations by participant and date, and shows the account/activity records actually found in the files. No account login or cloud uploads.
 
-> **Development preview v0.18.0.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
+> **Development preview v0.18.1.** Includes encrypted saved previews, PIN/passphrase protection, local search, photo viewing and import safeguards. The v0.12.0 milestone passed frontend, Rust tests and the [Windows executable build](https://github.com/MieleMadness/offline/actions/runs/43086713466), and its fictional HTML/JSON native parser checks passed [targeted Windows Rust acceptance](https://github.com/MieleMadness/offline/actions/runs/43088188723). There is no public installer yet.
 
 **Development acceptance:** See the [Windows, privacy and archive smoke-test checklist](docs/ACCEPTANCE.md) before using private archives or releasing an installer.
 

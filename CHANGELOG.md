@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.18.1 — Photo search cancellation JSX fix (development patch)
+
+- Repair a missing JSX closing brace in the photo comparison stop control caught by the initial v0.18.0 TypeScript CI gate.
+- Keep all source ZIP, 4 MiB / 25 MP, profile isolation, and model approval rules unchanged.
+- Re-run the complete frontend/fixture/model-compliance verification before native Windows build.
+
+
 ## v0.18.0 — Embedded photo similarity bridge (development)
 
 - Add Universal Embedder image encoding to the existing, packaged-only MediaPipe adapter, so an approved local EmbeddingGemma 2 440M bundle can compare user queries with JPEG/PNG images in the same 768-dimensional space.

@@ -220,7 +220,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       className="soc-ai-stop" type="button" onClick={() => {
         cancelled.current = true;
         setBusy("Stopping after the current local photo…");
-      }}>Stop photo comparison</button>
+      }}>Stop photo comparison</button>}
     {error && <p role="status">{error}</p>}
     <OfflineModelPack/>
     <ol className="soc-search-results">{results.map((match, i) =>

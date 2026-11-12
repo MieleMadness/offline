@@ -4,8 +4,8 @@ Offline is still a **development preview**, not a public release or supported in
 
 ## Build and get the artifact
 
-1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.18.0 · Verify** run whose Windows native checks completed.
-2. Under the run's **Artifacts** section, choose **Offline-v0.18.0-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
+1. Open the [Offline GitHub Actions page](https://github.com/MieleMadness/offline/actions) and select a successful **Offline 0.18.1 · Verify** run whose Windows native checks completed.
+2. Under the run's **Artifacts** section, choose **Offline-v0.18.1-Windows-unsigned-preview**. This only exists for a successful full Windows build; fast checks and targeted `[rust]` jobs do not generate one.
 3. Extract the artifact to a temporary test directory. It contains `offline.exe`, `SHA256SUMS.txt`, `third_party/licenses/Apache-2.0.txt`, `THIRD_PARTY_NOTICES.md`, and `models/embeddinggemma-2.manifest.json`. The artifact is retained for seven days and is not a stable release URL.
 4. Verify the file fingerprint in PowerShell:
 
