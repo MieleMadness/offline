@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import type { ImportedArchive } from "../social-model";
 import { sameInventory } from "../archive-images";
+import OfflineModelPack from "./OfflineModelPack";
 import type { ArchiveReport } from "../archive";
 import { fingerprint, packVector, searchIndex, textChunks, validIndex, type TextIndex } from "../text-index";
 
@@ -185,6 +186,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     </div>
     {busy && <p role="status">{busy}</p>}
     {error && <p role="status">{error}</p>}
+    <OfflineModelPack/>
     <ol className="soc-search-results">{results.map((match, i) =>
       <li key={i}><strong>{match.id}</strong><p>{match.reason}</p></li>)}</ol>
   </details>;
