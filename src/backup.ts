@@ -1,3 +1,4 @@
+import { SECTION_IDS } from "./archive";
 import { PROFILE_COLORS, cleanProfileName, type FamilyProfile, type ProfileColor } from "./profiles";
 import type { ImportedArchive } from "./social-model";
 import { validateStoredTextIndex } from "./text-index";
@@ -101,30 +102,70 @@ export function parseBackup(contents: string): PortableBackup {
   };
 }
 
-/** Reject malformed decrypted JSON before it reaches timeline/message renderers. */
-export function validateRecoveredArchive(value: unknown): asserts value is ImportedArchive {
-  const root = record(value);
-  const report = record(root.report);
-  const social = record(root.social);
+function isCount(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0;
+}
+
+function isTimestamp(value: unknown): boolean {
+  return value === null || (typeof value === "number" && Number.isInteger(value));
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(item => typeof item === "string");
+}
+
+function isArchiveSection(value: unknown): boolean {
+  return SECTION_IDS.some(section => section === value);
+}
+
+function validateInventory(report: Record<string, unknown>): void {
   if (typeof report.archiveName !== "string" || report.archiveName.length > 1_000
-      || typeof report.totalFiles !== "number" || !Number.isFinite(report.totalFiles)
+      || typeof report.formatHint !== "string"
+      || !isCount(report.totalFiles) || !isCount(report.totalUncompressedBytes)
+      || !isCount(report.displayedFiles)
       || !Array.isArray(report.entries) || report.entries.length > 5_000
+      || report.displayedFiles !== report.entries.length || report.displayedFiles > report.totalFiles
       || !Array.isArray(report.sections) || report.sections.length > 100) {
     throw new Error("The decrypted backup inventory is malformed.");
   }
+  for (const entry of report.entries) {
+    const item = record(entry);
+    if (typeof item.path !== "string" || !item.path || !isArchiveSection(item.section)
+        || !isCount(item.bytes) || typeof item.kind !== "string"
+        || (item.zipIndex !== undefined && !isCount(item.zipIndex))) {
+      throw new Error("The decrypted backup contains a malformed inventory entry.");
+    }
+  }
+  for (const section of report.sections) {
+    const item = record(section);
+    if (!isArchiveSection(item.id) || typeof item.label !== "string"
+        || !isCount(item.count) || !isCount(item.bytes)) {
+      throw new Error("The decrypted backup contains a malformed inventory section.");
+    }
+  }
+}
+
+/** Validate decrypted JSON before saving a recovery or displaying a saved preview. */
+export function validateRecoveredArchive(value: unknown): asserts value is ImportedArchive {
+  const root = record(value);
+  validateInventory(record(root.report));
+  const social = record(root.social);
   if (!Array.isArray(social.posts) || social.posts.length > 20_000
       || !Array.isArray(social.conversations) || social.conversations.length > 20_000
       || !Array.isArray(social.dataCategories) || social.dataCategories.length > 500
-      || typeof social.filesRead !== "number" || !Array.isArray(social.warnings)) {
+      || !isCount(social.filesRead) || !isCount(social.jsonFilesRead)
+      || !isCount(social.htmlFilesRead) || !isCount(social.filesSkipped)
+      || typeof social.formatHint !== "string" || !isStringArray(social.warnings)) {
     throw new Error("The decrypted backup contains unsupported social data.");
   }
-  // Existing backups without an AI index remain compatible. If one is present,
-  // reject malformed/oversized vectors before any encrypted snapshot is saved.
+  // Older backups may omit the index and the media path lists.
   if (root.textIndex !== undefined) validateStoredTextIndex(root.textIndex);
   for (const post of social.posts) {
     const item = record(post);
     if (typeof item.id !== "string" || typeof item.text !== "string"
-        || typeof item.sourcePath !== "string" || typeof item.mediaCount !== "number") {
+        || typeof item.sourcePath !== "string" || !isCount(item.mediaCount)
+        || !isTimestamp(item.timestamp) || (item.author !== null && typeof item.author !== "string")
+        || (item.mediaPaths !== undefined && !isStringArray(item.mediaPaths))) {
       throw new Error("The decrypted backup contains a malformed post.");
     }
   }
@@ -132,7 +173,8 @@ export function validateRecoveredArchive(value: unknown): asserts value is Impor
   for (const conversation of social.conversations) {
     const chat = record(conversation);
     if (typeof chat.id !== "string" || typeof chat.title !== "string"
-        || !Array.isArray(chat.messages) || !Array.isArray(chat.participants)) {
+        || !isTimestamp(chat.lastTimestamp) || !isStringArray(chat.participants)
+        || !Array.isArray(chat.messages)) {
       throw new Error("The decrypted backup contains a malformed conversation.");
     }
     messageCount += chat.messages.length;
@@ -140,20 +182,23 @@ export function validateRecoveredArchive(value: unknown): asserts value is Impor
     for (const message of chat.messages) {
       const item = record(message);
       if (typeof item.id !== "string" || typeof item.sender !== "string"
-          || typeof item.text !== "string" || typeof item.attachments !== "number") {
+          || typeof item.text !== "string" || !isCount(item.attachments)
+          || !isTimestamp(item.timestamp)
+          || (item.mediaPaths !== undefined && !isStringArray(item.mediaPaths))) {
         throw new Error("The decrypted backup contains a malformed message.");
       }
     }
   }
   for (const category of social.dataCategories) {
     const entry = record(category);
-    if (typeof entry.id !== "string" || typeof entry.label !== "string" || !Array.isArray(entry.records)) {
+    if (typeof entry.id !== "string" || typeof entry.label !== "string"
+        || !isCount(entry.fileCount) || !Array.isArray(entry.records)) {
       throw new Error("The decrypted backup contains a malformed data category.");
     }
     for (const candidate of entry.records) {
       const item = record(candidate);
       if (typeof item.title !== "string" || typeof item.detail !== "string"
-          || typeof item.sourcePath !== "string") {
+          || typeof item.sourcePath !== "string" || !isTimestamp(item.timestamp)) {
         throw new Error("The decrypted backup contains a malformed data record.");
       }
     }
