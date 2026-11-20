@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { Eye, EyeOff, LockKeyhole } from "lucide-react";
+import { isPrivateDataCategory } from "../data-privacy";
 import type { ImportedArchive } from "../social-model";
 import { sameInventory } from "../archive-images";
 import OfflineModelPack from "./OfflineModelPack";
@@ -9,7 +11,7 @@ import { MAX_EMBEDDED_PHOTOS, searchBundledPhotos } from "../embedded-photo-sear
 import type { ArchiveReport } from "../archive";
 import { fingerprint, packVector, searchIndex, textChunks, validIndex, type TextIndex } from "../text-index";
 
-interface Match { id: string; reason: string }
+interface Match { id: string; reason: string; categoryId?: string }
 interface SearchStatus { textReady: boolean; imagesReady: boolean }
 interface EmbeddingBatch { modelRevision: string; vectors: number[][] }
 
@@ -18,6 +20,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
 }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Match[]>([]);
+  const [showPrivate, setShowPrivate] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const [status, setStatus] = useState<SearchStatus | null>(null);
@@ -96,9 +99,14 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     } finally { finish(); }
   }
 
+  function clearResults() {
+    setResults([]);
+    setShowPrivate(false);
+  }
+
   async function buildIndex() {
     if (!start("Indexing text…")) return;
-    setResults([]);
+    clearResults();
     try {
       const revision = await modelRevision();
       const hash = await fingerprint(chunks);
@@ -132,7 +140,7 @@ export default function LocalSearch({ archive, onSaveIndex }: {
 
   async function search(images: boolean) {
     if (!query.trim() || !start("Searching on this computer…")) return;
-    setResults([]);
+    clearResults();
     try {
       let matches: Match[];
       if (images) {
@@ -207,7 +215,10 @@ export default function LocalSearch({ archive, onSaveIndex }: {
     {prepared.error && <p className="soc-search-index-warning" role="alert">{prepared.error}</p>}
     <p role="status">{completed} of {chunks.length} text sections indexed.</p>
     <label>Describe what to find
-      <input value={query} maxLength={250} disabled={disabled} onChange={e => setQuery(e.target.value)}/>
+      <input value={query} maxLength={250} disabled={disabled} onChange={event => {
+        setQuery(event.target.value);
+        clearResults();
+      }}/>
     </label>
     <div className="soc-search-actions">
       <button type="button" disabled={disabled || !query.trim() || !status?.textReady || !chunks.length || completed !== chunks.length}
@@ -223,7 +234,33 @@ export default function LocalSearch({ archive, onSaveIndex }: {
       }}>Stop photo comparison</button>}
     {error && <p role="status">{error}</p>}
     <OfflineModelPack/>
-    <ol className="soc-search-results">{results.map((match, i) =>
-      <li key={i}><strong>{match.id}</strong><p>{match.reason}</p></li>)}</ol>
+    <LocalSearchResults matches={results} showPrivate={showPrivate}
+      onTogglePrivate={() => setShowPrivate(value => !value)}/>
   </details>;
+}
+
+export function LocalSearchResults({ matches, showPrivate, onTogglePrivate }: {
+  matches: Match[]; showPrivate: boolean; onTogglePrivate: () => void;
+}) {
+  if (!matches.length) return null;
+  const hasPrivateMatches = matches.some(match => isPrivateDataCategory(match.categoryId));
+  return <>
+    {hasPrivateMatches && <div className="soc-search-private">
+      <LockKeyhole size={17} aria-hidden="true"/>
+      <span role="status">{showPrivate
+        ? "Private account data is visible in these AI results."
+        : "Private account data is hidden in these AI results."}</span>
+      <button type="button" onClick={onTogglePrivate}>
+        {showPrivate ? <EyeOff size={15} aria-hidden="true"/> : <Eye size={15} aria-hidden="true"/>}
+        {showPrivate ? "Hide private values" : "Show private values"}
+      </button>
+    </div>}
+    <ol className="soc-search-results">{matches.map((match, index) => {
+      const concealed = isPrivateDataCategory(match.categoryId) && !showPrivate;
+      return <li key={index}>
+        <strong>{concealed ? "Private data record" : match.id}</strong>
+        <p>{concealed ? "Content and source hidden." : match.reason}</p>
+      </li>;
+    })}</ol>
+  </>;
 }
