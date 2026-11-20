@@ -209,6 +209,7 @@ function Library({ profiles, activeProfile, sessionArchive, onSessionArchive, on
       if (snapshot && !enrolling) {
         const key = await deriveKey(password, snapshot.salt);
         const decoded = await unseal(activeProfileId, snapshot, key);
+        validateRecoveredArchive(decoded);
         setUnlocked({ key, archive: decoded });
       } else {
         if (!archive || !safeLoadProfiles().some(p => p.id === activeProfileId)) {
