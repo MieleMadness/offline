@@ -45,6 +45,7 @@ export interface TextChunk {
   id: string;
   source: string;
   text: string;
+  categoryId?: string;
 }
 
 export function textChunks(archive: ImportedArchive): TextChunk[] {
@@ -58,6 +59,7 @@ export function textChunks(archive: ImportedArchive): TextChunk[] {
     }))),
     ...archive.social.dataCategories.flatMap((category, c) => category.records.map((record, r) => ({
       id: "data-" + c + "-" + r, source: record.sourcePath, text: record.title + "\n" + record.detail,
+      categoryId: category.id,
     }))),
   ];
   const max = MAX_INDEX_SECTIONS;
@@ -79,7 +81,9 @@ export function textChunks(archive: ImportedArchive): TextChunk[] {
 }
 
 export async function fingerprint(chunks: TextChunk[]): Promise<string> {
-  const bytes = new TextEncoder().encode(JSON.stringify(chunks));
+  // Keep the version 1 fingerprint stable for existing encrypted indexes.
+  const indexedContent = chunks.map(({ id, source, text }) => ({ id, source, text }));
+  const bytes = new TextEncoder().encode(JSON.stringify(indexedContent));
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), value => value.toString(16).padStart(2, "0")).join("");
 }
@@ -141,5 +145,6 @@ export async function searchIndex(index: TextIndex, chunks: TextChunk[], query: 
   }
   return [...best.values()].sort((a, b) => b.score - a.score).slice(0, 10).map(({ chunk, score }) => ({
     id: chunk.source, reason: "Similarity " + score.toFixed(3) + " · " + chunk.text,
+    categoryId: chunk.categoryId,
   }));
 }
