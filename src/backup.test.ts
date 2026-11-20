@@ -71,6 +71,44 @@ describe("portable encrypted backup recovery", () => {
       .toThrow(/search index/);
   });
 
+  it("validates inventory entries and sections before accepting a restored preview", () => {
+    const entry = { path: "photos/one.jpg", section: "photos", bytes: 38, kind: "JPG" };
+    const section = { id: "photos", label: "Photos", count: 1, bytes: 38 };
+    const report = { ...archive.report, displayedFiles: 1, entries: [entry], sections: [section] };
+    expect(() => validateRecoveredArchive({ ...archive, report })).not.toThrow();
+
+    for (const invalid of [
+      { ...report, entries: [null] },
+      { ...report, entries: [{ ...entry, path: 4 }] },
+      { ...report, entries: [{ ...entry, section: "unknown" }] },
+      { ...report, entries: [{ ...entry, bytes: -1 }] },
+      { ...report, sections: [{ ...section, label: {} }] },
+      { ...report, displayedFiles: 0 },
+    ]) {
+      expect(() => validateRecoveredArchive({ ...archive, report: invalid })).toThrow();
+    }
+  });
+
+  it("rejects nested values that cannot be rendered or searched", () => {
+    const message = { id: "m1", sender: "Sam", timestamp: 1, text: "Hello", attachments: 1,
+      mediaPaths: ["messages/one.jpg"] };
+    const chat = { id: "c1", title: "Chat", lastTimestamp: 1, participants: ["Sam"], messages: [message] };
+    const item = { title: "Device", detail: "Fictional device", sourcePath: "account.json", timestamp: null };
+    const category = { id: "security", label: "Account", fileCount: 1, records: [item] };
+    const social = { ...archive.social, conversations: [chat], dataCategories: [category] };
+    expect(() => validateRecoveredArchive({ ...archive, social })).not.toThrow();
+
+    for (const invalid of [
+      { ...social, posts: [{ ...social.posts[0], author: {} }] },
+      { ...social, conversations: [{ ...chat, participants: [42] }] },
+      { ...social, conversations: [{ ...chat, messages: [{ ...message, mediaPaths: [null] }] }] },
+      { ...social, dataCategories: [{ ...category, records: [{ ...item, timestamp: "yesterday" }] }] },
+      { ...social, warnings: [{}] },
+    ]) {
+      expect(() => validateRecoveredArchive({ ...archive, social: invalid })).toThrow();
+    }
+  });
+
   it("keeps restored identity stable and handles duplicate profile names", () => {
     const existing = [{ ...profile, id: "other-family-0987" }];
     expect(recoveredProfileName(profile, existing)).toBe("Sam (restored 2)");
