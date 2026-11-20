@@ -57,6 +57,26 @@ describe("workspace text indexing", () => {
     expect(textChunks(other).some(chunk => chunk.text.includes("secret message"))).toBe(false);
   });
 
+  it("carries account categories into ranked results without invalidating version 1 indexes", async () => {
+    const archive = archiveWithPosts([]);
+    archive.social.dataCategories = [{
+      id: "security", label: "Account security", fileCount: 1,
+      records: [{ title: "Fictional login", detail: "Device A", timestamp: null, sourcePath: "security.json" }],
+    }];
+    const chunks = textChunks(archive);
+    const legacyChunks = [{ id: "data-0-0", source: "security.json", text: "Fictional login\nDevice A" }];
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(legacyChunks)));
+    const legacyFingerprint = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+    expect(await fingerprint(chunks)).toBe(legacyFingerprint);
+
+    const index: TextIndex = { version: 1, modelRevision: "synthetic", fingerprint: legacyFingerprint,
+      dimensions: 2, vectors: [packVector([1, 0])] };
+    expect(validIndex(index, await fingerprint(chunks), "synthetic", 1)).toBe(true);
+    expect(await searchIndex(index, chunks, [1, 0], () => false)).toEqual([
+      { id: "security.json", reason: "Similarity 1.000 · Fictional login\nDevice A", categoryId: "security" },
+    ]);
+  });
+
   it("ranks compressed vectors, keeps the best section per record and stops a cancelled search", async () => {
     const chunks = [
       { id: "one", source: "umbrella", text: "early section" },
